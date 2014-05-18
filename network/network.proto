@@ -1,0 +1,28 @@
+
+import "oms/objects.proto";
+
+enum MessageType {
+	MT_ACTION = 0;
+	MT_STATE_REFRESH = 1;
+	MT_FULL_COPY = 2;
+	MT_MESSAGE = 3;
+	MT_SERVER_COMMAND = 4;
+}
+
+enum ServerCommandType {
+	SCT_PING = 0;
+	SCT_GREET
+}
+
+message Action {
+}
+
+message ServerCommand {
+}
+
+message NetworkMessage {
+	required MessageType type = 1;
+// 	optional ObjectSet objects = 2;
+	optional Action action = 3;
+	optional ServerCommand = 4;
+}
