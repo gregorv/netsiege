@@ -35,12 +35,12 @@ ObjectManager::~ObjectManager()
     clear();
 }
 
-const std::shared_ptr< GameObject >& ObjectManager::createObject(const std::string& name)
+std::shared_ptr< GameObject > ObjectManager::createObject(const std::string& name)
 {
-    std::shared_ptr<GameObject> newObject(new GameObject(name));
+    auto newObject = std::make_shared<GameObject>(name);
     m_newObjects.insert(newObject);
-    m_objectsById[newObject->getId()] = newObject;
-    return m_objectsById[newObject->getId()];
+    m_objectsById[newObject->id()] = newObject;
+    return m_objectsById[newObject->id()];
 }
 
 void ObjectManager::removeObject(GameObject::id_t id)
@@ -53,7 +53,7 @@ void ObjectManager::removeObject(GameObject::id_t id)
 void ObjectManager::removeObject(const std::shared_ptr< GameObject >& obj)
 {
     if(obj.get()) {
-        removeObject(obj->getId());
+        removeObject(obj->id());
     }
 }
 
@@ -67,14 +67,14 @@ void ObjectManager::clear()
 std::shared_ptr< GameObject > ObjectManager::findObject(const std::string& name) const
 {
     for(auto it = m_objectsById.begin(); it != m_objectsById.end(); it++) {
-        if(it->second->getName() == name) {
+        if(it->second->name() == name) {
             return it->second;
         }
     }
     throw std::out_of_range(std::string("Object with specified name not found"));
 }
 
-const std::shared_ptr< GameObject >& ObjectManager::findObject(GameObject::id_t id) const
+std::shared_ptr< GameObject > ObjectManager::findObject(GameObject::id_t id) const
 {
     return m_objectsById.at(id);
 }
@@ -118,8 +118,8 @@ void ObjectManager::deserialize(omsproto::GameObjectSet* object_set)
     for(const auto& object: object_set->objects()) {
         const auto& it = m_objectsById.find(object.id());
         if(it == m_objectsById.end()) {
-            std::shared_ptr<GameObject> newObject(new GameObject(object.id(), object.name()));
-            m_objectsById[newObject->getId()] = newObject;
+            auto newObject = std::make_shared<GameObject>(object.id(), object.name());
+            m_objectsById[newObject->id()] = newObject;
             newObject->deserialize(&object);
         }
         else {

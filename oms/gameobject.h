@@ -43,19 +43,20 @@ public:
     void serialize(omsproto::GameObject* object, bool forceFullSerialize) const;
     void deserialize(const omsproto::GameObject* object);
 
-    id_t getId() const { return m_id; }
-    const std::string& getName() const { return m_name; }
-    const Ogre::Matrix4& getPositionMatrix() const { return m_positionMatrix; }
+    id_t id() const { return m_id; }
+    std::string name() const { return m_name; }
+    Ogre::Matrix4 positionMatrix() const { return m_positionMatrix; }
     void setPositionMatrix(const Ogre::Matrix4& pos);
 
-    bool operator<(const GameObject& other) const { return getId() < other.getId(); }
-    bool operator<(std::shared_ptr<GameObject> other) const { return getId() < other->getId(); }
+    bool operator<(const GameObject& other) const { return id() < other.id(); }
+    bool operator<(std::shared_ptr<GameObject> other) const { return id() < other->id(); }
 
 private:
-    id_t m_id;
-    std::string m_name;
+    const id_t m_id;
+    static id_t nextId;
+    const std::string m_name;
     Ogre::Matrix4 m_positionMatrix;
-    bool m_isVisible;
+    bool m_isVisible = false;
 };
 
 }

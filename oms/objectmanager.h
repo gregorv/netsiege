@@ -44,14 +44,14 @@ public:
     ObjectManager();
     ~ObjectManager();
 
-    const std::shared_ptr< GameObject >& createObject(const std::string& name);
+    std::shared_ptr< GameObject > createObject(const std::string& name);
     void removeObject(GameObject::id_t id);
     void removeObject(const std::shared_ptr<GameObject>& obj);
 
     void clear();
 
     std::shared_ptr<GameObject> findObject(const std::string& name) const;
-    const std::shared_ptr<GameObject>& findObject(GameObject::id_t id) const;
+    std::shared_ptr<GameObject> findObject(GameObject::id_t id) const;
     void addUpdatedObject(const std::shared_ptr<GameObject>& obj);
     void flushUpdateCache();
 
@@ -59,10 +59,10 @@ public:
     void serializeChanges(omsproto::GameObjectSet* object_set) const;
     void deserialize(omsproto::GameObjectSet* object_set);
 
-    const objectSet_t& getUpdatedObjects() const { return m_alteredObjects; }
-    const objectSet_t& getNewObjects() const { return m_newObjects; }
-    const idSet_t& getRemovedIds() const { return m_removedIds; }
-    const objectIdMap_t& getObjects() const { return m_objectsById; }
+    objectSet_t updatedObjects() const { return m_alteredObjects; }
+    objectSet_t newObjects() const { return m_newObjects; }
+    idSet_t removedIds() const { return m_removedIds; }
+    objectIdMap_t objects() const { return m_objectsById; }
 
 private:
     objectSet_t m_alteredObjects;

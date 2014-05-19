@@ -50,47 +50,47 @@ void omstest::testInsertion()
 {
     ObjectManager objectManager;
     objectManager.createObject(std::string("Foo_1"));
-    QCOMPARE(objectManager.getNewObjects().size(), 1ul);
-    QCOMPARE(objectManager.getObjects().size(), 1ul);
+    QCOMPARE(objectManager.newObjects().size(), 1ul);
+    QCOMPARE(objectManager.objects().size(), 1ul);
 
     objectManager.createObject(std::string("Foo_2"));
-    QCOMPARE(objectManager.getNewObjects().size(), 2ul);
-    QCOMPARE(objectManager.getObjects().size(), 2ul);
+    QCOMPARE(objectManager.newObjects().size(), 2ul);
+    QCOMPARE(objectManager.objects().size(), 2ul);
 
     objectManager.flushUpdateCache();
     objectManager.createObject(std::string("Foo_3"));
-    QCOMPARE(objectManager.getNewObjects().size(), 1ul);
-    QCOMPARE(objectManager.getObjects().size(), 3ul);
+    QCOMPARE(objectManager.newObjects().size(), 1ul);
+    QCOMPARE(objectManager.objects().size(), 3ul);
 
     objectManager.flushUpdateCache();
-    QCOMPARE(objectManager.getNewObjects().size(), 0ul);
-    QCOMPARE(objectManager.getUpdatedObjects().size(), 0ul);
-    QCOMPARE(objectManager.getObjects().size(), 3ul);
-    QCOMPARE(objectManager.getRemovedIds().size(), 0ul);
+    QCOMPARE(objectManager.newObjects().size(), 0ul);
+    QCOMPARE(objectManager.updatedObjects().size(), 0ul);
+    QCOMPARE(objectManager.objects().size(), 3ul);
+    QCOMPARE(objectManager.removedIds().size(), 0ul);
 }
 void omstest::testRemoval()
 {
     ObjectManager objectManager;
-    GameObject::id_t id = objectManager.createObject(std::string("Foo_1"))->getId();
+    GameObject::id_t id = objectManager.createObject(std::string("Foo_1"))->id();
     objectManager.createObject(std::string("Foo_2"));
     objectManager.createObject(std::string("Foo_3"));
     objectManager.flushUpdateCache();
-    QCOMPARE(objectManager.getNewObjects().size(), 0ul);
-    QCOMPARE(objectManager.getUpdatedObjects().size(), 0ul);
-    QCOMPARE(objectManager.getObjects().size(), 3ul);
-    QCOMPARE(objectManager.getRemovedIds().size(), 0ul);
+    QCOMPARE(objectManager.newObjects().size(), 0ul);
+    QCOMPARE(objectManager.updatedObjects().size(), 0ul);
+    QCOMPARE(objectManager.objects().size(), 3ul);
+    QCOMPARE(objectManager.removedIds().size(), 0ul);
 
     objectManager.removeObject(objectManager.findObject(std::string("Foo_3")));
-    QCOMPARE(objectManager.getRemovedIds().size(), 1ul);
-    QCOMPARE(objectManager.getObjects().size(), 2ul);
+    QCOMPARE(objectManager.removedIds().size(), 1ul);
+    QCOMPARE(objectManager.objects().size(), 2ul);
 
     objectManager.removeObject(id);
-    QCOMPARE(objectManager.getRemovedIds().size(), 2ul);
-    QCOMPARE(objectManager.getObjects().size(), 1ul);
+    QCOMPARE(objectManager.removedIds().size(), 2ul);
+    QCOMPARE(objectManager.objects().size(), 1ul);
 
     objectManager.flushUpdateCache();
-    QCOMPARE(objectManager.getRemovedIds().size(), 0ul);
-    QCOMPARE(objectManager.getObjects().size(), 1ul);
+    QCOMPARE(objectManager.removedIds().size(), 0ul);
+    QCOMPARE(objectManager.objects().size(), 1ul);
 
     objectManager.removeObject(75);
     try {
@@ -99,14 +99,14 @@ void omstest::testRemoval()
     }
     catch(std::exception& e) {
     }
-    QCOMPARE(objectManager.getRemovedIds().size(), 0ul);
-    QCOMPARE(objectManager.getObjects().size(), 1ul);
+    QCOMPARE(objectManager.removedIds().size(), 0ul);
+    QCOMPARE(objectManager.objects().size(), 1ul);
 }
 
 void omstest::testAccess()
 {
     ObjectManager objectManager;
-    GameObject::id_t id = objectManager.createObject(std::string("Foo_1"))->getId();
+    GameObject::id_t id = objectManager.createObject(std::string("Foo_1"))->id();
     std::shared_ptr<GameObject> null(nullptr);
 
     try {
@@ -154,7 +154,7 @@ void omstest::testSerialize()
     targetSet.ParseFromString(sourceSet.SerializeAsString());
     targetMgr.deserialize(&targetSet);
 
-    QCOMPARE(targetMgr.getObjects().size(), sourceMgr.getObjects().size());
+    QCOMPARE(targetMgr.objects().size(), sourceMgr.objects().size());
 }
 
 // #include "oms/tests/omstest.moc"

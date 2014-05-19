@@ -35,7 +35,7 @@ find_package(OGRE REQUIRED)
 find_package(OIS REQUIRED)
 pkg_search_module(CEGUI REQUIRED CEGUI-0-OGRE)
 
-set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall")
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-register")
 
 add_subdirectory(oms)
 add_subdirectory(network)

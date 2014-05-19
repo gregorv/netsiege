@@ -24,17 +24,16 @@
 
 namespace oms {
 
+id_t GameObject::nextId = 0;
+
 GameObject::GameObject(const std::string& name)
-: m_name(name), m_isVisible(false)
+: GameObject(nextId++, name)
 {
-    static id_t nextId = 0;
-    m_id = nextId++;
 }
 
 GameObject::GameObject(id_t id, const std::string& name)
-: GameObject(name)
+: m_id(id), m_name(name)
 {
-    m_id = id;
 }
 
 void GameObject::serialize(omsproto::GameObject* object, bool forceFullSerialize) const
@@ -54,10 +53,6 @@ void GameObject::serialize(omsproto::GameObject* object, bool forceFullSerialize
 void GameObject::deserialize(const omsproto::GameObject* object)
 {
     assert(object);
-    m_id = object->id();
-    if(object->has_name()) {
-        m_name = object->name();
-    }
     for(int8_t i=0; i<16; i++) {
         (&m_positionMatrix[0][0])[i] = object->position().Get(i);
     }
