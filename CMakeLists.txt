@@ -5,7 +5,8 @@ set(BUILD_TESTS FALSE CACHE BOOL "Build unittests for netsiege components. Requi
 
 include(FindPkgConfig REQUIRED)
 if(BUILD_TESTS)
-find_package(Qt4 REQUIRED QtCore QtTest)
+	enable_testing()
+	find_package(Qt4 REQUIRED QtCore QtTest)
 endif(BUILD_TESTS)
 
 if(WIN32)

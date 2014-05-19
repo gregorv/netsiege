@@ -21,6 +21,8 @@
 #define OMSTEST_H
 
 #include <QObject>
+#include <memory>
+#include "oms/objectmanager.h"
 
 class omstest : public QObject
 {
@@ -33,7 +35,11 @@ private slots:
     void cleanup();
 
     void testInsertion();
+    void testRemoval();
+    void testAccess();
+    void testSerialize();
 
+private:
 };
 
 #endif // OMSTEST_H

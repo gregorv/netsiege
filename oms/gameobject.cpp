@@ -18,33 +18,55 @@
  */
 
 #include "gameobject.h"
+#include "objects.pb.h"
 
-#include "icomponent.h"
+#include <cassert>
 
 namespace oms {
 
 GameObject::GameObject(const std::string& name)
-: m_name(name)
+: m_name(name), m_isVisible(false)
 {
     static id_t nextId = 0;
     m_id = nextId++;
 }
 
-std::ios& GameObject::serialize(std::ios& stream) const
+GameObject::GameObject(id_t id, const std::string& name)
+: GameObject(name)
 {
-    for(auto component: m_components) {
-        component->serialize(stream);
-    }
-    return stream;
+    m_id = id;
 }
 
-std::ios& GameObject::deserialize(std::ios& stream) const
+void GameObject::serialize(omsproto::GameObject* object, bool forceFullSerialize) const
 {
-    for(auto component: m_components) {
-        component->deserialize(stream);
+    assert(object);
+    object->set_id(m_id);
+    if(forceFullSerialize) {
+        object->set_name(m_name);
     }
-    return stream;
+    object->set_is_visible(m_isVisible);
+    object->clear_position();
+    for(int8_t i=0; i<16; i++) {
+        object->add_position((&m_positionMatrix[0][0])[i]);
+    }
 }
 
+void GameObject::deserialize(const omsproto::GameObject* object)
+{
+    assert(object);
+    m_id = object->id();
+    if(object->has_name()) {
+        m_name = object->name();
+    }
+    for(int8_t i=0; i<16; i++) {
+        (&m_positionMatrix[0][0])[i] = object->position().Get(i);
+    }
+    m_isVisible = object->is_visible();
+}
+
+void GameObject::setPositionMatrix(const Ogre::Matrix4& pos)
+{
+    m_positionMatrix = pos;
+}
 
 }

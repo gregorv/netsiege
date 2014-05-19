@@ -5,5 +5,7 @@ if(BUILD_TESTS)
   include_directories(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
   add_executable(omstest omstest.cpp ${omstest_MOC})
-  target_link_libraries(omstest oms ${QT_LIBRARIES})
+  target_link_libraries(omstest oms QtCore QtTest)
+
+  add_test(NAME omstest COMMAND omstest)
 endif(BUILD_TESTS)

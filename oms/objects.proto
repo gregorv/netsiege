@@ -1,34 +1,13 @@
-package oms;
+package omsproto;
 
-enum ComponentType {
-	COMP_GRAPHICS = 0;
-	COMP_SCRIPT = 1;
-}
-
-
-message ComponentScript {
-	required string class_name = 1;
-	required uint32 object_id = 2;
-	required string serializedObjectData = 3;
-}
-
-message ComponentGraphics {
-	required uint32 entity_id = 1;
-	required bool is_visible = 2;
-	// add animation
-}
-
-message Object {
-	message Component {
-		required ComponentType type = 1;
-		optional ComponentScript script = 2;
-	}
+message GameObject {
 	required uint32 id = 1;
 	optional string name = 2;
 	repeated float position = 3 [packed=true];
-	repeated Component components = 4;
+	optional bool is_visible = 4;
+	optional uint32 entity_id = 5;
 }
 
-message ObjectSet {
-	repeated Object objects = 1;
+message GameObjectSet {
+	repeated GameObject objects = 1;
 }

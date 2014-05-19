@@ -26,9 +26,12 @@
 #include <memory>
 #include <string>
 
-namespace oms {
 
-class IComponent;
+namespace omsproto {
+    class GameObject;
+}
+
+namespace oms {
 
 class GameObject
 {
@@ -36,19 +39,23 @@ public:
     typedef uint32_t id_t;
 
     GameObject(const std::string& name);
-    std::ios& serialize(std::ios& stream) const;
-    std::ios& deserialize(std::ios& stream) const;
+    GameObject(id_t id, const std::string& name);
+    void serialize(omsproto::GameObject* object, bool forceFullSerialize) const;
+    void deserialize(const omsproto::GameObject* object);
 
     id_t getId() const { return m_id; }
     const std::string& getName() const { return m_name; }
-    Ogre::Matrix4& getPositionMatrix() { return m_positionMatrix; }
     const Ogre::Matrix4& getPositionMatrix() const { return m_positionMatrix; }
+    void setPositionMatrix(const Ogre::Matrix4& pos);
+
+    bool operator<(const GameObject& other) const { return getId() < other.getId(); }
+    bool operator<(std::shared_ptr<GameObject> other) const { return getId() < other->getId(); }
 
 private:
     id_t m_id;
     std::string m_name;
     Ogre::Matrix4 m_positionMatrix;
-    std::vector<std::shared_ptr<IComponent>> m_components;
+    bool m_isVisible;
 };
 
 }

@@ -6,7 +6,7 @@ set(oms_SRC objectmanager.cpp
 
 pkg_search_module(PROTOBUF REQUIRED protobuf)
 
-include_directories(${PROTOBUF_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS})
+include_directories(${PROTOBUF_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR})
 
 add_library(oms STATIC ${oms_SRC})
 target_link_libraries(oms ${PROTOBUF_LIBRARIES})
