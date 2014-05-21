@@ -26,6 +26,10 @@ if(UNIX)
 
 	  set(CMAKE_MODULE_PATH "/usr/lib/OGRE/cmake/;${CMAKE_MODULE_PATH}")
 	  set(OGRE_SAMPLES_INCLUDEPATH "/usr/share/OGRE/samples/Common/include/") # Otherwise, this one
+	elseif(EXISTS "/usr/share/OGRE/cmake")
+
+	  set(CMAKE_MODULE_PATH "/usr/share/OGRE/cmake/;${CMAKE_MODULE_PATH}")
+	  set(OGRE_SAMPLES_INCLUDEPATH "/usr/share/OGRE/samples/Common/include/")
 
 	else ()
 	  message(SEND_ERROR "Failed to find module path.")
@@ -34,7 +38,7 @@ endif(UNIX)
 
 find_package(OGRE REQUIRED)
 find_package(OIS REQUIRED)
-pkg_search_module(CEGUI REQUIRED CEGUI-0-OGRE)
+#pkg_search_module(CEGUI REQUIRED CEGUI-0-OGRE)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-register")
 
