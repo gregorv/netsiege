@@ -21,18 +21,22 @@
 #define NETSIEGE_CLIENTSESSION_H
 
 #include "udpconnection.h"
-#include "network/network.pb.h"
 #include <memory>
 #include <boost/asio.hpp>
 
 using boost::asio::ip::udp;
 
 namespace network {
+namespace pb {
+    class C2SMessage;
+}
+
+typedef std::shared_ptr<pb::C2SMessage> C2SMessage_ptr;
 
 class NetworkServer;
 
 class ClientSession : public std::enable_shared_from_this<ClientSession>,
-                      public UdpConnection<int, pb::C2SMessage, NetworkServer>
+                      public UdpConnection<int, C2SMessage_ptr, NetworkServer>
 {
 public:
     ClientSession(const udp::endpoint myEndpoint, NetworkServer* server);

@@ -47,8 +47,9 @@ add_subdirectory(oms)
 add_subdirectory(network)
 
 add_executable(netsiege main.cpp)
-
-# link netsiege components together
 target_link_libraries(netsiege oms network)
+
+add_executable(netsiege-server server.cpp)
+target_link_libraries(netsiege-server oms network boost_system)
 
 install(TARGETS netsiege RUNTIME DESTINATION bin)

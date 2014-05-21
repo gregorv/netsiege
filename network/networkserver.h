@@ -45,10 +45,13 @@ public:
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package);
 
 private:
+    void syncTimeout();
     void sync();
     void listen();
     void handle_receive(const boost::system::error_code& error, std::size_t bytesTransferred);
     void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
+
+    void closeDeadConnections();
 
     boost::asio::io_service m_ioservice;
     boost::asio::deadline_timer m_syncTimer;

@@ -28,7 +28,7 @@ using boost::asio::ip::udp;
 namespace network{
 
 template<typename package_type_enum,
-         typename protobufMsg,
+         typename protobuf_msg_ptr,
          typename sender_class_t>
 class UdpConnection
 {
@@ -40,13 +40,16 @@ public:
     ack_mask_t ackMask() const { return m_ackMask; }
     seq_id_t remoteSeqId() const { return m_remoteSeqId; }
 
-    void sendPackage(protobufMsg& msg) {
-        msg.seq_id(m_seqId++);
-        msg.ack_id(m_remoteSeqId);
-        msg.ack_mask(m_ackMask);
-        assert(msg.ByteSize() < MAX_PACKAGE_SIZE);
+    void close() {
+    }
+
+    void sendPackage(protobuf_msg_ptr& msg) {
+        msg->seq_id(m_seqId++);
+        msg->ack_id(m_remoteSeqId);
+        msg->ack_mask(m_ackMask);
+        assert(msg->ByteSize() < MAX_PACKAGE_SIZE);
         package_buffer_t raw_msg;
-        msg.SerializeToArray(&raw_msg.front(), raw_msg.size());
+        msg->SerializeToArray(&raw_msg.front(), raw_msg.size());
         m_sender->send(m_remoteEndpoint, raw_msg);
     }
 
