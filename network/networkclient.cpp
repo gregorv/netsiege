@@ -17,20 +17,18 @@
  *
  */
 
-#ifndef NETWORKSERVER_H
-#define NETWORKSERVER_H
+#include "networkclient.h"
 
-#include <boost/asio.hpp>
+namespace network {
 
-class GameServer
+NetworkClient::NetworkClient()
 {
-public:
-    GameServer(const boost::asio::ip::tcp::endpoint& interface);
-    ~GameServer();
 
-private:
-    boost::asio::io_service* m_ioservice;
-    boost::asio::ip::tcp::acceptor* m_acceptor;
-};
+}
 
-#endif // NETWORKSERVER_H
+NetworkClient::~NetworkClient()
+{
+
+}
+
+}

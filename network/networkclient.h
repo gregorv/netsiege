@@ -17,14 +17,18 @@
  *
  */
 
-#ifndef NETWORKCLIENT_H
-#define NETWORKCLIENT_H
+#ifndef NETSIEGE_NETWORKCLIENT_H
+#define NETSIEGE_NETWORKCLIENT_H
 
-class GameClient
+namespace network {
+
+class NetworkClient
 {
 public:
-    GameClient();
-    ~GameClient();
+    NetworkClient();
+    ~NetworkClient();
 };
 
-#endif // NETWORKCLIENT_H
+}
+
+#endif // NETSIEGE_NETWORKCLIENT_H

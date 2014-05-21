@@ -17,14 +17,27 @@
  *
  */
 
-#include "gameclient.h"
+#include "clientsession.h"
+#include "network/network.pb.h"
 
-GameClient::GameClient()
+namespace network {
+
+ClientSession::ClientSession(const udp::endpoint myEndpoint, network::NetworkServer* server)
+: UdpConnection(myEndpoint, server)
 {
 
 }
 
-GameClient::~GameClient()
+ClientSession::~ClientSession()
 {
+
+}
+
+void ClientSession::inputPackage(const package_buffer_t& package)
+{
+    pb::C2SMessage msg;
+    msg.ParseFromArray(&package.front(), package.size());
+    refresh(msg.seq_id(), msg.ack_seq_id(), msg.ack_mask());
+}
 
 }

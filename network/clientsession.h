@@ -17,23 +17,32 @@
  *
  */
 
-#include "gameserver.h"
+#ifndef NETSIEGE_CLIENTSESSION_H
+#define NETSIEGE_CLIENTSESSION_H
+
+#include "udpconnection.h"
+#include "network/network.pb.h"
+#include <memory>
 #include <boost/asio.hpp>
 
-using namespace boost::asio;
-using boost::asio::ip::tcp;
+using boost::asio::ip::udp;
 
-GameServer::GameServer(const tcp::endpoint& interface)
- : m_ioservice(new io_service)
+namespace network {
+
+class NetworkServer;
+
+class ClientSession : public std::enable_shared_from_this<ClientSession>,
+                      public UdpConnection<int, pb::C2SMessage, NetworkServer>
 {
-    try {
-        m_acceptor = new tcp::acceptor(*m_ioservice, interface, true);
-    }
-    catch(std::exception& e) {
-    }
+public:
+    ClientSession(const udp::endpoint myEndpoint, NetworkServer* server);
+    ~ClientSession();
+
+    void inputPackage(const package_buffer_t& package);
+
+private:
+};
+
 }
 
-GameServer::~GameServer()
-{
-    delete m_ioservice;
-}
+#endif // NETSIEGE_CLIENTSESSION_H

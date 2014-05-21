@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.6)
 project(netsiege)
 
 set(BUILD_TESTS FALSE CACHE BOOL "Build unittests for netsiege components. Requires Qt's QTestLib.")
+set(PROTOBUF_COMPILER "/usr/bin/protoc" CACHE STRING "Google Protocol Buffer compiler, required for building netsiege.")
 
 include(FindPkgConfig REQUIRED)
 if(BUILD_TESTS)
@@ -37,6 +38,7 @@ pkg_search_module(CEGUI REQUIRED CEGUI-0-OGRE)
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-register")
 
+include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(oms)
 add_subdirectory(network)
 

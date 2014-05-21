@@ -1,28 +1,46 @@
-
+package network.pb;
 import "oms/objects.proto";
 
-enum MessageType {
-	MT_ACTION = 0;
-	MT_STATE_REFRESH = 1;
-	MT_FULL_COPY = 2;
-	MT_MESSAGE = 3;
-	MT_SERVER_COMMAND = 4;
+message S2CMessage {
+	message JoinServerResponse {
+		required uint32 player_id=1;
+		required uint32 server_version=2;
+		required bool player_accepted=3;
+		required string map_name=4;
+		required string map_version=5;
+	}
+	message WorldStateUpdate {
+		required omsproto.GameObjectSet updated_objects=1;
+		repeated uint32 removed_ids=2;
+	}
+	required uint32 protocol_id=1;
+	required uint32 seq_id=2;
+	optional uint32 msg_id=3;
+	required uint32 ack_seq_id=4;
+	required uint32 ack_mask=5;
+	optional JoinServerResponse join_server_response=6;
+	optional WorldStateUpdate world_state_update=7;
 }
 
-enum ServerCommandType {
-	SCT_PING = 0;
-	SCT_GREET
-}
-
-message Action {
-}
-
-message ServerCommand {
-}
-
-message NetworkMessage {
-	required MessageType type = 1;
-// 	optional ObjectSet objects = 2;
-	optional Action action = 3;
-	optional ServerCommand = 4;
+message C2SMessage {
+	message JoinServerReq {
+		required uint32 client_version=1;
+		required string name=2;
+	}
+	message ClickEvent {
+		required bool clicked_entity=1;
+		optional uint32 entity_id=2;
+		optional float world_coordinates=3;
+	}
+	message AsynchronousEvent {
+		required string event=1;
+		required string data=2;
+	}
+	required uint32 protocol_id=1;
+	required uint32 seq_id=2;
+	optional uint32 msg_id=3;
+	required uint32 ack_seq_id=4;
+	required uint32 ack_mask=5;
+	optional ClickEvent click_event=6;
+	optional JoinServerReq join_server_req=7;
 }

@@ -6,4 +6,5 @@ if(BUILD_TESTS)
 
   add_executable(netsynctest netsynctest.cpp ${netsynctest_MOC})
   target_link_libraries(netsynctest oms network ${QT_LIBRARIES})
+  add_test(NAME netsynctest COMMAND netsynctest)
 endif(BUILD_TESTS)

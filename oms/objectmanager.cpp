@@ -18,7 +18,7 @@
  */
 
 #include "objectmanager.h"
-#include "objects.pb.h"
+#include "oms/objects.pb.h"
 
 #include <cassert>
 #include <stdexcept>
