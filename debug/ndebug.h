@@ -1,12 +1,8 @@
 #ifndef NDEBUG_H
 #define NDEBUG_H
 
-#include <stdio.h>
+#include <string>
 
-namespace std
-{
-  class string;
-}
 class nDebug;
 
 class nDebug

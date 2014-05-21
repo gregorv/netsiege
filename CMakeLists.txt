@@ -45,6 +45,7 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-regist
 include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(oms)
 add_subdirectory(network)
+add_subdirectory(debug)
 
 file(WRITE "flags.h" "#ifndef FLAGS_H\n#define FLAGS_H\n")
 #export debug/release flag
@@ -57,7 +58,7 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 file(APPEND "flags.h" "#endif")
 
 add_executable(netsiege main.cpp)
-target_link_libraries(netsiege oms network boost_system)
+target_link_libraries(netsiege oms network boost_system ndebug)
 
 add_executable(netsiege-server server.cpp)
 target_link_libraries(netsiege-server oms network boost_system)
