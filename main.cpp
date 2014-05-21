@@ -18,8 +18,14 @@
  */
 
 #include <iostream>
+#include "network/networkclient.h"
 
 int main(int argc, char **argv) {
-    std::cout << "Hello, world!" << std::endl;
+    udp::endpoint serverEndpoint;
+    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("127.0.0.1"));
+    serverEndpoint.address(addr);
+    serverEndpoint.port(6370);
+    network::NetworkClient client(serverEndpoint, std::string("Serioux"));
+    client.run();
     return 0;
 }

@@ -20,13 +20,24 @@
 #ifndef NETSIEGE_NETWORKCLIENT_H
 #define NETSIEGE_NETWORKCLIENT_H
 
-namespace network {
+#include "udpconnection.h"
 
-class NetworkClient
+namespace network {
+namespace pb {
+    class S2CMessage;
+}
+
+typedef std::shared_ptr<pb::S2CMessage> S2CMessage_ptr;
+
+class NetworkClient : public UdpConnection<int, S2CMessage_ptr, NetworkClient>
 {
 public:
-    NetworkClient();
+    NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);
     ~NetworkClient();
+
+private:
+    std::string m_name;
+    void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package);
 };
 
 }
