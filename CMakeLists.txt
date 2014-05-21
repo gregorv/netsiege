@@ -57,8 +57,9 @@ endif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 file(APPEND "flags.h" "#endif")
 
 add_executable(netsiege main.cpp)
+target_link_libraries(netsiege oms network boost_system)
 
-# link netsiege components together
-target_link_libraries(netsiege oms network)
+add_executable(netsiege-server server.cpp)
+target_link_libraries(netsiege-server oms network boost_system)
 
 install(TARGETS netsiege RUNTIME DESTINATION bin)

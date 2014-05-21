@@ -48,9 +48,8 @@ void NetworkServer::stopServer()
 
 void NetworkServer::run()
 {
-
-    sync();
     listen();
+    sync();
     m_ioservice.run();
 }
 
@@ -81,17 +80,23 @@ void NetworkServer::listen()
     );
 }
 
+void NetworkServer::syncTimeout()
+{
+    sync();
+}
+
 void NetworkServer::sync()
 {
     std::cout << "Syncing clients..." << std::endl;
     m_syncTimer.expires_at(m_syncTimer.expires_at() + boost::posix_time::seconds(1));
-    m_syncTimer.async_wait(boost::bind(&NetworkServer::sync, this));
-    sync();
+    m_syncTimer.async_wait(boost::bind(&NetworkServer::syncTimeout, this));
+    closeDeadConnections();
 }
 
 void NetworkServer::handle_receive(const boost::system::error_code& error,
                                    std::size_t bytesTransferred)
 {
+    std::cout << "Received " << bytesTransferred << " bytes from " << m_remoteEndpoint << std::endl;
     auto it = m_clients.find(m_remoteEndpoint);
     if(it == m_clients.end()) {
         m_clients[m_remoteEndpoint] = std::make_shared<ClientSession>(m_remoteEndpoint, this);
@@ -105,6 +110,21 @@ void NetworkServer::handle_send(const boost::system::error_code& error, std::siz
 {
 
 }
+
+void NetworkServer::closeDeadConnections()
+{
+    using namespace std::chrono;
+    steady_time_point_t now = steady_clock::now();
+    for(auto& it: m_clients) {
+        duration<float> time_span = duration_cast<duration<float>>(now - it.second->timeOfLastAck());
+        if(time_span.count() > CONNECTION_TIMEOUT) {
+            std::cout << "Client " << it.first << " timed out." << std::endl;
+            it.second->close();
+            m_clients.erase(it.first);
+        }
+    }
+}
+
 
 
 }

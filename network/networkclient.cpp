@@ -21,12 +21,18 @@
 
 namespace network {
 
-NetworkClient::NetworkClient()
+NetworkClient::NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName)
+:UdpConnection(serverEndpoint, this), m_name(playerName)
 {
 
 }
 
 NetworkClient::~NetworkClient()
+{
+
+}
+
+void NetworkClient::send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package)
 {
 
 }

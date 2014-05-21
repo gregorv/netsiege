@@ -17,36 +17,15 @@
  *
  */
 
-#ifndef NETSIEGE_CLIENTSESSION_H
-#define NETSIEGE_CLIENTSESSION_H
+#include <iostream>
+#include "network/networkserver.h"
 
-#include "udpconnection.h"
-#include <memory>
-#include <boost/asio.hpp>
-
-using boost::asio::ip::udp;
-
-namespace network {
-namespace pb {
-    class C2SMessage;
+int main(int argc, char **argv) {
+    udp::endpoint listenInterface;
+    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("127.0.0.1"));
+    listenInterface.address(addr);
+    listenInterface.port(6370);
+    network::NetworkServer server(listenInterface);
+    server.run();
+    return 0;
 }
-
-typedef std::shared_ptr<pb::C2SMessage> C2SMessage_ptr;
-
-class NetworkServer;
-
-class ClientSession : public std::enable_shared_from_this<ClientSession>,
-                      public UdpConnection<int, C2SMessage_ptr, NetworkServer>
-{
-public:
-    ClientSession(const udp::endpoint myEndpoint, NetworkServer* server);
-    ~ClientSession();
-
-    void inputPackage(const package_buffer_t& package);
-
-private:
-};
-
-}
-
-#endif // NETSIEGE_CLIENTSESSION_H
