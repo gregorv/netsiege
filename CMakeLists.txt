@@ -46,6 +46,16 @@ include_directories(${CMAKE_SOURCE_DIR})
 add_subdirectory(oms)
 add_subdirectory(network)
 
+file(WRITE "flags.h" "#ifndef FLAGS_H\n#define FLAGS_H\n")
+#export debug/release flag
+if (CMAKE_BUILD_TYPE STREQUAL "Debug") 
+  message("-- Writing debug flag")
+  file(APPEND "flags.h" "#define NDEBUG\n")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+  #message("-- ")
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug") 
+file(APPEND "flags.h" "#endif")
+
 add_executable(netsiege main.cpp)
 
 # link netsiege components together
