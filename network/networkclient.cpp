@@ -37,4 +37,19 @@ void NetworkClient::send(const udp::endpoint& remoteEndpoint, const package_buff
 
 }
 
+void NetworkClient::initProcess()
+{
+}
+
+void NetworkClient::poll()
+{
+    m_ioservice.poll();
+}
+
+void NetworkClient::run()
+{
+    m_ioservice.run();
+}
+
+
 }

@@ -35,7 +35,12 @@ public:
     NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);
     ~NetworkClient();
 
+    void initProcess();
+    void run();
+    void poll();
+
 private:
+    boost::asio::io_service m_ioservice;
     std::string m_name;
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package);
 };
