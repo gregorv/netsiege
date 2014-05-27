@@ -1,6 +1,6 @@
 #include "ndebug.h"
 
-#include "../flags.h"
+#include "config.h"
 #include <iostream>
 
 nDebug::nDebug()
@@ -10,7 +10,7 @@ nDebug::nDebug()
 
 nDebug& nDebug::operator<<(std::string s)
 {
-#ifdef NDEBUG
+#ifdef DISABLE_DEBUG_OUTPUT
   std::cout << s.c_str() << " ";
 #endif
   return *this;
@@ -18,7 +18,7 @@ nDebug& nDebug::operator<<(std::string s)
 
 nDebug& nDebug::operator<<(int number)
 {
-#ifdef NDEBUG
+#ifdef DISABLE_DEBUG_OUTPUT
   std::cout << number << " ";
 #endif
   return *this;
@@ -26,7 +26,7 @@ nDebug& nDebug::operator<<(int number)
 
 nDebug::~nDebug()
 {
-#ifdef NDEBUG
+#ifdef DISABLE_DEBUG_OUTPUT
   std::cout << "\n";
 #endif
 }

@@ -40,6 +40,12 @@ endif(BUILD_TESTS)
 
 #pkg_search_module(CEGUI REQUIRED CEGUI-0-OGRE)
 
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+    set(DISABLE_DEBUG_OUTPUT 1)
+endif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
+
+CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
+
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-register" ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
@@ -49,22 +55,12 @@ add_subdirectory(oms)
 add_subdirectory(network)
 add_subdirectory(debug)
 
-file(WRITE "flags.h" "#ifndef FLAGS_H\n#define FLAGS_H\n")
-#export debug/release flag
-if (CMAKE_BUILD_TYPE STREQUAL "Debug") 
-  message("-- Writing debug flag")
-  file(APPEND "flags.h" "#define NDEBUG\n")
-elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
-  #message("-- ")
-endif(CMAKE_BUILD_TYPE STREQUAL "Debug") 
-file(APPEND "flags.h" "#endif")
-
 add_executable(netsiege main.cpp)
 qt5_use_modules(netsiege Core)
-target_link_libraries(netsiege oms network boost_system QtCore)
+target_link_libraries(netsiege oms network boost_system QtCore ndebug)
 
 add_executable(netsiege-server server.cpp)
 qt5_use_modules(netsiege-server Core)
-target_link_libraries(netsiege-server oms network boost_system QtCore)
+target_link_libraries(netsiege-server oms network boost_system QtCore ndebug)
 
 install(TARGETS netsiege RUNTIME DESTINATION bin)

@@ -1,0 +1,2 @@
+
+#cmakedefine DISABLE_DEBUG_OUTPUT 1
