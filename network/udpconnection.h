@@ -116,12 +116,11 @@ private:
 
     void remoteProcedureCall(const seq_id_t& messageId, const rpc_id_t& procedureId, const rpc_data_t& data)
     {
-        pb::RPC* rpc = new pb::RPC;
+        auto msg = std::make_shared<protobuf_msg>();
+        auto rpc = msg->mutable_rpc();
         rpc->set_msg_seq_id(messageId);
         rpc->set_rpc_id(procedureId);
         rpc->set_rpc_data(&data.front(), data.size());
-        auto msg = std::make_shared<protobuf_msg>();
-        msg->set_allocated_rpc(rpc);
         sendPackage(msg);
 
         rpc_info_t rpc_info {
