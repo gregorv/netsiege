@@ -5,40 +5,19 @@ set(BUILD_TESTS FALSE CACHE BOOL "Build unittests for netsiege components. Requi
 set(PROTOBUF_COMPILER "/usr/bin/protoc" CACHE STRING "Google Protocol Buffer compiler, required for building netsiege.")
 
 include(FindPkgConfig REQUIRED)
-if(WIN32)
-	set(CMAKE_MODULE_PATH "$ENV{OGRE_HOME}/CMake/;${CMAKE_MODULE_PATH}")
-	set(OGRE_SAMPLES_INCLUDEPATH
-		$ENV{OGRE_HOME}/Samples/include
-	)
-endif(WIN32)
  
-if(UNIX)
-	if(EXISTS "/usr/local/lib/OGRE/cmake")
-	  set(CMAKE_MODULE_PATH "/usr/local/lib/OGRE/cmake/;${CMAKE_MODULE_PATH}")
-	  set(OGRE_SAMPLES_INCLUDEPATH "/usr/local/share/OGRE/samples/Common/include/") # We could just *assume* that developers uses this basepath : /usr/local
 
-	elseif(EXISTS "/usr/lib/OGRE/cmake")
+#find_package(OGRE REQUIRED)
+#find_package(OIS REQUIRED)
 
-	  set(CMAKE_MODULE_PATH "/usr/lib/OGRE/cmake/;${CMAKE_MODULE_PATH}")
-	  set(OGRE_SAMPLES_INCLUDEPATH "/usr/share/OGRE/samples/Common/include/") # Otherwise, this one
-	elseif(EXISTS "/usr/share/OGRE/cmake")
-
-	  set(CMAKE_MODULE_PATH "/usr/share/OGRE/cmake/;${CMAKE_MODULE_PATH}")
-	  set(OGRE_SAMPLES_INCLUDEPATH "/usr/share/OGRE/samples/Common/include/")
-
-	else ()
-	  message(SEND_ERROR "Failed to find module path.")
-	endif(EXISTS "/usr/local/lib/OGRE/cmake")
-endif(UNIX)
-
-find_package(OGRE REQUIRED)
-find_package(OIS REQUIRED)
 if(BUILD_TESTS)
 	find_package(Qt5 REQUIRED Core Test)
 	enable_testing()
 endif(BUILD_TESTS)
 
 #pkg_search_module(CEGUI REQUIRED CEGUI-0-OGRE)
+pkg_search_module(OGRE REQUIRED OGRE)
+
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel")
     set(DISABLE_DEBUG_OUTPUT 1)
