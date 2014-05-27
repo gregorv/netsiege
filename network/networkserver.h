@@ -42,7 +42,7 @@ public:
     void stopServer();
     void run();
 
-    void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package);
+    void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
 private:
     void syncTimeout();

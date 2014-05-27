@@ -27,9 +27,9 @@ namespace pb {
     class S2CMessage;
 }
 
-typedef std::shared_ptr<pb::S2CMessage> S2CMessage_ptr;
+// typedef std::shared_ptr<pb::S2CMessage> S2CMessage_ptr;
 
-class NetworkClient : public UdpConnection<int, S2CMessage_ptr, NetworkClient>
+class NetworkClient : public UdpConnection<int, pb::S2CMessage, NetworkClient>
 {
 public:
     NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);
@@ -38,11 +38,19 @@ public:
     void initProcess();
     void run();
     void poll();
+    void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
 private:
-    boost::asio::io_service m_ioservice;
+    void listen();
+    void handle_receive(const boost::system::error_code& error, std::size_t bytesTransferred);
+    void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
+
+private:
     std::string m_name;
-    void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package);
+    boost::asio::io_service m_ioservice;
+    udp::socket m_socket;
+    package_buffer_t m_receiveBuffer;
+
 };
 
 }

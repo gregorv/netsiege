@@ -25,12 +25,16 @@ QTEST_MAIN(netsynctest);
 
 void netsynctest::initTestCase()
 {
-    // Called before the first testfunction is executed
+    udp::endpoint serverInterface;
+    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("127.0.0.1"));
+    serverInterface.address(addr);
+    serverInterface.port(6375);
+//     m_client = std::make_shared<network::NetworkClient>(serverInterface);
+//     m_server = std::make_shared<network::NetworkClient>(serverInterface);
 }
 
 void netsynctest::cleanupTestCase()
 {
-    // Called after the last testfunction was executed
 }
 
 void netsynctest::init()
@@ -42,5 +46,38 @@ void netsynctest::cleanup()
 {
     // Called after every testfunction
 }
+
+void netsynctest::testSeqIdCalculus()
+{
+    using network::NetworkServer;
+    using network::UdpConnection;
+    QCOMPARE(network::isSeqIdMoreRecent(0, 1), false);
+    QCOMPARE(network::isSeqIdMoreRecent(1, 0), true);
+    QCOMPARE(network::isSeqIdMoreRecent(network::MAX_SEQ_ID, 0), false);
+    QCOMPARE(network::isSeqIdMoreRecent(0, network::MAX_SEQ_ID), true);
+
+    QCOMPARE(network::seqIdDifference(0, 5), static_cast<network::seq_id_t>(5));
+    QCOMPARE(network::seqIdDifference(5, 0), static_cast<network::seq_id_t>(5));
+    QCOMPARE(network::seqIdDifference(network::MAX_SEQ_ID-2, 5), static_cast<network::seq_id_t>(8));
+    QCOMPARE(network::seqIdDifference(5, network::MAX_SEQ_ID-2), static_cast<network::seq_id_t>(8));
+
+    network::ack_mask_t ackMask = 0;
+    network::seq_id_t remoteSeqId = 100;
+    ackMask |= 1 << 0; // 99
+    ackMask |= 1 << 1; // 98
+    ackMask |= 1 << 5; // 94
+    ackMask |= 1 << 7; // 92
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 100), true);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 99), true);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 98), true);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 97), false);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 96), false);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 95), false);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 94), true);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 93), false);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 92), true);
+    QCOMPARE(network::isSeqIdAcknowledged(ackMask, remoteSeqId, 91), false);
+}
+
 
 // #include "netsynctest.moc"

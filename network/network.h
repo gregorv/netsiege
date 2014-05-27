@@ -29,6 +29,9 @@ namespace network {
 // with IP, but so large that it will be fragmented =(
 const std::size_t MAX_PACKAGE_SIZE = 32000;
 
+// Maximum size of payload in an RPC call.
+const std::size_t MAX_RPC_DATA_SIZE = 512;
+
 // When CONNECTION_TIMEOUT seconds have passed without communication from
 // a partner, the connection is considered lost.
 const float CONNECTION_TIMEOUT = 10.0f;
@@ -51,14 +54,22 @@ const uint16_t PROTOCOL_BASE_ID = 0xcd40;
 const uint16_t PROTOCOL_ID = PROTOCOL_BASE_ID + PROTOCOL_VERSION;
 
 typedef std::array<char, MAX_PACKAGE_SIZE> package_buffer_t;
+typedef std::array<char, MAX_RPC_DATA_SIZE> rpc_data_t;
 typedef std::chrono::time_point<std::chrono::steady_clock> steady_time_point_t;
 typedef std::chrono::duration<std::chrono::steady_clock> steady_time_duration_t;
 
 typedef uint16_t seq_id_t;
 const uint16_t MAX_SEQ_ID = 0xFFFF;
 
+typedef uint16_t rpc_id_t;
+const uint16_t MAX_RPC_ID = 0xFFFF;
+
 typedef uint16_t ack_mask_t;
 const uint16_t NUM_ACKS = 16;
+
+bool isSeqIdMoreRecent(seq_id_t seqId1, seq_id_t seqId2);
+seq_id_t seqIdDifference(seq_id_t seqId1, seq_id_t seqId2);
+bool isSeqIdAcknowledged(ack_mask_t ackMask, seq_id_t remoteSeqId, seq_id_t seqId);
 
 }
 

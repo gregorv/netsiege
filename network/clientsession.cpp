@@ -19,6 +19,7 @@
 
 #include "clientsession.h"
 #include "network/network.pb.h"
+#include "networkserver.h"
 
 namespace network {
 
@@ -37,7 +38,8 @@ void ClientSession::inputPackage(const package_buffer_t& package)
 {
     pb::C2SMessage msg;
     msg.ParseFromArray(&package.front(), package.size());
-    refresh(msg.seq_id(), msg.ack_seq_id(), msg.ack_mask());
+    if(!parsePackage(msg)) {
+    }
 }
 
 }

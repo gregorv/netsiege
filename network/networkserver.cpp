@@ -53,11 +53,11 @@ void NetworkServer::run()
     m_ioservice.run();
 }
 
-void NetworkServer::send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package)
+void NetworkServer::send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes)
 {
     m_socket.async_send_to(
         boost::asio::buffer(&package.front(),
-                            package.size()),
+                            std::min(package.size(), nBytes)),
         remoteEndpoint,
         boost::bind(&NetworkServer::handle_receive, this,
             boost::asio::placeholders::error,

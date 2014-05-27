@@ -21,6 +21,11 @@
 #define NETSYNCTEST_H
 
 #include <QObject>
+#include "network/udpconnection.h"
+#include "network/network.pb.h"
+#include "network/networkclient.h"
+#include "network/networkserver.h"
+
 
 class netsynctest : public QObject
 {
@@ -31,6 +36,12 @@ private slots:
 
     void init();
     void cleanup();
+
+    void testSeqIdCalculus();
+
+private:
+    std::shared_ptr<network::NetworkServer> m_server;
+    std::shared_ptr<network::NetworkClient> m_client;
 
 };
 

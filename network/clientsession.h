@@ -27,16 +27,16 @@
 using boost::asio::ip::udp;
 
 namespace network {
-namespace pb {
-    class C2SMessage;
-}
+// namespace pb {
+//     class C2SMessage;
+// }
 
-typedef std::shared_ptr<pb::C2SMessage> C2SMessage_ptr;
+// typedef std::shared_ptr<pb::C2SMessage> C2SMessage_ptr;
 
 class NetworkServer;
 
 class ClientSession : public std::enable_shared_from_this<ClientSession>,
-                      public UdpConnection<int, C2SMessage_ptr, NetworkServer>
+                      public UdpConnection<int, pb::C2SMessage, NetworkServer>
 {
 public:
     ClientSession(const udp::endpoint myEndpoint, NetworkServer* server);

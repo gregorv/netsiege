@@ -26,6 +26,7 @@ int main(int argc, char **argv) {
     serverEndpoint.address(addr);
     serverEndpoint.port(6370);
     network::NetworkClient client(serverEndpoint, std::string("Serioux"));
+    client.initProcess();
     client.run();
     return 0;
 }
