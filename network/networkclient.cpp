@@ -24,7 +24,7 @@ namespace network {
 
 NetworkClient::NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName)
 : UdpConnection(serverEndpoint, this), m_name(playerName),
-m_socket(m_ioservice, serverEndpoint)
+m_socket(m_ioservice, udp::endpoint(udp::v4(), 0))
 {
 
 }

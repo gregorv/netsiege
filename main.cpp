@@ -21,10 +21,14 @@
 #include "network/networkclient.h"
 
 int main(int argc, char **argv) {
+    if(argc != 3) {
+        std::cerr << argv[0] << " ServerIpV4 Port" << std::endl;
+        return -1;
+    }
     udp::endpoint serverEndpoint;
-    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("127.0.0.1"));
+    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string(argv[1]));
     serverEndpoint.address(addr);
-    serverEndpoint.port(6370);
+    serverEndpoint.port(atoi(argv[2]));
     network::NetworkClient client(serverEndpoint, std::string("Serioux"));
     client.initProcess();
     client.run();

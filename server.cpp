@@ -22,9 +22,16 @@
 
 int main(int argc, char **argv) {
     udp::endpoint listenInterface;
-    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("127.0.0.1"));
+    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
     listenInterface.address(addr);
     listenInterface.port(6370);
+    if(argc == 3) {
+        addr = boost::asio::ip::address_v4::from_string(argv[1]);
+        listenInterface.address(addr);
+        listenInterface.port(atoi(argv[2]));
+    } else if(argc != 1) {
+        std::cerr << argv[0] << "(ListenIpV4 Port)" << std::endl;
+    }
     network::NetworkServer server(listenInterface);
     server.run();
     return 0;
