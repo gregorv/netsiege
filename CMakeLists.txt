@@ -47,7 +47,17 @@ set(CMAKE_AUTOMOC ON)
 include_directories(${CMAKE_SOURCE_DIR} ${Qt5Core_INCLUDES} ${Qt5Test_INCLUDES})
 add_subdirectory(oms)
 add_subdirectory(network)
+add_subdirectory(debug)
 
+file(WRITE "flags.h" "#ifndef FLAGS_H\n#define FLAGS_H\n")
+#export debug/release flag
+if (CMAKE_BUILD_TYPE STREQUAL "Debug") 
+  message("-- Writing debug flag")
+  file(APPEND "flags.h" "#define NDEBUG\n")
+elseif (CMAKE_BUILD_TYPE STREQUAL "Release")
+  #message("-- ")
+endif(CMAKE_BUILD_TYPE STREQUAL "Debug") 
+file(APPEND "flags.h" "#endif")
 
 add_executable(netsiege main.cpp)
 qt5_use_modules(netsiege Core)
