@@ -29,14 +29,15 @@ set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-regist
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
+add_subdirectory(angelscript/projects/cmake)
 add_subdirectory(oms)
 add_subdirectory(network)
 add_subdirectory(debug)
 
 add_executable(netsiege main.cpp)
-target_link_libraries(netsiege oms network boost_system ndebug)
+target_link_libraries(netsiege oms network boost_system ndebug Angelscript)
 
 add_executable(netsiege-server server.cpp)
-target_link_libraries(netsiege-server oms network boost_system ndebug)
+target_link_libraries(netsiege-server oms network boost_system ndebug Angelscript)
 
 install(TARGETS netsiege RUNTIME DESTINATION bin)
