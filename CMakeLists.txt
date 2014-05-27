@@ -33,8 +33,8 @@ endif(UNIX)
 
 find_package(OGRE REQUIRED)
 find_package(OIS REQUIRED)
-find_package(Qt5 REQUIRED Core Test)
 if(BUILD_TESTS)
+	find_package(Qt5 REQUIRED Core Test)
 	enable_testing()
 endif(BUILD_TESTS)
 
@@ -48,19 +48,16 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/config.h.in ${CMAKE_CURRENT_BINARY_DI
 
 set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "--std=c++11 -Wall -Wno-deprecated-register" ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS})
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
 
-include_directories(${CMAKE_SOURCE_DIR} ${Qt5Core_INCLUDES} ${Qt5Test_INCLUDES})
+include_directories(${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR})
 add_subdirectory(oms)
 add_subdirectory(network)
 add_subdirectory(debug)
 
 add_executable(netsiege main.cpp)
-qt5_use_modules(netsiege Core)
-target_link_libraries(netsiege oms network boost_system QtCore ndebug)
+target_link_libraries(netsiege oms network boost_system ndebug)
 
 add_executable(netsiege-server server.cpp)
-qt5_use_modules(netsiege-server Core)
-target_link_libraries(netsiege-server oms network boost_system QtCore ndebug)
+target_link_libraries(netsiege-server oms network boost_system ndebug)
 
 install(TARGETS netsiege RUNTIME DESTINATION bin)

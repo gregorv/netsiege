@@ -1,3 +1,3 @@
-include_directories(${CMAKE_BINARY_DIR})
 
+include_directories(${Qt5Core_INCLUDES} ${Qt5Test_INCLUDES})
 add_library(ndebug ndebug.cpp)
