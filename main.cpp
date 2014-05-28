@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include "network/networkclient.h"
+#include "debug/ndebug.h"
 
 int main(int argc, char **argv) {
     if(argc != 3) {
@@ -26,6 +27,7 @@ int main(int argc, char **argv) {
         return -1;
     }
     udp::endpoint serverEndpoint;
+    nDebug() << "IP address:" << argv[1];
     boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string(argv[1]));
     serverEndpoint.address(addr);
     serverEndpoint.port(atoi(argv[2]));
