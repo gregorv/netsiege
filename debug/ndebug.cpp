@@ -1,6 +1,6 @@
 /*
  * netsiege - A multiplayer point and click adventure
- * Copyright (C) 2014 Alexander Kraus <alexander.kraus@student.kit.edu>
+ * Copyright (C) 2014 Gregor Vollmer <gregor@celement.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,56 +19,24 @@
 
 #include "ndebug.h"
 
-#include "config.h"
-#include <iostream>
 #include <string>
-#include <stdlib.h>
+#include <cstdlib>
 
-nDebug::nDebug()
-  : m_env_flag(true)
-{
-  char *p = getenv("NETSIEGE_NO_DEBUG_OUTPUT");
-  std::string debug_env_flag;
-  if(p==0); 
-  else
-  {
-    debug_env_flag = std::string(p);
-    if(debug_env_flag == std::string("TRUE") || debug_env_flag == std::string("1") || debug_env_flag == std::string("true")) 
-      m_env_flag = false;
-  }
-}
 
-nDebug& nDebug::operator<<(float fnumber)
-{
-#ifndef DISABLE_DEBUG_OUTPUT
-  if(m_env_flag) std::cout << fnumber << " ";
+bool g_disableDebugOutput = true;
+
+#ifndef PERMANENTLY_DISABLE_DEBUG_OUTPUT
+class ConfigureDebug {
+public:
+    ConfigureDebug() {
+#ifdef DEBUG
+        g_disableDebugOutput = false;
 #endif
-  return *this;
-}
-
-nDebug& nDebug::operator<<(std::string s)
-{
-#ifndef DISABLE_DEBUG_OUTPUT
-  if(m_env_flag)
-  {
-    std::cout << s.c_str();
-    if(s.at(s.length()-1) != ' ') std::cout << " ";
-  }
-#endif
-  return *this;
-}
-
-nDebug& nDebug::operator<<(int number)
-{
-#ifndef DISABLE_DEBUG_OUTPUT
-  if(m_env_flag) std::cout << number << " ";
-#endif
-  return *this;
-}
-
-nDebug::~nDebug()
-{
-#ifndef DISABLE_DEBUG_OUTPUT
-  if(m_env_flag) std::cout << "\n";
-#endif
-}
+        auto debugVar = std::getenv("DEBUG");
+        if(debugVar) {
+            g_disableDebugOutput = std::strtol(debugVar, 0, 10) == 0;
+        }
+    }
+};
+ConfigureDebug debugCfg;
+#endif//ndef PERMANENTLY_DISABLE_DEBUG_OUTPUT

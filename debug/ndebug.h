@@ -1,6 +1,6 @@
 /*
  * netsiege - A multiplayer point and click adventure
- * Copyright (C) 2014 Alexander Kraus <alexander.kraus@student.kit.edu>
+ * Copyright (C) 2014 Gregor Vollmer <gregor@celement.de>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,24 +17,22 @@
  *
  */
 
-#ifndef NDEBUG_H
-#define NDEBUG_H
+#ifndef NETSIEGE_NDEBUG_H
+#define NETSIEGE_NDEBUG_H
 
-#include <string>
+#include "config.h"
+#include <iostream>
 
-class nDebug;
+extern bool g_disableDebugOutput;
 
-class nDebug
-{
-public:
-  nDebug();
-  virtual ~nDebug();
-  nDebug &operator<<(std::string s);
-  nDebug &operator<<(int number);
-  nDebug &operator<<(float fnumber);
-  
-private:
-  bool m_env_flag;
-};
-
+#ifndef PERMANENTLY_DISABLE_DEBUG_OUTPUT
+ #define nDebug if(g_disableDebugOutput) {} \
+else \
+std::cerr << __FILE__ << ":" << __LINE__ << ": "
+#else
+ #define nDebug if(1) {} \
+else \
+std::cerr
 #endif
+
+#endif//NETSIEGE_NDEBUG_H

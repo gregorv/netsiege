@@ -22,11 +22,11 @@
 
 int main(int argc, char **argv) {
     udp::endpoint listenInterface;
-    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string("0.0.0.0"));
+    boost::asio::ip::address addr(boost::asio::ip::address::from_string("0.0.0.0"));
     listenInterface.address(addr);
     listenInterface.port(6370);
     if(argc == 3) {
-        addr = boost::asio::ip::address_v4::from_string(argv[1]);
+        addr = boost::asio::ip::address::from_string(argv[1]);
         listenInterface.address(addr);
         listenInterface.port(atoi(argv[2]));
     } else if(argc != 1) {

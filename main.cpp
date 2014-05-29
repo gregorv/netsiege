@@ -27,8 +27,8 @@ int main(int argc, char **argv) {
         return -1;
     }
     udp::endpoint serverEndpoint;
-    nDebug() << "IP address:" << argv[1];
-    boost::asio::ip::address addr(boost::asio::ip::address_v4::from_string(argv[1]));
+    nDebug << "IP address:" << argv[1];
+    boost::asio::ip::address addr(boost::asio::ip::address::from_string(argv[1]));
     serverEndpoint.address(addr);
     serverEndpoint.port(atoi(argv[2]));
     network::NetworkClient client(serverEndpoint, std::string("Serioux"));
