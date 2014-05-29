@@ -20,6 +20,7 @@
 #include "networkserver.h"
 
 #include "network/network.pb.h"
+#include "debug/ndebug.h"
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -87,7 +88,7 @@ void NetworkServer::syncTimeout()
 
 void NetworkServer::sync()
 {
-    std::cout << "Syncing clients..." << std::endl;
+    nDebug << "Syncing clients..." << std::endl;
     m_syncTimer.expires_at(m_syncTimer.expires_at() + boost::posix_time::seconds(1));
     m_syncTimer.async_wait(boost::bind(&NetworkServer::syncTimeout, this));
     closeDeadConnections();
@@ -96,7 +97,7 @@ void NetworkServer::sync()
 void NetworkServer::handle_receive(const boost::system::error_code& error,
                                    std::size_t bytesTransferred)
 {
-    std::cout << "Received " << bytesTransferred << " bytes from " << m_remoteEndpoint << std::endl;
+    nDebug << "Received " << bytesTransferred << " bytes from " << m_remoteEndpoint << std::endl;
     auto it = m_clients.find(m_remoteEndpoint);
     if(it == m_clients.end()) {
         m_clients[m_remoteEndpoint] = std::make_shared<ClientSession>(m_remoteEndpoint, this);
