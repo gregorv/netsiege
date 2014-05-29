@@ -1,6 +1,7 @@
 /*
  * netsiege - A multiplayer point and click adventure
  * Copyright (C) 2014 Gregor Vollmer <gregor@celement.de>
+ * Copyright (C) 2014 Alexander Kraus <alexander.kraus@student.kit.edu>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
