@@ -18,7 +18,7 @@
  */
 
 package network.pb;
-import "oms/objects.proto";
+import "src/oms/objects.proto";
 
 
 message RPC {
