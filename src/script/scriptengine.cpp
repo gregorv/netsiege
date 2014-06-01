@@ -25,7 +25,7 @@
 #include "scriptmath/scriptmath.h"
 #include "debug/ndebug.h"
 
-using namespace campaign;
+using namespace script;
 
 void debug(std::string &msg)
 {

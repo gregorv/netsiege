@@ -21,7 +21,7 @@
 #include <cassert>
 #include <OGRE/OgreResourceGroupManager.h>
 
-using namespace campaign;
+using namespace script;
 
 ScriptFile::ScriptFile(Ogre::ResourceManager* creator, const Ogre::String& name,
                        Ogre::ResourceHandle handle, const Ogre::String& group,

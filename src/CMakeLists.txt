@@ -3,4 +3,4 @@ add_subdirectory(oms)
 add_subdirectory(network)
 add_subdirectory(debug)
 add_subdirectory(campaign)
-
+add_subdirectory(script)

@@ -23,7 +23,7 @@
 #include <OGRE/OgreResource.h>
 #include <string.h>
 
-namespace campaign {
+namespace script {
 
 class ScriptFile : public Ogre::Resource
 {

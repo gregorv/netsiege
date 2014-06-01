@@ -23,7 +23,7 @@
 #include <OGRE/OgreResourceManager.h>
 #include "scriptfile.h"
 
-namespace campaign {
+namespace script {
 
 class ScriptFileManager : public Ogre::ResourceManager, public Ogre::Singleton<ScriptFileManager>
 {

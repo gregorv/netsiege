@@ -20,7 +20,7 @@
 #include "scriptfilemanager.h"
 #include <cassert>
 
-using namespace campaign;
+using namespace script;
 
 template<> ScriptFileManager *Ogre::Singleton<ScriptFileManager>::msSingleton = 0;
 
@@ -52,7 +52,7 @@ template<> ScriptFileManager *Ogre::Singleton<ScriptFileManager>::msSingleton = 
      Ogre::ResourceGroupManager::getSingleton()._unregisterResourceManager(mResourceType);
  }
 
- campaign::ScriptFilePtr ScriptFileManager::load(const Ogre::String& name, const Ogre::String& group)
+ ScriptFilePtr ScriptFileManager::load(const Ogre::String& name, const Ogre::String& group)
  {
      auto script = getResourceByName(name);
 

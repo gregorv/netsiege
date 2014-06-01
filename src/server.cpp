@@ -22,7 +22,7 @@
 #include "network/networkserver.h"
 #include "campaign/manager.h"
 #include "campaign/serverlogic.h"
-#include "campaign/scriptfilemanager.h"
+#include "script/scriptfilemanager.h"
 #include "oms/objectmanager.h"
 #include <OGRE/OgreRoot.h>
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
     Ogre::Root root;
     nDebug << "ResourceGroupManager Pointer: " << std::hex << Ogre::ResourceGroupManager::getSingletonPtr() << std::dec << std::endl;
-    new campaign::ScriptFileManager;
+    new script::ScriptFileManager;
     auto manager = std::make_shared<campaign::Manager>(mapName);
     if(!manager->loadCampaignPath()) {
         logError() << "Did not find campaign " << mapName << " in the specified search paths!" << std::endl;

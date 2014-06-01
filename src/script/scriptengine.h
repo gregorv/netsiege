@@ -25,7 +25,7 @@
 class asIScriptEngine;
 class CScriptBuilder;
 
-namespace campaign {
+namespace script {
 
 class ScriptEngine
 {
