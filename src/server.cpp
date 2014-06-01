@@ -56,7 +56,10 @@ int main(int argc, char **argv) {
     auto objectManager = std::make_shared<oms::ObjectManager>();
     server.setObjectManager(objectManager);
     campaign::ServerLogic logic(manager);
-    logic.init();
+    if(!logic.init()) {
+        logError() << "Server logic could not be initialized, abort!" << std::endl;
+        return -1;
+    }
     server.setTimeoutCallback(0.05f, std::bind(&campaign::ServerLogic::step, &logic, 0.05f));
     server.run();
     delete Ogre::ResourceGroupManager::getSingleton()._getResourceManager("ScriptFile");
