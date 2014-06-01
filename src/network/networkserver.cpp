@@ -68,12 +68,12 @@ void NetworkServer::send(const udp::endpoint& remoteEndpoint, const package_buff
         boost::asio::buffer(&package.front(),
                             std::min(package.size(), nBytes)),
         remoteEndpoint,
-        boost::bind(&NetworkServer::handle_receive, this,
+        boost::bind(&NetworkServer::handle_send, this,
             boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred()
-//             package.size()
-            )
-        );
+            boost::asio::placeholders::bytes_transferred(),
+            nBytes
+        )
+    );
 }
 
 void NetworkServer::listen()
@@ -117,6 +117,7 @@ void NetworkServer::handle_receive(const boost::system::error_code& error,
 
 void NetworkServer::handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected)
 {
+    assert(bytesTransferred == bytesExcpected);
 }
 
 void NetworkServer::handle_timeoutCallback()
