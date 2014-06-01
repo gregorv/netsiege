@@ -57,5 +57,13 @@ target_link_libraries(netsiege ${netsiege_LIBRARIES})
 add_executable(netsiege-server src/server.cpp)
 target_link_libraries(netsiege-server ${netsiege_server_LIBRARIES})
 
+# link the campaign directory into the build dir,
+# so we can just start the damn thing without
+# setting environment variables.
+add_custom_command(
+	TARGET netsiege POST_BUILD
+	COMMAND ln -fs ${CMAKE_SOURCE_DIR}/campaigns ${CMAKE_BINARY_DIR}
+)
+
 
 install(TARGETS netsiege RUNTIME DESTINATION bin)
