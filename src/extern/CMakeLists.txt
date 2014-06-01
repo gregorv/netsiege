@@ -1,0 +1,2 @@
+add_subdirectory(angelscript)
+set(ANGELSCRIPT_INCLUDE_DIRS ${ANGELSCRIPT_INCLUDE_DIRS} PARENT_SCOPE)

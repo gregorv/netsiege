@@ -1,1 +1,3 @@
 .
+src/extern/angelscript/include
+src/extern/angelscript_addon
