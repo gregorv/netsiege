@@ -29,6 +29,10 @@
 #include "network.h"
 #include "clientsession.h"
 
+namespace oms {
+    class ObjectManager;
+}
+
 namespace network {
 
 using boost::asio::ip::udp;
@@ -43,6 +47,8 @@ public:
 
     void stopServer();
     void run();
+
+    void setObjectManager(std::shared_ptr<oms::ObjectManager> objMgr);
 
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
@@ -67,6 +73,7 @@ private:
     udp::endpoint m_remoteEndpoint;
     package_buffer_t m_receiveBuffer;
     std::map<udp::endpoint, std::shared_ptr<ClientSession>> m_clients;
+    std::shared_ptr<oms::ObjectManager> m_objectManager;
 };
 
 }

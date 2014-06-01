@@ -21,6 +21,7 @@
 
 #include "network/network.pb.h"
 #include "debug/ndebug.h"
+#include <oms/objectmanager.h>
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -52,6 +53,11 @@ void NetworkServer::run()
     listen();
     sync();
     m_ioservice.run();
+}
+
+void NetworkServer::setObjectManager(std::shared_ptr< oms::ObjectManager > objMgr)
+{
+    m_objectManager = objMgr;
 }
 
 void NetworkServer::setTimeoutCallback(float timeout, NetworkServer::timeoutCallback_t callback)
@@ -96,7 +102,13 @@ void NetworkServer::syncTimeout()
 
 void NetworkServer::sync()
 {
-    nDebug << "Syncing clients..." << std::endl;
+    if(m_objectManager.get() && m_clients.size() > 0) {
+        auto msg = std::make_shared<pb::S2CMessage>();
+        m_objectManager->serializeChanges(msg->mutable_world_state_update()->mutable_updated_objects());
+        for(auto client: m_clients) {
+            client.second->sendPackage(msg);
+        }
+    }
     m_syncTimer.expires_from_now(boost::posix_time::seconds(SYNC_PERIOD));
     m_syncTimer.async_wait(boost::bind(&NetworkServer::syncTimeout, this));
     closeDeadConnections();
