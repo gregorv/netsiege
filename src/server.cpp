@@ -18,21 +18,44 @@
  */
 
 #include <iostream>
+#include "debug/ndebug.h"
 #include "network/networkserver.h"
+#include "campaign/manager.h"
+#include "campaign/serverlogic.h"
+#include "campaign/scriptfilemanager.h"
+#include <OGRE/OgreRoot.h>
 
 int main(int argc, char **argv) {
     udp::endpoint listenInterface;
     boost::asio::ip::address addr(boost::asio::ip::address::from_string("0.0.0.0"));
     listenInterface.address(addr);
     listenInterface.port(6370);
-    if(argc == 3) {
-        addr = boost::asio::ip::address::from_string(argv[1]);
+    std::string mapName;
+    if(argc == 4) {
+        addr = boost::asio::ip::address::from_string(argv[2]);
         listenInterface.address(addr);
-        listenInterface.port(atoi(argv[2]));
-    } else if(argc != 1) {
-        std::cerr << argv[0] << "(ListenIpV4 Port)" << std::endl;
+        listenInterface.port(atoi(argv[3]));
+        mapName = argv[1];
+    } else if(argc == 2) {
+        mapName = argv[1];
+    } else if(argc != 2) {
+        std::cerr << argv[0] << " CampaignName (ListenIpV4 Port)" << std::endl;
+        return -1;
     }
     network::NetworkServer server(listenInterface);
+
+    Ogre::Root root;
+    nDebug << "ResourceGroupManager Pointer: " << std::hex << Ogre::ResourceGroupManager::getSingletonPtr() << std::endl;
+    new campaign::ScriptFileManager;
+    auto manager = std::make_shared<campaign::Manager>(mapName);
+    if(!manager->loadCampaignPath()) {
+        std::cerr << "Did not find campaign " << mapName << " in the specified search paths!" << std::endl;
+        return -1;
+    }
+    campaign::ServerLogic logic(manager);
+    logic.init();
+    server.setTimeoutCallback(1.05f, std::bind(&campaign::ServerLogic::step, &logic, 0.05f));
     server.run();
+    delete Ogre::ResourceGroupManager::getSingleton()._getResourceManager("ScriptFile");
     return 0;
 }
