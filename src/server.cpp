@@ -53,8 +53,7 @@ int main(int argc, char **argv) {
         logError() << "Did not find campaign " << mapName << " in the specified search paths!" << std::endl;
         return -1;
     }
-    auto objectManager = std::make_shared<oms::ObjectManager>();
-    server.setObjectManager(objectManager);
+    server.setObjectManager(manager->objectManager());
     campaign::ServerLogic logic(manager);
     if(!logic.init()) {
         logError() << "Server logic could not be initialized, abort!" << std::endl;

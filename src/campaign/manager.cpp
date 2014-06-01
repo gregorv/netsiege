@@ -18,7 +18,8 @@
  */
 
 #include "manager.h"
-#include "scriptengine.h"
+#include "script/scriptengine.h"
+#include "oms/objectmanager.h"
 #include "debug/ndebug.h"
 #include <list>
 #include <OGRE/OgreResourceGroupManager.h>
@@ -27,7 +28,9 @@ using namespace campaign;
 using namespace boost::filesystem;
 
 Manager::Manager(const std::string& campaignName)
- : m_scriptEngine(std::make_shared<ScriptEngine>()), m_campaignName(campaignName)
+ : m_scriptEngine(std::make_shared<script::ScriptEngine>()),
+ m_objectManager(std::make_shared<oms::ObjectManager>()),
+ m_campaignName(campaignName)
 {
     Ogre::ResourceGroupManager::getSingleton().createResourceGroup(campaignName);
 }

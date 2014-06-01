@@ -23,9 +23,15 @@
 #include <memory>
 #include <boost/filesystem.hpp>
 
-namespace campaign {
+namespace script {
+    class ScriptEngine;
+}
 
-class ScriptEngine;
+namespace oms {
+    class ObjectManager;
+}
+
+namespace campaign {
 
 class Manager
 {
@@ -35,12 +41,14 @@ public:
 
     bool loadCampaignPath();
 
-    std::shared_ptr<ScriptEngine> scriptEngine() { return m_scriptEngine; }
+    std::shared_ptr<script::ScriptEngine> scriptEngine() { return m_scriptEngine; }
+    std::shared_ptr<oms::ObjectManager> objectManager() { return m_objectManager; }
 
 private:
     static bool checkLocation(const std::string& campaignName, const boost::filesystem::path& location);
 
-    std::shared_ptr<ScriptEngine> m_scriptEngine;
+    std::shared_ptr<script::ScriptEngine> m_scriptEngine;
+    std::shared_ptr<oms::ObjectManager> m_objectManager;
     std::string m_campaignName;
     boost::filesystem::path m_path;
 };

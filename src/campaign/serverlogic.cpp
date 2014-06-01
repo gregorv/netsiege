@@ -23,7 +23,7 @@
 
 #include "angelscript.h"
 #include "manager.h"
-#include "scriptengine.h"
+#include "script/scriptengine.h"
 #include "debug/ndebug.h"
 
 using namespace campaign;
