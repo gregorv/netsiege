@@ -40,7 +40,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Ogre_CFLAGS}")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(netsiege_COMMON_LIBRARIES
-    oms network ndebug Angelscript
+    oms network campaign ndebug Angelscript
     ${Boost_LIBRARIES}
     ${Protobuf_LIBRARIES}
     ${Ogre_LIBRARIES}
