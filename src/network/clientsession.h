@@ -36,7 +36,7 @@ namespace network {
 class NetworkServer;
 
 class ClientSession : public std::enable_shared_from_this<ClientSession>,
-                      public UdpConnection<int, pb::C2SMessage, NetworkServer>
+                      public UdpConnection<int, pb::C2SMessage, pb::S2CMessage, NetworkServer>
 {
 public:
     ClientSession(const udp::endpoint myEndpoint, NetworkServer* server);

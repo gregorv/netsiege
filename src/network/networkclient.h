@@ -29,7 +29,7 @@ namespace pb {
 
 // typedef std::shared_ptr<pb::S2CMessage> S2CMessage_ptr;
 
-class NetworkClient : public UdpConnection<int, pb::S2CMessage, NetworkClient>
+class NetworkClient : public UdpConnection<int, pb::S2CMessage, pb::C2SMessage, NetworkClient>
 {
 public:
     NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);

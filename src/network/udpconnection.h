@@ -30,14 +30,17 @@ using boost::asio::ip::udp;
 namespace network{
 
 template<typename package_type_enum,
-         typename protobuf_msg,
+         typename recv_msg,
+         typename send_msg,
          typename sender_class_t>
 class UdpConnection
 {
 public:
-    typedef std::shared_ptr<protobuf_msg> protobuf_msg_ptr;
+    typedef std::shared_ptr<recv_msg> recv_msg_ptr;
+    typedef std::shared_ptr<send_msg> send_msg_ptr;
 
-    UdpConnection(udp::endpoint remoteEndpoint, sender_class_t* sender) : m_sender(sender) { }
+    UdpConnection(udp::endpoint remoteEndpoint, sender_class_t* sender)
+     : m_remoteEndpoint(remoteEndpoint), m_sender(sender) { }
 
     steady_time_point_t timeOfLastAck() const { return m_timeOfLastAck; }
     seq_id_t seqId() const { return m_seqId; }
@@ -47,7 +50,8 @@ public:
     void close() {
     }
 
-    void sendPackage(protobuf_msg_ptr& msg) {
+    void sendPackage(send_msg_ptr& msg) {
+        msg->set_protocol_id(PROTOCOL_ID);
         msg->set_seq_id(m_seqId++);
         msg->set_ack_seq_id(m_remoteSeqId);
         msg->set_ack_mask(m_ackMask);
@@ -66,7 +70,7 @@ public:
     }
 
 protected:
-    bool parsePackage(const protobuf_msg& msg)
+    bool parsePackage(const recv_msg& msg)
     {
         refresh(msg.seq_id(), msg.ack_seq_id(), msg.ack_mask());
         if(msg.has_rpc()) {
@@ -116,7 +120,7 @@ private:
 
     void remoteProcedureCall(const seq_id_t& messageId, const rpc_id_t& procedureId, const rpc_data_t& data)
     {
-        auto msg = std::make_shared<protobuf_msg>();
+        auto msg = std::make_shared<send_msg>();
         auto rpc = msg->mutable_rpc();
         rpc->set_msg_seq_id(messageId);
         rpc->set_rpc_id(procedureId);
