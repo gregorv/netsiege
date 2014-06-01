@@ -23,6 +23,7 @@
 #include "campaign/manager.h"
 #include "campaign/serverlogic.h"
 #include "campaign/scriptfilemanager.h"
+#include "oms/objectmanager.h"
 #include <OGRE/OgreRoot.h>
 
 int main(int argc, char **argv) {
@@ -52,9 +53,11 @@ int main(int argc, char **argv) {
         std::cerr << "Did not find campaign " << mapName << " in the specified search paths!" << std::endl;
         return -1;
     }
+    auto objectManager = std::make_shared<oms::ObjectManager>();
+    server.setObjectManager(objectManager);
     campaign::ServerLogic logic(manager);
     logic.init();
-    server.setTimeoutCallback(1.05f, std::bind(&campaign::ServerLogic::step, &logic, 0.05f));
+    server.setTimeoutCallback(0.05f, std::bind(&campaign::ServerLogic::step, &logic, 0.05f));
     server.run();
     delete Ogre::ResourceGroupManager::getSingleton()._getResourceManager("ScriptFile");
     return 0;
