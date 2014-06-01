@@ -23,21 +23,48 @@
 #include <string>
 #include <cstdlib>
 
-
-bool g_disableDebugOutput = true;
+bool ndebug::g_disableDebugOutput = true;
+int ndebug::g_debugVerbosity = 1;
+bool ndebug::g_coloredOutput = true;
 
 #ifndef PERMANENTLY_DISABLE_DEBUG_OUTPUT
 class ConfigureDebug {
 public:
     ConfigureDebug() {
 #ifdef DEBUG
-        g_disableDebugOutput = false;
+        ndebug::g_disableDebugOutput = false;
 #endif
         auto debugVar = std::getenv("DEBUG");
         if(debugVar) {
-            g_disableDebugOutput = std::strtol(debugVar, 0, 10) == 0;
+            auto verbosity = std::strtol(debugVar, 0, 10);
+            ndebug::g_disableDebugOutput = verbosity == 0;
+            ndebug::g_debugVerbosity = verbosity;
+        }
+
+        auto colorVar = std::getenv("DEBUG_COLOR");
+        if(colorVar) {
+            auto color = std::strtol(colorVar, 0, 10);
+            ndebug::g_coloredOutput = color != 0;
         }
     }
 };
 ConfigureDebug debugCfg;
+
+
+std::ostream& logInfo()
+{
+    return std::cout << "\x1b[37;1mINFO: \x1b[0m";
+}
+
+std::ostream& logError()
+{
+    return std::cerr << "\x1b[31;1mERR: \x1b[0m";
+}
+
+std::ostream& logWarning()
+{
+    return std::cerr << "\x1b[33;1mWARN: \x1b[0m";
+}
+
+
 #endif//ndef PERMANENTLY_DISABLE_DEBUG_OUTPUT

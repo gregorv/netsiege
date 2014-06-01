@@ -24,16 +24,29 @@
 #include "config.h"
 #include <iostream>
 
+namespace ndebug {
+
 extern bool g_disableDebugOutput;
+extern bool g_coloredOutput;
+extern int g_debugVerbosity;
+
+}
 
 #ifndef PERMANENTLY_DISABLE_DEBUG_OUTPUT
- #define nDebug if(g_disableDebugOutput) {} \
-else \
-std::cerr << __FILE__ << ":" << __LINE__ << ": "
+ #define nDebugL(x) if(ndebug::g_disableDebugOutput) {} \
+else if(x <= ndebug::g_debugVerbosity)\
+std::cerr << (ndebug::g_coloredOutput?"\x1b[34;1m":"") << __FILE__ << ":" << __LINE__ << ": " << (ndebug::g_coloredOutput?"\x1b[0m":"")
 #else
- #define nDebug if(1) {} \
+ #define nDebugL(x) if(1) {} \
 else \
 std::cerr
 #endif
+
+#define nDebug nDebugL(1)
+#define nDebugVerbose nDebugL(2)
+
+std::ostream& logInfo();
+std::ostream& logWarning();
+std::ostream& logError();
 
 #endif//NETSIEGE_NDEBUG_H

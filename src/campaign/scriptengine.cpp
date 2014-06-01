@@ -30,7 +30,7 @@ using namespace campaign;
 void debug(std::string &msg)
 {
 #ifndef PERMANENTLY_DISABLE_DEBUG_OUTPUT
-    if(!g_disableDebugOutput)
+    if(!ndebug::g_disableDebugOutput)
         std::cerr << "AngelScript: " << msg << std::endl;
 #endif
 }
