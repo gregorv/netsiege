@@ -34,7 +34,7 @@ namespace network {
 
 NetworkServer::NetworkServer(const udp::endpoint& interface)
 : m_ioservice(), m_syncTimer(m_ioservice, boost::posix_time::seconds(SYNC_PERIOD)),
-  m_socket(m_ioservice, interface)
+  m_callbackTimer(m_ioservice, boost::posix_time::seconds(2)), m_socket(m_ioservice, interface)
 {
 }
 
@@ -52,6 +52,14 @@ void NetworkServer::run()
     listen();
     sync();
     m_ioservice.run();
+}
+
+void NetworkServer::setTimeoutCallback(float timeout, NetworkServer::timeoutCallback_t callback)
+{
+    m_callbackTimerTimeout = timeout;
+    m_callback = callback;
+    m_callbackTimer.expires_from_now(boost::posix_time::seconds(m_callbackTimerTimeout));
+    m_callbackTimer.async_wait(boost::bind(&NetworkServer::handle_timeoutCallback, this));
 }
 
 void NetworkServer::send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes)
@@ -109,8 +117,15 @@ void NetworkServer::handle_receive(const boost::system::error_code& error,
 
 void NetworkServer::handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected)
 {
-
 }
+
+void NetworkServer::handle_timeoutCallback()
+{
+    m_callback();
+    m_callbackTimer.expires_from_now(boost::posix_time::seconds(m_callbackTimerTimeout));
+    m_callbackTimer.async_wait(boost::bind(&NetworkServer::handle_timeoutCallback, this));
+}
+
 
 void NetworkServer::closeDeadConnections()
 {

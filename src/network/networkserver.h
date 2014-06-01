@@ -36,6 +36,8 @@ using boost::asio::ip::udp;
 class NetworkServer
 {
 public:
+    typedef std::function<void()> timeoutCallback_t;
+
     NetworkServer(const udp::endpoint& interface);
     ~NetworkServer();
 
@@ -44,17 +46,23 @@ public:
 
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
+    void setTimeoutCallback(float timeout, timeoutCallback_t callback);
+
 private:
     void syncTimeout();
     void sync();
     void listen();
     void handle_receive(const boost::system::error_code& error, std::size_t bytesTransferred);
     void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
+    void handle_timeoutCallback();
 
     void closeDeadConnections();
 
     boost::asio::io_service m_ioservice;
     boost::asio::deadline_timer m_syncTimer;
+    boost::asio::deadline_timer m_callbackTimer;
+    timeoutCallback_t m_callback;
+    float m_callbackTimerTimeout;
     udp::socket m_socket;
     udp::endpoint m_remoteEndpoint;
     package_buffer_t m_receiveBuffer;
