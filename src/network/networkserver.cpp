@@ -120,6 +120,7 @@ void NetworkServer::handle_receive(const boost::system::error_code& error,
     nDebug << "Received " << bytesTransferred << " bytes from " << m_remoteEndpoint << std::endl;
     auto it = m_clients.find(m_remoteEndpoint);
     if(it == m_clients.end()) {
+        logInfo() << "Client connected from " << m_remoteEndpoint << std::endl;
         m_clients[m_remoteEndpoint] = std::make_shared<ClientSession>(m_remoteEndpoint, this);
         it = m_clients.find(m_remoteEndpoint);
     }
@@ -147,7 +148,7 @@ void NetworkServer::closeDeadConnections()
     for(auto& it: m_clients) {
         duration<float> time_span = duration_cast<duration<float>>(now - it.second->timeOfLastAck());
         if(time_span.count() > CONNECTION_TIMEOUT) {
-            std::cout << "Client " << it.first << " timed out." << std::endl;
+            logInfo() << "Client " << it.first << " timed out." << std::endl;
             it.second->close();
             m_clients.erase(it.first);
         }

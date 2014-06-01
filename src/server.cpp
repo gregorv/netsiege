@@ -46,11 +46,11 @@ int main(int argc, char **argv) {
     network::NetworkServer server(listenInterface);
 
     Ogre::Root root;
-    nDebug << "ResourceGroupManager Pointer: " << std::hex << Ogre::ResourceGroupManager::getSingletonPtr() << std::endl;
+    nDebug << "ResourceGroupManager Pointer: " << std::hex << Ogre::ResourceGroupManager::getSingletonPtr() << std::dec << std::endl;
     new campaign::ScriptFileManager;
     auto manager = std::make_shared<campaign::Manager>(mapName);
     if(!manager->loadCampaignPath()) {
-        std::cerr << "Did not find campaign " << mapName << " in the specified search paths!" << std::endl;
+        logError() << "Did not find campaign " << mapName << " in the specified search paths!" << std::endl;
         return -1;
     }
     auto objectManager = std::make_shared<oms::ObjectManager>();

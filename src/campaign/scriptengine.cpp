@@ -44,7 +44,7 @@ void MessageCallback(const asSMessageInfo *msg, void *param)
     else if( msg->type == asMSGTYPE_INFORMATION )
             type = "INFO";
 
-    std::cerr << msg->section << " (" <<  msg->section << ":" << msg->row << ") " << type << ": " << msg->message << std::endl;
+    logError() << "AngelScript " << " (" <<  msg->section << ":" << msg->row << ") " << type << ": " << msg->message << std::endl;
 }
 
 int IncludeCallback(const char *include, const char *from, CScriptBuilder *builder, void *userParam)
@@ -112,7 +112,7 @@ bool ScriptEngine::importModule(const std::string& moduleName, const std::string
         }
     }
     catch(const Ogre::FileNotFoundException& e) {
-        std::cerr << "Cannot locate script file: " << scriptResource << std::endl;
+        logError() << "Cannot locate script file: " << scriptResource << std::endl;
         nDebug << "Exception: " << e.what() << std::endl;
         return false;
     }
