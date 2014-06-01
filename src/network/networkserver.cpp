@@ -33,7 +33,7 @@
 namespace network {
 
 NetworkServer::NetworkServer(const udp::endpoint& interface)
-: m_ioservice(), m_syncTimer(m_ioservice, boost::posix_time::seconds(5)),
+: m_ioservice(), m_syncTimer(m_ioservice, boost::posix_time::seconds(SYNC_PERIOD)),
   m_socket(m_ioservice, interface)
 {
 }
@@ -89,7 +89,7 @@ void NetworkServer::syncTimeout()
 void NetworkServer::sync()
 {
     nDebug << "Syncing clients..." << std::endl;
-    m_syncTimer.expires_at(m_syncTimer.expires_at() + boost::posix_time::seconds(1));
+    m_syncTimer.expires_from_now(boost::posix_time::seconds(SYNC_PERIOD));
     m_syncTimer.async_wait(boost::bind(&NetworkServer::syncTimeout, this));
     closeDeadConnections();
 }

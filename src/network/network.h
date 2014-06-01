@@ -53,6 +53,9 @@ const uint16_t PROTOCOL_BASE_ID = 0xcd40;
 // version number.
 const uint16_t PROTOCOL_ID = PROTOCOL_BASE_ID + PROTOCOL_VERSION;
 
+// Time passing between state pushs to connected clients
+const float SYNC_PERIOD = 0.1f;
+
 typedef std::array<char, MAX_PACKAGE_SIZE> package_buffer_t;
 typedef std::array<char, MAX_RPC_DATA_SIZE> rpc_data_t;
 typedef std::chrono::time_point<std::chrono::steady_clock> steady_time_point_t;
