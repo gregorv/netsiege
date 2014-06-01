@@ -49,16 +49,16 @@ void omstest::cleanup()
 void omstest::testInsertion()
 {
     ObjectManager objectManager;
-    objectManager.createObject(std::string("Foo_1"));
+    objectManager.createObject(0, std::string("Foo_1"));
     QCOMPARE(objectManager.newObjects().size(), 1ul);
     QCOMPARE(objectManager.objects().size(), 1ul);
 
-    objectManager.createObject(std::string("Foo_2"));
+    objectManager.createObject(0, std::string("Foo_2"));
     QCOMPARE(objectManager.newObjects().size(), 2ul);
     QCOMPARE(objectManager.objects().size(), 2ul);
 
     objectManager.flushUpdateCache();
-    objectManager.createObject(std::string("Foo_3"));
+    objectManager.createObject(0, std::string("Foo_3"));
     QCOMPARE(objectManager.newObjects().size(), 1ul);
     QCOMPARE(objectManager.objects().size(), 3ul);
 
@@ -71,9 +71,9 @@ void omstest::testInsertion()
 void omstest::testRemoval()
 {
     ObjectManager objectManager;
-    GameObject::id_t id = objectManager.createObject(std::string("Foo_1"))->id();
-    objectManager.createObject(std::string("Foo_2"));
-    objectManager.createObject(std::string("Foo_3"));
+    GameObject::id_t id = objectManager.createObject(0, std::string("Foo_1"))->id();
+    objectManager.createObject(0, std::string("Foo_2"));
+    objectManager.createObject(0, std::string("Foo_3"));
     objectManager.flushUpdateCache();
     QCOMPARE(objectManager.newObjects().size(), 0ul);
     QCOMPARE(objectManager.updatedObjects().size(), 0ul);
@@ -106,7 +106,7 @@ void omstest::testRemoval()
 void omstest::testAccess()
 {
     ObjectManager objectManager;
-    GameObject::id_t id = objectManager.createObject(std::string("Foo_1"))->id();
+    GameObject::id_t id = objectManager.createObject(0, std::string("Foo_1"))->id();
     std::shared_ptr<GameObject> null(nullptr);
 
     try {
@@ -143,11 +143,11 @@ void omstest::testAccess()
 void omstest::testSerialize()
 {
     ObjectManager sourceMgr, targetMgr;
-    sourceMgr.createObject(std::string("Foo_1"));
-    sourceMgr.createObject(std::string("Foo_2"));
-    sourceMgr.createObject(std::string("Foo_3"));
-    sourceMgr.createObject(std::string("Foo_4"));
-    sourceMgr.createObject(std::string("Foo_5"));
+    sourceMgr.createObject(0, std::string("Foo_1"));
+    sourceMgr.createObject(0, std::string("Foo_2"));
+    sourceMgr.createObject(0, std::string("Foo_3"));
+    sourceMgr.createObject(0, std::string("Foo_4"));
+    sourceMgr.createObject(0, std::string("Foo_5"));
 
     omsproto::GameObjectSet sourceSet, targetSet;
     sourceMgr.serializeChanges(&sourceSet);

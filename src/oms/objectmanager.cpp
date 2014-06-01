@@ -19,6 +19,8 @@
 
 #include "objectmanager.h"
 #include "oms/objects.pb.h"
+#include "script/scriptengine.h"
+#include <angelscript.h>
 
 #include <cassert>
 #include <stdexcept>
@@ -35,9 +37,22 @@ ObjectManager::~ObjectManager()
     clear();
 }
 
-std::shared_ptr< GameObject > ObjectManager::createObject(const std::string& name)
+void ObjectManager::setScriptEngine(std::shared_ptr<script::ScriptEngine> engine)
 {
-    auto newObject = std::make_shared<GameObject>(name);
+    m_scriptEngine = engine;
+    int r;
+    m_scriptEngine->engine()->RegisterInterface("IObject");
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("int createObject(IObject@,string)", asMETHOD(ObjectManager, createObjectRetId), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
+//     r = m_scriptEngine->engine()->RegisterGlobalFunction("void removeObject(unsigned int)", asMETHODPR(ObjectManager, removeObject, (uint32_t), void), asCALL_THISCALL_ASGLOBAL, this);
+//     assert(r >= 0);
+}
+
+
+std::shared_ptr< GameObject > ObjectManager::createObject(asIScriptObject* scriptObj, const std::string& name)
+{
+    auto newObject = std::make_shared<GameObject>(scriptObj, name);
+    newObject->setScriptEngine(m_scriptEngine);
     m_newObjects.insert(newObject);
     m_objectsById[newObject->id()] = newObject;
     return m_objectsById[newObject->id()];
@@ -118,13 +133,20 @@ void ObjectManager::deserialize(omsproto::GameObjectSet* object_set)
     for(const auto& object: object_set->objects()) {
         const auto& it = m_objectsById.find(object.id());
         if(it == m_objectsById.end()) {
-            auto newObject = std::make_shared<GameObject>(object.id(), object.name());
+            auto newObject = std::make_shared<GameObject>(object.id(), nullptr, object.name());
             m_objectsById[newObject->id()] = newObject;
             newObject->deserialize(&object);
         }
         else {
             m_objectsById[object.id()]->deserialize(&object);
         }
+    }
+}
+
+void ObjectManager::step(float dt)
+{
+    for(auto objPair: m_objectsById) {
+        objPair.second->step(dt);
     }
 }
 

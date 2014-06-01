@@ -32,6 +32,12 @@ namespace omsproto {
     class GameObjectSet;
 }
 
+namespace script {
+    class ScriptEngine;
+}
+
+class asIScriptObject;
+
 namespace oms {
 
 class ObjectManager
@@ -44,7 +50,10 @@ public:
     ObjectManager();
     ~ObjectManager();
 
-    std::shared_ptr< GameObject > createObject(const std::string& name);
+    void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
+
+    std::shared_ptr< GameObject > createObject(asIScriptObject* scriptObj, const std::string& name);
+    id_t createObjectRetId(asIScriptObject* scriptObj, const std::string& name) { return createObject(scriptObj, name)->id(); }
     void removeObject(GameObject::id_t id);
     void removeObject(const std::shared_ptr<GameObject>& obj);
 
@@ -64,11 +73,14 @@ public:
     idSet_t removedIds() const { return m_removedIds; }
     objectIdMap_t objects() const { return m_objectsById; }
 
+    void step(float dt);
+
 private:
     objectSet_t m_alteredObjects;
     objectSet_t m_newObjects;
     idSet_t m_removedIds;
     objectIdMap_t m_objectsById;
+    std::shared_ptr<script::ScriptEngine> m_scriptEngine;
 };
 
 }

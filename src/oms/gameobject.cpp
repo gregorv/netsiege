@@ -19,21 +19,66 @@
 
 #include "gameobject.h"
 #include "oms/objects.pb.h"
+#include "script/scriptengine.h"
+#include "debug/ndebug.h"
 
 #include <cassert>
+#include <angelscript.h>
 
 namespace oms {
 
 id_t GameObject::nextId = 0;
 
-GameObject::GameObject(const std::string& name)
-: GameObject(nextId++, name)
+GameObject::GameObject(asIScriptObject* scriptObject, const std::string& name)
+: GameObject(nextId++, scriptObject, name)
 {
 }
 
-GameObject::GameObject(id_t id, const std::string& name)
-: m_id(id), m_name(name)
+GameObject::GameObject(id_t id, asIScriptObject* scriptObject, const std::string& name)
+: m_id(id), m_name(name), m_scriptObject(scriptObject)
 {
+    if(m_scriptObject) {
+        m_scriptObject->AddRef();
+    }
+}
+
+GameObject::~GameObject()
+{
+    if(m_scriptObject) {
+        m_scriptObject->Release();
+    }
+}
+
+void GameObject::setScriptEngine(std::shared_ptr< script::ScriptEngine > engine)
+{
+    if(engine.get() == 0) {
+        logWarning() << "GameObject::setScriptEngineAndCreateObject() called, but engine is not set!" << std::endl;
+        return;
+    }
+    assert(!m_engine.get());
+    assert(m_scriptObject);
+    m_engine = engine;
+
+    auto type = m_scriptObject->GetObjectType();
+    auto ctx = m_engine->engine()->CreateContext();
+    ctx->Prepare(type->GetMethodByDecl("void init()"));
+    ctx->SetObject(m_scriptObject);
+    ctx->Execute();
+    ctx->Release();
+}
+
+void GameObject::step(float dt)
+{
+    assert(m_engine.get());
+    assert(m_scriptObject);
+
+    auto type = m_scriptObject->GetObjectType();
+    auto ctx = m_engine->engine()->CreateContext();
+    ctx->Prepare(type->GetMethodByDecl("void step(float)"));
+    ctx->SetObject(m_scriptObject);
+    ctx->SetArgFloat(0, dt);
+    ctx->Execute();
+    ctx->Release();
 }
 
 void GameObject::serialize(omsproto::GameObject* object, bool forceFullSerialize) const

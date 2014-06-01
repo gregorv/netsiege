@@ -1,4 +1,5 @@
 add_subdirectory(extern)
+include_directories(${ANGELSCRIPT_INCLUDE_DIRS})
 add_subdirectory(oms)
 add_subdirectory(network)
 add_subdirectory(debug)

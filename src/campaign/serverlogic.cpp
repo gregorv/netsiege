@@ -25,6 +25,7 @@
 #include "manager.h"
 #include "script/scriptengine.h"
 #include "debug/ndebug.h"
+#include "oms/objectmanager.h"
 
 using namespace campaign;
 
@@ -75,5 +76,6 @@ bool ServerLogic::step(float dt)
         return false;
     }
     ctx->Release();
+    m_manager->objectManager()->step(dt);
     return true;
 }

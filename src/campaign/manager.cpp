@@ -33,6 +33,7 @@ Manager::Manager(const std::string& campaignName)
  m_campaignName(campaignName)
 {
     Ogre::ResourceGroupManager::getSingleton().createResourceGroup(campaignName);
+    m_objectManager->setScriptEngine(m_scriptEngine);
 }
 
 Manager::~Manager()

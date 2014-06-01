@@ -31,6 +31,12 @@ namespace omsproto {
     class GameObject;
 }
 
+namespace script {
+    class ScriptEngine;
+}
+
+class asIScriptObject;
+
 namespace oms {
 
 class GameObject
@@ -38,8 +44,13 @@ class GameObject
 public:
     typedef uint32_t id_t;
 
-    GameObject(const std::string& name);
-    GameObject(id_t id, const std::string& name);
+    GameObject(asIScriptObject* scriptObject, const std::string& name);
+    GameObject(id_t id, asIScriptObject* scriptObject, const std::string& name);
+    ~GameObject();
+
+    void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
+    void step(float dt);
+
     void serialize(omsproto::GameObject* object, bool forceFullSerialize) const;
     void deserialize(const omsproto::GameObject* object);
 
@@ -54,9 +65,11 @@ public:
 private:
     const id_t m_id;
     static id_t nextId;
-    const std::string m_name;
+    std::string m_name;
     Ogre::Matrix4 m_positionMatrix;
     bool m_isVisible = false;
+    asIScriptObject* m_scriptObject;
+    std::shared_ptr<script::ScriptEngine> m_engine;
 };
 
 }
