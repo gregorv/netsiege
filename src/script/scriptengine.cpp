@@ -58,13 +58,13 @@ int IncludeCallback(const char *include, const char *from, CScriptBuilder *build
 }
 
 ScriptEngine::ScriptEngine()
- : m_engine(asCreateScriptEngine(ANGELSCRIPT_VERSION)),
+ : m_engine(asCreateScriptEngine(ANGELSCRIPT_VERSION), ASRefRelease<asIScriptEngine>),
  m_scriptBuilder(std::unique_ptr<CScriptBuilder>(new CScriptBuilder))
 {
     int r = m_engine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
     assert(r >= 0);
-    RegisterStdString(m_engine);
-    RegisterScriptMath(m_engine);
+    RegisterStdString(m_engine.get());
+    RegisterScriptMath(m_engine.get());
     r = m_engine->RegisterGlobalFunction("void debug(const string &in)", asFUNCTION(debug), asCALL_CDECL); assert( r >= 0 );
     m_scriptBuilder->SetIncludeCallback(IncludeCallback, this);
 }
@@ -95,7 +95,7 @@ bool ScriptEngine::importModule(const std::string& moduleName, const std::string
     try {
         auto resource = ScriptFileManager::getSingleton().load(scriptResource, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
         auto code = resource->code();
-        auto r = m_scriptBuilder->StartNewModule(m_engine, moduleName.c_str());
+        auto r = m_scriptBuilder->StartNewModule(m_engine.get(), moduleName.c_str());
         if(r < 0) {
             nDebug << "Failed to start module, return code " << r << std::endl;
             return false;

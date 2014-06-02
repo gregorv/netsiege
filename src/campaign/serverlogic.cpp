@@ -43,7 +43,7 @@ ServerLogic::~ServerLogic()
 bool ServerLogic::init()
 {
     auto engine = m_manager->scriptEngine()->engine();
-    auto ctx = engine->CreateContext();
+    auto ctx = script::shared(engine->CreateContext());
     auto func = engine->GetModule(SERVER_AS_MODULE.c_str())->GetFunctionByDecl("void initServer()");
     if(!func) {
         logError() << "Cannot locate required AngelScript function 'initServer'" << std::endl;
@@ -55,14 +55,13 @@ bool ServerLogic::init()
         logError() << "Calling function 'initServer' failed" << std::endl;
         return false;
     }
-    ctx->Release();
     return true;
 }
 
 bool ServerLogic::step(float dt)
 {
     auto engine = m_manager->scriptEngine()->engine();
-    auto ctx = engine->CreateContext();
+    auto ctx = script::shared(engine->CreateContext());
     auto func = engine->GetModule(SERVER_AS_MODULE.c_str())->GetFunctionByDecl("void stepServer(float)");
     if(!func) {
         logError() << "Cannot locate required AngelScript function 'stepServer'" << std::endl;
@@ -75,7 +74,6 @@ bool ServerLogic::step(float dt)
         logError() << "Calling function 'stepServer' failed" << std::endl;
         return false;
     }
-    ctx->Release();
     m_manager->objectManager()->step(dt);
     return true;
 }

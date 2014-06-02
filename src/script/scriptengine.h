@@ -21,11 +21,90 @@
 #define CAMPAIGN_SCRIPTENGINE_H
 
 #include <memory>
+#include "debug/ndebug.h"
 
 class asIScriptEngine;
 class CScriptBuilder;
 
 namespace script {
+
+/**
+Call Release() on arbitrary AngelScript object pointers.
+
+This function acts as 'delete statement' for interal AngelScript
+reference-counted objects, e.g. asIScriptEngine. The primary use
+for this function is to use it as a custom deleter in std::shared_ptr.
+
+Normaly you do not want to call the std::shared_ptr constructor directly,
+but use one of the two functions script::shared or script::shared_addref
+
+@example
+    asObjPtr* foo = [...]
+    std::shared_ptr ptr(foo, script::ASRefRelease<asObjPtr>);
+
+@tparam T Type of the AngelScript object.
+@param object Object pointer to call Release() on.
+@sa script::shared, script::shared_addref
+ */
+template <class T>
+void ASRefRelease(T* object)
+{
+    nDebugL(4) << "ASRefRelease on object" << std::hex << object << std::dec << ", of type " << typeid(object).name() << std::endl;
+    object->Release();
+}
+
+/**
+ Generate shared ptr on not-used AngelScript ref-counted objects
+
+ The function creates a std::shared_ptr on the supplied object
+ pointer. Additionaly, obj->AddRef() is called to increase
+ the reference count of the object.
+
+ Use this function on any object returned by a Get* function
+ from AngelScript that you want to store over a period of time
+ and therefore have automaticaly managed.
+
+ @warning
+ You *must not* use this function if the ref count is already
+ increased for your use, e.g. when creating a context with
+ engine->CreateContext, since it "increases" the refcount by one
+ prior to returning.
+
+ @example
+ auto func = script::shared_addref(module->GetFuncByDecl("void foo()"));
+
+ @sa script::shared
+*/
+template <class T>
+std::shared_ptr<T> shared_addref(T* obj)
+{
+    if(obj) obj->AddRef();
+    return std::shared_ptr<T>(obj, ASRefRelease<T>);
+}
+
+/**
+ Generate shared ptr on created AngelScript ref-counted objects
+
+ The function creates a std::shared_ptr on the supplied object
+ pointer. It will not call AddRef on the object by itself, which
+ is the required behaviour for any AngelScript function returning
+ pointers to new objects, the Create* functions.
+
+ @warning
+ You *must not* use this function if the ref count is *not*
+ increased for your use, e.g. querying a function pointer from
+ a module, since your object might cease its existence while
+ you still need it!
+
+ @example
+ auto ctx = script::shared(engine-CreateContext());
+
+ @sa script::shared_addref
+*/
+template <class T> std::shared_ptr<T> shared(T* obj)
+{
+    return std::shared_ptr<T>(obj, ASRefRelease<T>);
+}
 
 class ScriptEngine
 {
@@ -40,11 +119,10 @@ public:
     void registerOgreMath();
     void registerObjectSystem();
 
-    const asIScriptEngine* engine() const { return m_engine; }
-    asIScriptEngine* engine() { return m_engine; }
+    std::shared_ptr<asIScriptEngine> engine() { return m_engine; }
 
 private:
-    asIScriptEngine* m_engine;
+    std::shared_ptr<asIScriptEngine> m_engine;
     std::unique_ptr<CScriptBuilder> m_scriptBuilder;
 };
 }
