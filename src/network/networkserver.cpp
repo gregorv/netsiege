@@ -109,6 +109,7 @@ void NetworkServer::sync()
             client.second->sendPackage(msg);
         }
     }
+    m_objectManager->flushUpdateCache();
     m_syncTimer.expires_from_now(boost::posix_time::milliseconds(SYNC_PERIOD*1000.0));
     m_syncTimer.async_wait(boost::bind(&NetworkServer::syncTimeout, this));
     closeDeadConnections();
