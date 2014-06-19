@@ -50,9 +50,6 @@ int NetworkServer::RegisterNetworkSystem(std::shared_ptr< script::ScriptEngine >
 {
     RPCPackage::RegisterType(engine->engine());
     RegisterDispatcher(engine);
-    auto r = engine->engine()->RegisterGlobalFunction("void sendRemoteProcedureCall(const RPCPackage@)",
-                                                      asMETHOD(NetworkServer, remoteProcedureCall),
-                                                      asCALL_THISCALL_ASGLOBAL, this);
     addRpcHandler(0, RPC_ID_JOIN_SERVER_REQ,
                   std::bind(&NetworkServer::handle_joinRequest, this,
                             std::placeholders::_1, std::placeholders::_2
