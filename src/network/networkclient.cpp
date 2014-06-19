@@ -23,7 +23,7 @@
 namespace network {
 
 NetworkClient::NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName)
-: UdpConnection(serverEndpoint, this), m_name(playerName),
+: UdpConnection(serverEndpoint, this, this), m_name(playerName),
 m_socket(m_ioservice, udp::endpoint(udp::v4(), 0))
 {
 
@@ -59,11 +59,17 @@ void NetworkClient::send(const udp::endpoint& remoteEndpoint, const package_buff
             boost::asio::placeholders::bytes_transferred()
 //             package.size()
             )
-        );
+    );
 }
 
 void NetworkClient::initProcess()
 {
+    addRpcHandler(0,
+                  RPC_ID_JOIN_SERVER_RESP,
+                  std::bind(&NetworkClient::handleJoinResponse, this,
+                            std::placeholders::_1, std::placeholders::_2),
+                  RPC_ARGS_JOIN_SERVER_RESP
+    );
     listen();
 }
 
@@ -77,6 +83,14 @@ void NetworkClient::run()
     m_ioservice.run();
 }
 
+void NetworkClient::sendJoinRequest()
+{
+    auto package = RPCPackage::make(RPC_ID_JOIN_SERVER_REQ);
+    package->push(0);
+    package->push(m_name);
+    remoteProcedureCall(package);
+}
+
 void NetworkClient::handle_receive(const boost::system::error_code& error,
                                    std::size_t bytesTransferred)
 {
@@ -84,6 +98,8 @@ void NetworkClient::handle_receive(const boost::system::error_code& error,
     msg.ParseFromArray(&m_receiveBuffer.front(),
                        m_receiveBuffer.size());
     if(!parsePackage(msg)) {
+        // TODO: apply changes to scene manager
+        // TODO Server negotiation
     }
     listen();
 }
@@ -93,5 +109,9 @@ void NetworkClient::handle_send(const boost::system::error_code& error, std::siz
 
 }
 
+void NetworkClient::handleJoinResponse(uint16_t client_id, std::shared_ptr<RPCPackage> package)
+{
+    nDebug << "handleJoinResponse" << std::endl;
+}
 
 }

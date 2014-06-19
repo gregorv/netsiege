@@ -21,6 +21,7 @@
 #define NETSIEGE_NETWORKCLIENT_H
 
 #include "udpconnection.h"
+#include "rpcdispatcher.h"
 
 namespace network {
 namespace pb {
@@ -29,7 +30,8 @@ namespace pb {
 
 // typedef std::shared_ptr<pb::S2CMessage> S2CMessage_ptr;
 
-class NetworkClient : public UdpConnection<int, pb::S2CMessage, pb::C2SMessage, NetworkClient>
+class NetworkClient : public UdpConnection<int, pb::S2CMessage, pb::C2SMessage, NetworkClient>,
+                      public RPCDispatcher
 {
 public:
     NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);
@@ -40,16 +42,21 @@ public:
     void poll();
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
+    void sendJoinRequest();
+
 private:
     void listen();
     void handle_receive(const boost::system::error_code& error, std::size_t bytesTransferred);
     void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
+
+    void handleJoinResponse(uint16_t client_id, std::shared_ptr< network::RPCPackage > package);
 
 private:
     std::string m_name;
     boost::asio::io_service m_ioservice;
     udp::socket m_socket;
     package_buffer_t m_receiveBuffer;
+    bool m_connectionActive;
 
 };
 
