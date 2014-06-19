@@ -1,0 +1,4 @@
+16	sendChatMessage		L	# Chat Message
+17	Player_attack		s	# Character ID
+18	Player_moveTo		SSS	# 3D Coordinates
+19	Player_applyItem	ss	# Inventory ID, Character ID
