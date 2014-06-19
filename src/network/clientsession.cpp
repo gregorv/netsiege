@@ -23,10 +23,9 @@
 
 namespace network {
 
-ClientSession::ClientSession(const udp::endpoint myEndpoint, network::NetworkServer* server)
-: UdpConnection(myEndpoint, server)
+ClientSession::ClientSession(const size_t& client_id, const udp::endpoint myEndpoint, network::NetworkServer* server)
+: UdpConnection(myEndpoint, server, server), m_clientId(client_id)
 {
-
 }
 
 ClientSession::~ClientSession()
@@ -39,6 +38,7 @@ void ClientSession::inputPackage(const package_buffer_t& package)
     pb::C2SMessage msg;
     msg.ParseFromArray(&package.front(), package.size());
     if(!parsePackage(msg)) {
+        // TODO Client negotiation
     }
 }
 

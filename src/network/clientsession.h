@@ -39,12 +39,17 @@ class ClientSession : public std::enable_shared_from_this<ClientSession>,
                       public UdpConnection<int, pb::C2SMessage, pb::S2CMessage, NetworkServer>
 {
 public:
-    ClientSession(const udp::endpoint myEndpoint, NetworkServer* server);
+    ClientSession(const size_t& client_id, const udp::endpoint myEndpoint, NetworkServer* server);
     ~ClientSession();
 
     void inputPackage(const package_buffer_t& package);
 
+    bool isActive() const { return true; }
+
+    size_t clientId() { return m_clientId; }
+
 private:
+    size_t m_clientId;
 };
 
 }

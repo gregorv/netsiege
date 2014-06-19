@@ -22,6 +22,8 @@
 #include "network/network.pb.h"
 #include "debug/ndebug.h"
 #include <oms/objectmanager.h>
+#include <script/scriptengine.h>
+#include <angelscript.h>
 
 #include <iostream>
 #include <boost/asio.hpp>
@@ -33,9 +35,29 @@
 
 namespace network {
 
+int NetworkServer::RegisterNetworkSystem(std::shared_ptr< script::ScriptEngine > engine)
+{
+    RPCPackage::RegisterType(engine->engine());
+    RegisterDispatcher(engine);
+    auto r = engine->engine()->RegisterGlobalFunction("void sendRemoteProcedureCall(const RPCPackage@)",
+                                                      asMETHOD(NetworkServer, remoteProcedureCall),
+                                                      asCALL_THISCALL_ASGLOBAL, this);
+    addRpcHandler(0, RPC_ID_JOIN_SERVER_REQ,
+                  std::bind(&NetworkServer::handle_joinRequest, this,
+                            std::placeholders::_1, std::placeholders::_2
+                ),
+                  RPC_ARGS_JOIN_SERVER_REQ
+    );
+    assert(r >= 0);
+    setRpcSendFunction(std::bind(&NetworkServer::remoteProcedureCall, this,
+                                 std::placeholders::_1, std::placeholders::_2));
+    return 0;
+}
+
 NetworkServer::NetworkServer(const udp::endpoint& interface)
 : m_ioservice(), m_syncTimer(m_ioservice, boost::posix_time::milliseconds(SYNC_PERIOD*1000.0)),
-  m_callbackTimer(m_ioservice, boost::posix_time::milliseconds(2000)), m_socket(m_ioservice, interface)
+  m_callbackTimer(m_ioservice, boost::posix_time::milliseconds(2000)),
+  m_socket(m_ioservice, interface)
 {
 }
 
@@ -95,6 +117,24 @@ void NetworkServer::listen()
     );
 }
 
+bool NetworkServer::remoteProcedureCall(uint16_t client_id, std::shared_ptr< network::RPCPackage > package)
+{
+    bool r = true;
+    for(auto pair: m_clients) {
+        std::shared_ptr<ClientSession> client = pair.second;
+        if(!client->isActive()) {
+            continue;
+        }
+        if(client_id > 0 && client->clientId() != client_id) {
+            continue;
+        }
+        if(!client->remoteProcedureCall(package)) {
+            r = false;
+        }
+    }
+    return r;
+}
+
 void NetworkServer::syncTimeout()
 {
     sync();
@@ -118,11 +158,11 @@ void NetworkServer::sync()
 void NetworkServer::handle_receive(const boost::system::error_code& error,
                                    std::size_t bytesTransferred)
 {
-    nDebug << "Received " << bytesTransferred << " bytes from " << m_remoteEndpoint << std::endl;
+    nDebugL(3) << "Received " << bytesTransferred << " bytes from " << m_remoteEndpoint << std::endl;
     auto it = m_clients.find(m_remoteEndpoint);
     if(it == m_clients.end()) {
         logInfo() << "Client connected from " << m_remoteEndpoint << std::endl;
-        m_clients[m_remoteEndpoint] = std::make_shared<ClientSession>(m_remoteEndpoint, this);
+        m_clients[m_remoteEndpoint] = std::make_shared<ClientSession>(m_nextClientId++, m_remoteEndpoint, this);
         it = m_clients.find(m_remoteEndpoint);
     }
     it->second->inputPackage(m_receiveBuffer);
@@ -141,6 +181,11 @@ void NetworkServer::handle_timeoutCallback()
     m_callbackTimer.async_wait(boost::bind(&NetworkServer::handle_timeoutCallback, this));
 }
 
+void NetworkServer::handle_joinRequest(uint16_t client_id, std::shared_ptr<RPCPackage> package)
+{
+    auto clientVersion = package->popValue<uint32_t>();
+    auto clientName = package->popString();
+}
 
 void NetworkServer::closeDeadConnections()
 {

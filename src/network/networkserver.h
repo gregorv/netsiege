@@ -28,19 +28,26 @@
 
 #include "network.h"
 #include "clientsession.h"
+#include "rpcdispatcher.h"
 
 namespace oms {
     class ObjectManager;
+}
+
+namespace script {
+    class ScriptEngine;
 }
 
 namespace network {
 
 using boost::asio::ip::udp;
 
-class NetworkServer
+class NetworkServer : public RPCDispatcher
 {
 public:
     typedef std::function<void()> timeoutCallback_t;
+
+    int RegisterNetworkSystem(std::shared_ptr<script::ScriptEngine> engine);
 
     NetworkServer(const udp::endpoint& interface);
     ~NetworkServer();
@@ -54,6 +61,8 @@ public:
 
     void setTimeoutCallback(float timeout, timeoutCallback_t callback);
 
+    bool remoteProcedureCall(uint16_t client_id, std::shared_ptr< network::RPCPackage > package);
+
 private:
     void syncTimeout();
     void sync();
@@ -61,9 +70,11 @@ private:
     void handle_receive(const boost::system::error_code& error, std::size_t bytesTransferred);
     void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
     void handle_timeoutCallback();
+    void handle_joinRequest(uint16_t client_id, std::shared_ptr< network::RPCPackage > package);
 
     void closeDeadConnections();
 
+    size_t m_nextClientId = 0;
     boost::asio::io_service m_ioservice;
     boost::asio::deadline_timer m_syncTimer;
     boost::asio::deadline_timer m_callbackTimer;
