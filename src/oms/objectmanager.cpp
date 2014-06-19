@@ -42,25 +42,38 @@ void ObjectManager::setScriptEngine(std::shared_ptr<script::ScriptEngine> engine
     m_scriptEngine = engine;
     int r;
     m_scriptEngine->engine()->RegisterInterface("IObject");
-    r = m_scriptEngine->engine()->RegisterGlobalFunction("int createObject(IObject@,string)", asMETHOD(ObjectManager, createObjectRetId), asCALL_THISCALL_ASGLOBAL, this);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("int gameObjectCreate(IObject@,string)", asMETHOD(ObjectManager, createObjectRetId), asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
-//     r = m_scriptEngine->engine()->RegisterGlobalFunction("void removeObject(unsigned int)", asMETHODPR(ObjectManager, removeObject, (uint32_t), void), asCALL_THISCALL_ASGLOBAL, this);
-//     assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("void gameObjectRemove(int)", asMETHODPR(ObjectManager, removeObject, (uint32_t), void), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
 }
 
 
 std::shared_ptr< GameObject > ObjectManager::createObject(asIScriptObject* scriptObj, const std::string& name)
 {
-    auto newObject = std::make_shared<GameObject>(scriptObj, name);
+    auto scriptObjPtr = script::shared(scriptObj);
+    asGetActiveContext()->PushState();
+    auto newObject = std::make_shared<GameObject>(scriptObjPtr, name);
     newObject->setScriptEngine(m_scriptEngine);
     m_newObjects.insert(newObject);
+    asGetActiveContext()->PopState();
     m_objectsById[newObject->id()] = newObject;
     return m_objectsById[newObject->id()];
 }
 
+id_t ObjectManager::createObjectRetId(asIScriptObject* scriptObj, const std::string& name)
+{
+    return createObject(scriptObj, name)->id();
+}
+
 void ObjectManager::removeObject(GameObject::id_t id)
 {
-    if(m_objectsById.erase(id) != 0) {
+    auto it = m_objectsById.find(id);
+    if(it != m_objectsById.end()) {
+        asGetActiveContext()->PushState();
+        it->second->_onRemove();
+        asGetActiveContext()->PopState();
+        m_objectsById.erase(it);
         m_removedIds.insert(id);
     }
 }
@@ -145,8 +158,14 @@ void ObjectManager::deserialize(omsproto::GameObjectSet* object_set)
 
 void ObjectManager::step(float dt)
 {
-    for(auto objPair: m_objectsById) {
-        objPair.second->step(dt);
+    for(auto it = m_objectsById.begin(); it != m_objectsById.end();) {
+        auto obj = it->second;
+        // Advance iterator before executing step(),
+        // otherwise the iterator becomes invalid if
+        // the object is removed in the current step.
+        // -> SIGSEGV
+        it++;
+        obj->step(dt);
     }
 }
 

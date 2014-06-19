@@ -11,30 +11,52 @@ interface IObject2
     void deserialize();*/
 }
 
-mixin class Object {
-    int m_objectId;
-    void register(string name)
+mixin class Object : IObject {
+    void register(const string &in name)
     {
         debug("register()");
-        m_objectId = createObject(this, name);
+        m_objectId = gameObjectCreate(this, name);
     }
+
+    void destroy()
+    {
+        gameObjectRemove(m_objectId);
+    }
+
+// private:
+    int m_objectId;
 }
 
-class Character : IObject, Object
+class Character : Object
 {
-    Character(string name)
+    float timeOut;
+    Character(const string &in name)
     {
         debug("ctor");
         register(name);
+
+    }
+    ~Character()
+    {
+        debug("dtor");
     }
 
     void init()
     {
+        timeOut = .25;
         debug("init()");
     }
     void step(float dt)
     {
+        timeOut -= dt;
         debug("step()");
+        if (timeOut <= 0.0) {
+            destroy();
+        }
+    }
+    void cleanup()
+    {
+        debug("cleanup()");
     }
 }
 

@@ -29,24 +29,21 @@ namespace oms {
 
 id_t GameObject::nextId = 0;
 
-GameObject::GameObject(asIScriptObject* scriptObject, const std::string& name)
+GameObject::GameObject(std::shared_ptr<asIScriptObject> scriptObject, const std::string& name)
 : GameObject(nextId++, scriptObject, name)
 {
 }
 
-GameObject::GameObject(id_t id, asIScriptObject* scriptObject, const std::string& name)
+GameObject::GameObject(id_t id, std::shared_ptr<asIScriptObject> scriptObject, const std::string& name)
 : m_id(id), m_name(name), m_scriptObject(scriptObject)
 {
-    if(m_scriptObject) {
-        m_scriptObject->AddRef();
-    }
+    nDebugVerbose << "GameObject(" << m_id << ") " << m_name << " created!" << std::endl;
 }
 
 GameObject::~GameObject()
 {
-    if(m_scriptObject) {
-        m_scriptObject->Release();
-    }
+    _onRemove();
+    nDebugVerbose << "GameObject(" << m_id << ") " << m_name << " destroyed!" << std::endl;
 }
 
 void GameObject::setScriptEngine(std::shared_ptr< script::ScriptEngine > engine)
@@ -60,25 +57,36 @@ void GameObject::setScriptEngine(std::shared_ptr< script::ScriptEngine > engine)
     m_engine = engine;
 
     auto type = m_scriptObject->GetObjectType();
-    auto ctx = m_engine->engine()->CreateContext();
+    auto ctx = m_engine->context();
     ctx->Prepare(type->GetMethodByDecl("void init()"));
-    ctx->SetObject(m_scriptObject);
+    ctx->SetObject(m_scriptObject.get());
     ctx->Execute();
-    ctx->Release();
 }
 
 void GameObject::step(float dt)
 {
     assert(m_engine.get());
-    assert(m_scriptObject);
+    assert(m_scriptObject.get());
 
     auto type = m_scriptObject->GetObjectType();
-    auto ctx = m_engine->engine()->CreateContext();
+    auto ctx = m_engine->context();
     ctx->Prepare(type->GetMethodByDecl("void step(float)"));
-    ctx->SetObject(m_scriptObject);
+    ctx->SetObject(m_scriptObject.get());
     ctx->SetArgFloat(0, dt);
     ctx->Execute();
-    ctx->Release();
+}
+
+void GameObject::_onRemove()
+{
+    if(m_scriptObject.get()) {
+        auto type = m_scriptObject->GetObjectType();
+        auto ctx = m_engine->context();
+        ctx->Prepare(type->GetMethodByDecl("void cleanup()"));
+        ctx->SetObject(m_scriptObject.get());
+        ctx->Execute();
+        m_scriptObject.reset();
+        m_engine.reset();
+    }
 }
 
 void GameObject::serialize(omsproto::GameObject* object, bool forceFullSerialize) const

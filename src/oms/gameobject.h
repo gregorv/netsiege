@@ -44,12 +44,13 @@ class GameObject
 public:
     typedef uint32_t id_t;
 
-    GameObject(asIScriptObject* scriptObject, const std::string& name);
-    GameObject(id_t id, asIScriptObject* scriptObject, const std::string& name);
+    GameObject(std::shared_ptr<asIScriptObject> scriptObject, const std::string& name);
+    GameObject(id_t id, std::shared_ptr<asIScriptObject> scriptObject, const std::string& name);
     ~GameObject();
 
     void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
     void step(float dt);
+    void _onRemove();
 
     void serialize(omsproto::GameObject* object, bool forceFullSerialize) const;
     void deserialize(const omsproto::GameObject* object);
@@ -68,7 +69,7 @@ private:
     std::string m_name;
     Ogre::Matrix4 m_positionMatrix;
     bool m_isVisible = false;
-    asIScriptObject* m_scriptObject;
+    std::shared_ptr<asIScriptObject> m_scriptObject;
     std::shared_ptr<script::ScriptEngine> m_engine;
 };
 

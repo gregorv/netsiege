@@ -53,7 +53,7 @@ public:
     void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
 
     std::shared_ptr< GameObject > createObject(asIScriptObject* scriptObj, const std::string& name);
-    id_t createObjectRetId(asIScriptObject* scriptObj, const std::string& name) { return createObject(scriptObj, name)->id(); }
+    id_t createObjectRetId(asIScriptObject* scriptObj, const std::string& name);
     void removeObject(GameObject::id_t id);
     void removeObject(const std::shared_ptr<GameObject>& obj);
 
