@@ -49,8 +49,10 @@ but use one of the two functions script::shared or script::shared_addref
 template <class T>
 void ASRefRelease(T* object)
 {
-    nDebugL(4) << "ASRefRelease on object" << std::hex << object << std::dec << ", of type " << typeid(object).name() << std::endl;
-    object->Release();
+    if(object) {
+        nDebugL(4) << "ASRefRelease on object" << std::hex << object << std::dec << ", of type " << typeid(object).name() << std::endl;
+        object->Release();
+    }
 }
 
 /**
