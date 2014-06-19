@@ -78,6 +78,7 @@ private:
     boost::asio::io_service m_ioservice;
     boost::asio::deadline_timer m_syncTimer;
     boost::asio::deadline_timer m_callbackTimer;
+    boost::asio::signal_set m_signals;
     timeoutCallback_t m_callback;
     float m_callbackTimerTimeout;
     udp::socket m_socket;

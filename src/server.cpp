@@ -20,9 +20,11 @@
 #include <iostream>
 #include "debug/ndebug.h"
 #include "network/networkserver.h"
+#include "network/rpcpackage.h"
 #include "campaign/manager.h"
 #include "campaign/serverlogic.h"
 #include "script/scriptfilemanager.h"
+#include "script/scriptengine.h"
 #include "oms/objectmanager.h"
 #include <OGRE/OgreRoot.h>
 
@@ -54,7 +56,9 @@ int main(int argc, char **argv) {
         return -1;
     }
     server.setObjectManager(manager->objectManager());
+    server.RegisterNetworkSystem(manager->scriptEngine());
     campaign::ServerLogic logic(manager);
+//     server.setRpcScriptEngine(manager->scriptEngine());
     if(!logic.init()) {
         logError() << "Server logic could not be initialized, abort!" << std::endl;
         return -1;
