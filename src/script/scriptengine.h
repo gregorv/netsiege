@@ -24,6 +24,7 @@
 #include "debug/ndebug.h"
 
 class asIScriptEngine;
+class asIScriptContext;
 class CScriptBuilder;
 
 namespace script {
@@ -122,9 +123,11 @@ public:
     void registerObjectSystem();
 
     std::shared_ptr<asIScriptEngine> engine() { return m_engine; }
+    std::shared_ptr<asIScriptContext> context() { return m_context; }
 
 private:
     std::shared_ptr<asIScriptEngine> m_engine;
+    std::shared_ptr<asIScriptContext> m_context;
     std::unique_ptr<CScriptBuilder> m_scriptBuilder;
 };
 }

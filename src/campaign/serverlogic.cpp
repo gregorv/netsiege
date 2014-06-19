@@ -32,6 +32,7 @@ using namespace campaign;
 ServerLogic::ServerLogic(const std::shared_ptr<Manager>& manager)
  : m_manager(manager)
 {
+    m_manager->scriptEngine()->setPreprocessorDefine("SERVER");
     m_manager->scriptEngine()->importModule(SERVER_AS_MODULE, "main.as");
 }
 
@@ -43,7 +44,7 @@ ServerLogic::~ServerLogic()
 bool ServerLogic::init()
 {
     auto engine = m_manager->scriptEngine()->engine();
-    auto ctx = script::shared(engine->CreateContext());
+    auto ctx = m_manager->scriptEngine()->context();
     auto func = engine->GetModule(SERVER_AS_MODULE.c_str())->GetFunctionByDecl("void initServer()");
     if(!func) {
         logError() << "Cannot locate required AngelScript function 'initServer'" << std::endl;
@@ -61,7 +62,7 @@ bool ServerLogic::init()
 bool ServerLogic::step(float dt)
 {
     auto engine = m_manager->scriptEngine()->engine();
-    auto ctx = script::shared(engine->CreateContext());
+    auto ctx = m_manager->scriptEngine()->context();
     auto func = engine->GetModule(SERVER_AS_MODULE.c_str())->GetFunctionByDecl("void stepServer(float)");
     if(!func) {
         logError() << "Cannot locate required AngelScript function 'stepServer'" << std::endl;

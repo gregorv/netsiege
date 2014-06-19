@@ -95,6 +95,9 @@ set(ADDON_SOURCE
         ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scriptstdstring/scriptstdstring.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scriptmath/scriptmath.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/debugger/debugger.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scriptarray/scriptarray.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scriptany/scriptany.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scripthandle/scripthandle.cpp
 )
 
 set(ANGELSCRIPT_INCLUDE_DIRS
@@ -104,7 +107,7 @@ set(ANGELSCRIPT_INCLUDE_DIRS
 )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_definitions("-D_CRT_SECURE_NO_WARNINGS -DANGELSCRIPT_EXPORT -D_LIB")
+add_definitions("-D_CRT_SECURE_NO_WARNINGS -DANGELSCRIPT_EXPORT -D_LIB -DAS_USE_STLNAMES=1")
 
 # Fix x64 issues on Linux
 if("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "x86_64" AND NOT APPLE)
