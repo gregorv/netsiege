@@ -62,13 +62,26 @@ typedef std::chrono::time_point<std::chrono::steady_clock> steady_time_point_t;
 typedef std::chrono::duration<std::chrono::steady_clock> steady_time_duration_t;
 
 typedef uint16_t seq_id_t;
-const uint16_t MAX_SEQ_ID = 0xFFFF;
+const seq_id_t MAX_SEQ_ID = 0xFFFF;
 
 typedef uint16_t rpc_id_t;
-const uint16_t MAX_RPC_ID = 0xFFFF;
+const rpc_id_t MAX_RPC_ID = 0xFFFF;
+
+// The RPC IDs up to this constant are reserved for interal use by the C++-side
+// of the game. Registering an AngelScript handler for these RPCs is invalid
+// and will result in an error!
+const rpc_id_t MAX_INTERNAL_RPC_ID = 15;
+
+const rpc_id_t RPC_ID_JOIN_SERVER_REQ = 0;
+// RPC Arguments: uint32 client_version, string name
+static const char* RPC_ARGS_JOIN_SERVER_REQ = "iL";
+
+const rpc_id_t RPC_ID_JOIN_SERVER_RESP = 1;
+// RPC arguments: uint32 player_id, uint32 server_version, char player_accepted, string map_name, uint32 map_version
+static const char* RPC_ARGS_JOIN_SERVER_RESP = "iicLi";
 
 typedef uint16_t ack_mask_t;
-const uint16_t NUM_ACKS = 16;
+const uint16_t NUM_ACKS = sizeof(ack_mask_t)*8;
 
 bool isSeqIdMoreRecent(seq_id_t seqId1, seq_id_t seqId2);
 seq_id_t seqIdDifference(seq_id_t seqId1, seq_id_t seqId2);
