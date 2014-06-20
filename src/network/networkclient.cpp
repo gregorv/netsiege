@@ -18,6 +18,8 @@
  */
 
 #include "networkclient.h"
+#include "script/scriptengine.h"
+#include "angelscript.h"
 #include <boost/bind.hpp>
 
 namespace network {
@@ -32,6 +34,21 @@ m_socket(m_ioservice, udp::endpoint(udp::v4(), 0))
 NetworkClient::~NetworkClient()
 {
 
+}
+
+int NetworkClient::RegisterNetworkSystem(std::shared_ptr< script::ScriptEngine > engine)
+{
+    RPCPackage::RegisterType(engine->engine());
+    RegisterDispatcher(engine);
+    addRpcHandler(0, RPC_ID_JOIN_SERVER_RESP,
+                  std::bind(&NetworkClient::handleJoinResponse, this,
+                            std::placeholders::_1, std::placeholders::_2
+                ),
+                  RPC_ARGS_JOIN_SERVER_RESP
+    );
+    setRpcSendFunction(std::bind(&NetworkClient::remoteProcedureCall, this,
+                                 std::placeholders::_1, std::placeholders::_2));
+    return 0;
 }
 
 void NetworkClient::listen()
@@ -54,12 +71,17 @@ void NetworkClient::send(const udp::endpoint& remoteEndpoint, const package_buff
         boost::asio::buffer(&package.front(),
                             std::min(package.size(), nBytes)),
         remoteEndpoint,
-        boost::bind(&NetworkClient::handle_receive, this,
+        boost::bind(&NetworkClient::handle_send, this,
             boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred()
-//             package.size()
+            boost::asio::placeholders::bytes_transferred(),
+            package.size()
             )
     );
+}
+
+bool NetworkClient::remoteProcedureCall(uint16_t receiverClientId, std::shared_ptr< RPCPackage > package)
+{
+    return UdpConnection::remoteProcedureCall(package);
 }
 
 void NetworkClient::initProcess()
@@ -86,14 +108,16 @@ void NetworkClient::run()
 void NetworkClient::sendJoinRequest()
 {
     auto package = RPCPackage::make(RPC_ID_JOIN_SERVER_REQ);
-    package->push(0);
+    package->push((uint32_t)0);
     package->push(m_name);
-    remoteProcedureCall(package);
+    assert(package->argString() == RPC_ARGS_JOIN_SERVER_REQ);
+    remoteProcedureCall(0, package);
 }
 
 void NetworkClient::handle_receive(const boost::system::error_code& error,
                                    std::size_t bytesTransferred)
 {
+    nDebugL(4) << "NetworkClient::handle_receive(" << error << ", " << bytesTransferred << ")" << std::endl;
     pb::S2CMessage msg;
     msg.ParseFromArray(&m_receiveBuffer.front(),
                        m_receiveBuffer.size());

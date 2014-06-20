@@ -105,6 +105,7 @@ void NetworkServer::setTimeoutCallback(float timeout, NetworkServer::timeoutCall
 
 void NetworkServer::send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes)
 {
+    nDebugL(4) << "NetworkServer::send(" << remoteEndpoint << ", [package], " << nBytes << ")" << std::endl;
     m_socket.async_send_to(
         boost::asio::buffer(&package.front(),
                             std::min(package.size(), nBytes)),
@@ -200,6 +201,22 @@ void NetworkServer::handle_joinRequest(uint16_t client_id, std::shared_ptr<RPCPa
 {
     auto clientVersion = package->popValue<uint32_t>();
     auto clientName = package->popString();
+    nDebug << "handle_joinRequest: Client ID " << client_id << ", Client Version " << clientVersion << ", client name " << clientName << std::endl;
+    auto response = RPCPackage::make(RPC_ID_JOIN_SERVER_RESP);
+//     uint32 player_id, uint32 server_version, char player_accepted, string map_name, uint32 map_version
+    response->push((uint32_t)client_id);
+    response->push((uint32_t)0); //d server version
+    response->push((uint8_t)true);
+    response->push("test");
+    response->push((uint32_t)0);
+    for(auto& kv: m_clients) {
+        if(kv.second->clientId() == client_id) {
+            kv.second->isActive(true);
+        }
+    }
+    remoteProcedureCall(client_id, response);
+    assert(response->argString() == RPC_ARGS_JOIN_SERVER_RESP);
+
 }
 
 void NetworkServer::closeDeadConnections()

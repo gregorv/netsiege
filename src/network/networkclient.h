@@ -37,6 +37,8 @@ public:
     NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);
     ~NetworkClient();
 
+    int RegisterNetworkSystem(std::shared_ptr<script::ScriptEngine> engine);
+
     void initProcess();
     void run();
     void poll();
@@ -50,6 +52,8 @@ private:
     void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
 
     void handleJoinResponse(uint16_t client_id, std::shared_ptr< network::RPCPackage > package);
+
+    bool remoteProcedureCall(uint16_t receiverClientId, std::shared_ptr<RPCPackage> package);
 
 private:
     std::string m_name;
