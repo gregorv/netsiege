@@ -149,6 +149,7 @@ private:
         rpc->set_rpc_id(procedureId);
         rpc->set_rpc_data(data.data(), dataSize);
         sendPackage(msg);
+        nDebugL(4) << "Sent RPC package: seqId " << msg->seq_id() << ", msgId " << messageId << ", rpcId " << procedureId << std::endl;
 
         rpc_info_t rpc_info {
             static_cast<seq_id_t>(rpc->msg_seq_id()),
@@ -174,9 +175,11 @@ private:
         for(auto it = m_rpcMemory.begin(); it != m_rpcMemory.end(); it++) {
             duration<float> time_span = duration_cast<duration<float>>(now - it->timeOfSend);
             if(isSeqIdAcknowledged(it->seqId)) {
+                nDebugL(4) << "RPC message no." << it->msgId << " acknowledged!" << std::endl;
                 it = m_rpcMemory.erase(it);
             }
             else if(time_span.count() > PACKAGE_LOSS_TIMEOUT) {
+                nDebugL(4) << "RPC Package timeout, resend message no. " << it->msgId << ", RPC ID " << it->rpcId << std::endl;
                 remoteProcedureCall(*it);
                 it = m_rpcMemory.erase(it);
             }
