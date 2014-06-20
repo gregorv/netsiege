@@ -28,7 +28,12 @@ using namespace campaign;
 using namespace boost::filesystem;
 
 Manager::Manager(const std::string& campaignName)
- : m_scriptEngine(std::make_shared<script::ScriptEngine>()),
+ : Manager(campaignName, std::make_shared<script::ScriptEngine>())
+{
+}
+
+Manager::Manager(const std::string& campaignName, std::shared_ptr< script::ScriptEngine > scriptEngine)
+ : m_scriptEngine(scriptEngine),
  m_objectManager(std::make_shared<oms::ObjectManager>()),
  m_campaignName(campaignName)
 {
@@ -38,7 +43,6 @@ Manager::Manager(const std::string& campaignName)
 
 Manager::~Manager()
 {
-
 }
 
 bool Manager::loadCampaignPath()

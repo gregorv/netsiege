@@ -37,6 +37,7 @@ class Manager
 {
 public:
     Manager(const std::string& campaignName);
+    Manager(const std::string& campaignName, std::shared_ptr<script::ScriptEngine> scriptEngine);
     ~Manager();
 
     bool loadCampaignPath();
