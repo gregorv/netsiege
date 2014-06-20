@@ -74,8 +74,13 @@ public:
 
     void setRpcSendFunction(send_rpc_function_t func) { m_sendRpcFunction = func; }
 
+    static std::string argSpec2decl(const std::string& funcname, const std::string& argSpec);
+    static std::pair<bool, std::string> argSpecFromFunction(const asIScriptFunction* function);
+
+    std::string getArgSpecForRpc(const rpc_id_t& id) const;
+
 private:
-    handler_id_t addRpcHandler(uint16_t client_id, rpc_id_t id, std::string funcname, std::string argspec);
+    handler_id_t addRpcHandler(uint16_t client_id, network::rpc_id_t id, std::string funcname);
     handler_id_t addRpcHandler(uint16_t client_id, rpc_id_t id, CScriptHandle* handle, std::string funcname, std::string argspec);
     bool registerRpc(rpc_id_t id, std::string name, std::string argspec);
     static void buildCall(asIScriptGeneric* gen);

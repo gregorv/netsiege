@@ -60,10 +60,10 @@ void RPCDispatcher::RegisterDispatcher(std::shared_ptr<script::ScriptEngine> eng
     r = m_engine->engine()->RegisterGlobalFunction("bool __rpcRegister(uint16,string,string)",
                                                  asMETHOD(RPCDispatcher, registerRpc), asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
-    r = m_engine->engine()->RegisterGlobalFunction("uint32 __rpcRegisterHandler(uint16,uint16,string,string)",
+    r = m_engine->engine()->RegisterGlobalFunction("uint32 __rpcRegisterHandler(uint16,uint16,string)",
                                                  asMETHODPR(RPCDispatcher,
                                                             addRpcHandler,
-                                                            (uint16_t client_id, rpc_id_t id, std::string funcname, std::string argspec),
+                                                            (uint16_t client_id, rpc_id_t id, std::string funcname),
                                                             handler_id_t
                                                            ),
                                                    asCALL_THISCALL_ASGLOBAL, this);
@@ -93,6 +93,7 @@ bool RPCDispatcher::loadRpcHandlerSpec(const std::string& filename)
     return true;
 }
 
+
 bool RPCDispatcher::executeReceivedCall(const uint16_t& sender_client_id, std::shared_ptr<RPCPackage> package)
 {
     assert(m_engine.get());
@@ -102,34 +103,51 @@ bool RPCDispatcher::executeReceivedCall(const uint16_t& sender_client_id, std::s
         return false;
     }
     if(handler.function) {
+        nDebugVerbose << "Execute AS Handler for RPC " << package->rpcId()
+                      << " from " << sender_client_id
+                      << ", function '" << handler.function->GetName() << "'"
+                      << std::endl;
         auto ctx = m_engine->context();
-        ctx->Prepare(handler.function);
+        auto r = ctx->Prepare(handler.function);
+        if(r < 0) {
+            logError() << "Cannot prepare AS context for execution of RPC handler "
+                       << handler.function->GetName()
+                       << " for RPC ID " << package->rpcId()
+                       << " from client " << sender_client_id
+                       << ". Error code " << r
+                       << std::endl;
+            return false;
+        }
         package->reset();
         if(handler.object) {
-            ctx->SetObject(handler.object);
+            r = ctx->SetObject(handler.object);
+            assert(r >= 0);
         }
-        ctx->SetArgWord(0, sender_client_id);
+        r = ctx->SetArgWord(0, sender_client_id);
+        assert(r >= 0);
         uint16_t argPos = 1;
         std::list<std::string> stringCache;
         for(char argType: handler.argSpec) {
-            if(argType == 'c') ctx->SetArgByte(argPos, package->popValue<uint8_t>());
-            else if(argType == 'C') ctx->SetArgByte(argPos, package->popValue<int8_t>());
-            else if(argType == 's') ctx->SetArgWord(argPos, package->popValue<uint16_t>());
-            else if(argType == 'S') ctx->SetArgWord(argPos, package->popValue<int16_t>());
-            else if(argType == 'i') ctx->SetArgDWord(argPos, package->popValue<uint32_t>());
-            else if(argType == 'I') ctx->SetArgDWord(argPos, package->popValue<int32_t>());
-            else if(argType == 'd') ctx->SetArgDouble(argPos, package->popValue<double>());
-            else if(argType == 'f') ctx->SetArgFloat(argPos, package->popValue<float>());
+            if(argType == 'c') { r = ctx->SetArgByte(argPos, package->popValue<uint8_t>()); assert(r >= 0); }
+            else if(argType == 'C') { r = ctx->SetArgByte(argPos, package->popValue<int8_t>()); assert(r >= 0); }
+            else if(argType == 's') { r = ctx->SetArgWord(argPos, package->popValue<uint16_t>()); assert(r >= 0); }
+            else if(argType == 'S') { r = ctx->SetArgWord(argPos, package->popValue<int16_t>()); assert(r >= 0); }
+            else if(argType == 'i') { r = ctx->SetArgDWord(argPos, package->popValue<uint32_t>()); assert(r >= 0); }
+            else if(argType == 'I') { r = ctx->SetArgDWord(argPos, package->popValue<int32_t>()); assert(r >= 0); }
+            else if(argType == 'd') { r = ctx->SetArgDouble(argPos, package->popValue<double>()); assert(r >= 0); }
+            else if(argType == 'f') { r = ctx->SetArgFloat(argPos, package->popValue<float>()); assert(r >= 0); }
             else if(argType == 'L') {
                 auto str = package->popString();
-                stringCache.push_front(str);
-                ctx->SetArgObject(argPos, &*stringCache.begin());
+//                 stringCache.push_front(str);
+                r = ctx->SetArgObject(argPos, &str);
+                assert(r >= 0);
             }
             else assert(false);
             argPos++;
         }
         ctx->Execute();
     } else {
+        nDebugVerbose << "Execute C++ Handler for RPC " << package->rpcId() << " from " << sender_client_id << std::endl;
         handler.cppFunction(sender_client_id, package);
     }
     return true;
@@ -161,11 +179,11 @@ bool RPCDispatcher::addRpcHandler(uint16_t client_id, rpc_id_t id, RPCDispatcher
     return true;
 }
 
-RPCDispatcher::handler_id_t RPCDispatcher::addRpcHandler(uint16_t client_id, rpc_id_t id, std::string funcname, std::string argspec)
+RPCDispatcher::handler_id_t RPCDispatcher::addRpcHandler(uint16_t client_id, rpc_id_t id, std::string funcname)
 {
     assert(m_engine.get());
-    nDebug << "addRpcHandler " << funcname << "[" << argspec
-           << "] to RPC ID " << id << std::endl;
+    nDebug << "addRpcHandler " << funcname
+           << " to RPC ID " << id << std::endl;
     if(id <= MAX_INTERNAL_RPC_ID) {
         logError() << "Tried to bind AS function " << funcname
                    << " to ID " << id
@@ -177,7 +195,19 @@ RPCDispatcher::handler_id_t RPCDispatcher::addRpcHandler(uint16_t client_id, rpc
     if(!function) {
         logError() << "Failed to register RPC Handler ID " << id
                   << ", AS function name '" << funcname
-                  << "', argspec '" << argspec << "'" << std::endl;
+                  << "': Function not found!"
+                  << std::endl;
+        return 0;
+    }
+    // Check if handler prototype match specification from rpc.tab
+    auto kv = argSpecFromFunction(function);
+    auto argspec = getArgSpecForRpc(id);
+    if(!kv.first || kv.second != argspec) {
+        logError() << "Failed to register RPC Handler ID " << id
+                   << ", AS function name '" << funcname
+                   << "': Expected prototype " << argSpec2decl(funcname, argspec)
+                   << ", found " << function->GetDeclaration()
+                   << std::endl;
         return 0;
     }
     m_handlers[m_nextHandlerId] = handler_t { id, function, 0, 0, argspec, client_id };
@@ -220,7 +250,8 @@ RPCDispatcher::handler_id_t RPCDispatcher::addRpcHandler(uint16_t client_id, rpc
 bool RPCDispatcher::registerRpc(rpc_id_t id, std::string name, std::string argspec)
 {
     assert(m_engine.get());
-    nDebug << "Register RPC " << id << " named '" << name << "', argspec '" << argspec << "'" << std::endl;
+    auto decl = argSpec2decl(name, argspec);
+    nDebug << "Register RPC " << id << ": " << decl << std::endl;
     if(id <= MAX_INTERNAL_RPC_ID) {
         logError() << "Tried to register RPC with ID " << id
                    << " named " << name
@@ -240,24 +271,7 @@ bool RPCDispatcher::registerRpc(rpc_id_t id, std::string name, std::string argsp
         return false;
     }
     m_procedures[name] = procedure_t { id, argspec };
-    std::ostringstream decl;
-    decl << "bool " << name << "(uint16"; // receiver_client_id
-    for(char c: argspec) {
-        decl << ", ";
-        if(c == 'c') decl << "uint8";
-        else if(c == 'C') decl << "int8";
-        else if(c == 's') decl << "uint16";
-        else if(c == 'S') decl << "int16";
-        else if(c == 'i') decl << "uint32";
-        else if(c == 'I') decl << "int32";
-        else if(c == 'f') decl << "float";
-        else if(c == 'd') decl << "double";
-        else if(c == 'L') decl << "string";
-        else assert(false);
-    }
-    decl << ")";
-    nDebug << "Declaration for RPC wrapper object method: " << decl.str() << std::endl;
-    auto r = m_engine->engine()->RegisterObjectMethod("RPC", decl.str().c_str(), asFUNCTION(RPCDispatcher::buildCall), asCALL_GENERIC);
+    auto r = m_engine->engine()->RegisterObjectMethod("RPC", decl.c_str(), asFUNCTION(RPCDispatcher::buildCall), asCALL_GENERIC);
     assert(r >= 0);
     m_rpcObjectType->GetMethodByName(name.c_str())->SetUserData(this);
     return true;
@@ -267,7 +281,6 @@ void RPCDispatcher::buildCall(asIScriptGeneric* gen)
 {
     auto func = gen->GetFunction();
     auto dispatcher = reinterpret_cast<RPCDispatcher*>(func->GetUserData());
-    nDebug << "Build RPC " << func->GetName() << std::endl;
     auto handler = dispatcher->m_procedures[func->GetName()];
     auto package = RPCPackage::make(handler.id);
     auto argnum = 1;
@@ -304,4 +317,62 @@ bool RPCDispatcher::findRpcHandler(RPCDispatcher::handler_t& handler, const uint
     }
     return false;
 }
+
+
+std::string RPCDispatcher::argSpec2decl(const std::string& funcname, const std::string& argSpec)
+{
+    std::ostringstream decl;
+    decl << "void " << funcname << "(uint16"; // receiver_client_id
+    for(char c: argSpec) {
+        decl << ", ";
+        if(c == 'c') decl << "uint8";
+        else if(c == 'C') decl << "int8";
+        else if(c == 's') decl << "uint16";
+        else if(c == 'S') decl << "int16";
+        else if(c == 'i') decl << "uint32";
+        else if(c == 'I') decl << "int32";
+        else if(c == 'f') decl << "float";
+        else if(c == 'd') decl << "double";
+        else if(c == 'L') decl << "string";
+        else assert(false);
+    }
+    decl << ")";
+    return decl.str();
+}
+
+std::pair< bool, std::string > RPCDispatcher::argSpecFromFunction(const asIScriptFunction* function)
+{
+    std::string argSpec;
+    if(function->GetParamCount() == 0) {
+        return std::make_pair(false, std::string{});
+    }
+    if(function->GetParamTypeId(0) != asTYPEID_UINT16) {
+        return std::make_pair(false, std::string{});
+    }
+    for(size_t i = 1; i < function->GetParamCount(); i++) {
+        auto type = function->GetParamTypeId(i);
+        if(type == asTYPEID_UINT8) argSpec += 'c';
+        else if(type == asTYPEID_INT8) argSpec += 'C';
+        else if(type == asTYPEID_UINT16) argSpec += 's';
+        else if(type == asTYPEID_INT16) argSpec += 'S';
+        else if(type == asTYPEID_UINT32) argSpec += 'i';
+        else if(type == asTYPEID_INT32) argSpec += 'I';
+        else if(type == asTYPEID_FLOAT) argSpec += 'f';
+        else if(type == asTYPEID_DOUBLE) argSpec += 'd';
+        else if(type == function->GetEngine()->GetStringFactoryReturnTypeId()) argSpec += 'L';
+        else return std::make_pair(false, std::string{});
+    }
+    return std::make_pair(true, argSpec);
+}
+
+std::string RPCDispatcher::getArgSpecForRpc(const rpc_id_t& id) const
+{
+    for(const auto& kv: m_procedures) {
+        if(kv.second.id == id) {
+            return kv.second.argSpec;
+        }
+    }
+    return std::string{};
+}
+
 
