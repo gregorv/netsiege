@@ -44,12 +44,14 @@ public:
 
     void inputPackage(const package_buffer_t& package);
 
-    bool isActive() const { return true; }
+    bool isActive() const { return m_isActive; }
+    void isActive(bool active) { m_isActive = active; }
 
     size_t clientId() { return m_clientId; }
 
 private:
     size_t m_clientId;
+    bool m_isActive = false;
 };
 
 }
