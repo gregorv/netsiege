@@ -159,7 +159,9 @@ void NetworkServer::sync()
         auto msg = std::make_shared<pb::S2CMessage>();
         m_objectManager->serializeChanges(msg->mutable_world_state_update()->mutable_updated_objects());
         for(auto client: m_clients) {
-            client.second->sendPackage(msg);
+            if(client.second->isActive()) {
+                client.second->sendPackage(msg);
+            }
         }
     }
     m_objectManager->flushUpdateCache();
