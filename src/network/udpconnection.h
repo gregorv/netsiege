@@ -90,13 +90,12 @@ public:
     }
 
 protected:
-    bool parsePackage(const recv_msg& msg)
+    bool parsePackage(const recv_msg& msg, uint16_t srcClientId=0)
     {
         refresh(msg.seq_id(), msg.ack_seq_id(), msg.ack_mask());
         if(msg.has_rpc()) {
-            m_rpcDispatcher->executeReceivedCall(0, msg.rpc().rpc_id(), msg.rpc().rpc_data());
-        }
-        else {
+            m_rpcDispatcher->executeReceivedCall(srcClientId, msg.rpc().rpc_id(), msg.rpc().rpc_data());
+        } else {
             return false;
         }
         return true;

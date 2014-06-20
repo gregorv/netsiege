@@ -37,7 +37,7 @@ void ClientSession::inputPackage(const package_buffer_t& package)
 {
     pb::C2SMessage msg;
     msg.ParseFromArray(&package.front(), package.size());
-    if(!parsePackage(msg)) {
+    if(!parsePackage(msg, m_clientId)) {
         // TODO Client negotiation
     }
 }
