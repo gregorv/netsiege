@@ -65,6 +65,7 @@ public:
     virtual ~RPCDispatcher();
 
     void RegisterDispatcher(std::shared_ptr<script::ScriptEngine> engine);
+    bool loadRpcHandlerSpec(const std::string& filename="rpc.tab");
 
     bool executeReceivedCall(const uint16_t& sender_client_id, std::shared_ptr< network::RPCPackage > package);
     bool executeReceivedCall(const uint16_t& sender_client_id, const rpc_id_t& id, const std::string& data);

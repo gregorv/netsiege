@@ -76,7 +76,11 @@ void RPCDispatcher::RegisterDispatcher(std::shared_ptr<script::ScriptEngine> eng
                                                            ),
                                                    asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
-    auto resource = script::ScriptFileManager::getSingleton().load(Ogre::String("rpc.tab"),
+}
+
+bool RPCDispatcher::loadRpcHandlerSpec(const std::string& filename)
+{
+    auto resource = script::ScriptFileManager::getSingleton().load(Ogre::String(filename),
                                                                    Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     std::istringstream rpcConfig(resource->code());
     while(!rpcConfig.eof()) {
@@ -86,6 +90,7 @@ void RPCDispatcher::RegisterDispatcher(std::shared_ptr<script::ScriptEngine> eng
         while(!rpcConfig.eof() && rpcConfig.get() != '\n');
         registerRpc(rpc.id, function, rpc.argSpec);
     }
+    return true;
 }
 
 bool RPCDispatcher::executeReceivedCall(const uint16_t& sender_client_id, std::shared_ptr<RPCPackage> package)

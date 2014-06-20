@@ -57,6 +57,7 @@ int main(int argc, char **argv) {
     }
     server.setObjectManager(manager->objectManager());
     server.RegisterNetworkSystem(manager->scriptEngine());
+    server.loadRpcHandlerSpec();
     campaign::ServerLogic logic(manager);
 //     server.setRpcScriptEngine(manager->scriptEngine());
     if(!logic.init()) {
