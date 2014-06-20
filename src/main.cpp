@@ -19,9 +19,13 @@
 
 #include <iostream>
 #include "network/networkclient.h"
+#include "script/scriptengine.h"
+#include "script/scriptfilemanager.h"
 #include "debug/ndebug.h"
+#include <OGRE/Ogre.h>
 
 int main(int argc, char **argv) {
+
     if(argc != 3) {
         std::cerr << argv[0] << " ServerIpV4 Port" << std::endl;
         return -1;
@@ -31,8 +35,15 @@ int main(int argc, char **argv) {
     boost::asio::ip::address addr(boost::asio::ip::address::from_string(argv[1]));
     serverEndpoint.address(addr);
     serverEndpoint.port(atoi(argv[2]));
+    Ogre::Root root;
+    nDebug << "ResourceGroupManager Pointer: " << std::hex << Ogre::ResourceGroupManager::getSingletonPtr() << std::dec << std::endl;
+    new script::ScriptFileManager;
+    auto scriptEngine = std::make_shared<script::ScriptEngine>();
     network::NetworkClient client(serverEndpoint, std::string("Serioux"));
+    client.RegisterNetworkSystem(scriptEngine);
     client.initProcess();
+    client.sendJoinRequest();
     client.run();
+    delete Ogre::ResourceGroupManager::getSingleton()._getResourceManager("ScriptFile");
     return 0;
 }
