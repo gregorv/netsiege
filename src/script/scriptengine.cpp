@@ -28,6 +28,7 @@
 #include "scripthandle/scripthandle.h"
 #include "network/rpcpackage.h"
 #include "debug/ndebug.h"
+#include "serializer.h"
 #include <OGRE/OgreMatrix3.h>
 #include <OGRE/OgreMatrix4.h>
 #include <OGRE/OgreVector2.h>
@@ -85,7 +86,8 @@ int IncludeCallback(const char *include, const char *from, CScriptBuilder *build
 ScriptEngine::ScriptEngine()
  : m_engine(asCreateScriptEngine(ANGELSCRIPT_VERSION), ASRefRelease<asIScriptEngine>),
  m_context(shared(m_engine->CreateContext())),
- m_scriptBuilder(std::unique_ptr<CScriptBuilder>(new CScriptBuilder))
+ m_scriptBuilder(std::unique_ptr<CScriptBuilder>(new CScriptBuilder)),
+ m_serializer(std::unique_ptr<Serializer>(new Serializer(this)))
 {
     int r = m_engine->SetMessageCallback(asFUNCTION(MessageCallback), 0, asCALL_CDECL);
     assert(r >= 0);

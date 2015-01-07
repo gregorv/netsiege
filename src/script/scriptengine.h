@@ -124,11 +124,13 @@ public:
 
     std::shared_ptr<asIScriptEngine> engine() { return m_engine; }
     std::shared_ptr<asIScriptContext> context() { return m_context; }
+    Serializer* serializer() { return m_serializer.get(); }
 
 private:
     std::shared_ptr<asIScriptEngine> m_engine;
     std::shared_ptr<asIScriptContext> m_context;
     std::unique_ptr<CScriptBuilder> m_scriptBuilder;
+    std::unique_ptr<Serializer> m_serializer;
 };
 }
 
