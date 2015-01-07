@@ -215,19 +215,23 @@ void ObjectManager::serializeFull(omsproto::GameObjectSet* object_set) const
     }
 }
 
-void ObjectManager::deserialize(omsproto::GameObjectSet* object_set)
+void ObjectManager::deserialize(const omsproto::GameObjectSet* object_set)
 {
     for(const auto& object: object_set->objects()) {
         const auto& it = m_objectsById.find(object.id());
         if(it == m_objectsById.end()) {
-            auto newObject = std::make_shared<GameObject>(object.id(), nullptr, object.name());
-            m_objectsById[newObject->id()] = newObject;
+            // todo: get object type info
+            std::string objectTypeName(object.data().object_type());
+            auto objInfo = m_registeredTypes[objectTypeName];
+            auto newObject = createObject(objectTypeName, object.name(), true, object.id());
             newObject->deserialize(&object);
         }
         else {
             m_objectsById[object.id()]->deserialize(&object);
         }
     }
+    flushUpdateCache();
+}
 
 asIScriptObject* ObjectManager::asFindObject(const std::string& name)
 {

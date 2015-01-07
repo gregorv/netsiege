@@ -66,7 +66,7 @@ public:
 
     void serializeFull(omsproto::GameObjectSet* object_set) const;
     void serializeChanges(omsproto::GameObjectSet* object_set) const;
-    void deserialize(omsproto::GameObjectSet* object_set);
+    void deserialize(const omsproto::GameObjectSet* object_set);
 
     objectSet_t updatedObjects() const { return m_alteredObjects; }
     objectSet_t newObjects() const { return m_newObjects; }

@@ -23,6 +23,11 @@
 #include "udpconnection.h"
 #include "rpcdispatcher.h"
 
+
+namespace oms {
+    class ObjectManager;
+}
+
 namespace network {
 namespace pb {
     class S2CMessage;
@@ -43,12 +48,15 @@ public:
 
     void initProcess();
     void run();
+    void stop();
     void poll();
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
     void sendJoinRequest();
 
     void setJoinAcceptHandler(join_accept_callback_t callback);
+
+    void setObjectManager(std::shared_ptr<oms::ObjectManager> manager);
 
 private:
     void listen();
@@ -66,6 +74,7 @@ private:
     package_buffer_t m_receiveBuffer;
     bool m_connectionActive;
     join_accept_callback_t m_acceptCallback;
+    std::shared_ptr<oms::ObjectManager> m_objectManager;
 
 };
 

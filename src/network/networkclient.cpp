@@ -19,6 +19,7 @@
 
 #include "networkclient.h"
 #include "script/scriptengine.h"
+#include "oms/objectmanager.h"
 #include "angelscript.h"
 #include <boost/bind.hpp>
 
@@ -100,6 +101,11 @@ void NetworkClient::poll()
     m_ioservice.poll();
 }
 
+void NetworkClient::stop()
+{
+    m_ioservice.stop();
+}
+
 void NetworkClient::run()
 {
     m_ioservice.run();
@@ -117,6 +123,10 @@ void NetworkClient::sendJoinRequest()
 void NetworkClient::setJoinAcceptHandler(join_accept_callback_t callback)
 {
     m_acceptCallback = callback;
+
+void NetworkClient::setObjectManager(std::shared_ptr<oms::ObjectManager> manager)
+{
+    m_objectManager = manager;
 }
 
 void NetworkClient::handle_receive(const boost::system::error_code& error,
@@ -127,8 +137,13 @@ void NetworkClient::handle_receive(const boost::system::error_code& error,
     msg.ParseFromArray(&m_receiveBuffer.front(),
                        m_receiveBuffer.size());
     if(!parsePackage(msg)) {
-        // TODO: apply changes to scene manager
-        // TODO Server negotiation
+        if(msg.has_world_state_update() && m_objectManager.get()) {
+            m_objectManager->deserialize(&msg.world_state_update().updated_objects());
+            for(size_t i=0; i<msg.world_state_update().removed_ids_size(); i++) {
+                m_objectManager->removeObject(msg.world_state_update().removed_ids(i));
+            }
+            m_objectManager->flushUpdateCache();
+        }
     }
     listen();
 }

@@ -20,6 +20,7 @@
 #include "gameobject.h"
 #include "oms/objects.pb.h"
 #include "script/scriptengine.h"
+#include "script/serializer.h"
 #include "debug/ndebug.h"
 
 #include <cassert>
@@ -101,6 +102,9 @@ void GameObject::serialize(omsproto::GameObject* object, bool forceFullSerialize
     for(int8_t i=0; i<16; i++) {
         object->add_position((&m_positionMatrix[0][0])[i]);
     }
+    auto data = object->mutable_data();
+    data->set_object_type(m_scriptInfo.typeName);
+    m_engine->serializer()->serializeObject(data, m_scriptObject, m_scriptInfo.syncProperties);
 }
 
 void GameObject::deserialize(const omsproto::GameObject* object)
@@ -110,6 +114,8 @@ void GameObject::deserialize(const omsproto::GameObject* object)
         (&m_positionMatrix[0][0])[i] = object->position().Get(i);
     }
     m_isVisible = object->is_visible();
+    assert(m_engine.get() != nullptr);
+    m_engine->serializer()->deserializeObject(object->data(), m_scriptObject);
 }
 
 void GameObject::setPositionMatrix(const Ogre::Matrix4& pos)
