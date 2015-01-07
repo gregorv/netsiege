@@ -21,6 +21,8 @@
 #include "network/networkclient.h"
 #include "script/scriptengine.h"
 #include "script/scriptfilemanager.h"
+#include "campaign/manager.h"
+#include "campaign/clientlogic.h"
 #include "debug/ndebug.h"
 #include <OGRE/Ogre.h>
 
@@ -40,10 +42,38 @@ int main(int argc, char **argv) {
     new script::ScriptFileManager;
     auto scriptEngine = std::make_shared<script::ScriptEngine>();
     network::NetworkClient client(serverEndpoint, std::string("Serioux"));
+    std::shared_ptr<campaign::Manager> campaignManager;
+    std::shared_ptr<campaign::ClientLogic> logic;
+    client.setJoinAcceptHandler([&campaignManager,&scriptEngine,&logic,&client](uint32_t player_id, uint32_t server_version, bool accepted, std::string map, uint32_t map_version) {
+        nDebug << "Load map '" << map << "'" << std::endl;
+        campaignManager = std::make_shared<campaign::Manager>(map, scriptEngine);
+        client.setObjectManager(campaignManager->objectManager());
+        if(!campaignManager->loadCampaignPath()) {
+            logError() << "Did not find campaign " << map << " in the specified search paths!" << std::endl;
+            return false;
+        }
+        client.loadRpcHandlerSpec();
+        logic = std::make_shared<campaign::ClientLogic>(campaignManager);
+        logic->init();
+//         client.stop();
+        return true;
+    });
     client.RegisterNetworkSystem(scriptEngine);
     client.initProcess();
     client.sendJoinRequest();
-    client.run();
+    while(!campaignManager.get()) {
+        client.poll();
+    }
+    if(campaignManager.get()) {
+        nDebug << "Join worked, yay! :)" << std::endl;
+        while(1) {
+            logic->step(0.1);
+            client.poll();
+            usleep(1000);
+        }
+    } else {
+        nDebug << "Join request failed :(" << std::endl;
+    }
     delete Ogre::ResourceGroupManager::getSingleton()._getResourceManager("ScriptFile");
     return 0;
 }
