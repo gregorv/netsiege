@@ -98,6 +98,7 @@ set(ADDON_SOURCE
         ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scriptarray/scriptarray.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scriptany/scriptany.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/scripthandle/scripthandle.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/../angelscript_addon/weakref/weakref.cpp
 )
 
 set(ANGELSCRIPT_INCLUDE_DIRS
