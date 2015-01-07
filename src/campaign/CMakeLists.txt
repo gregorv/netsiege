@@ -1,5 +1,6 @@
 
 set(CAMPAIGN_SRC
+	clientlogic.cpp
 	serverlogic.cpp
 	manager.cpp
 )
