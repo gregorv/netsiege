@@ -13,28 +13,25 @@ interface IObject2
 }
 
 mixin class Object : IObject {
-    void register(const string &in name)
-    {
-        debug("register()");
-        m_objectId = gameObjectCreate(this, name);
-    }
-
     void destroy()
     {
         gameObjectRemove(m_objectId);
     }
 
 // private:
-    int m_objectId;
+    uint32 m_objectId;
 }
 
 class Character : Object
 {
     float timeOut;
-    Character(const string &in name)
+    int bla;
+    string foo;
+    array<string> blup;
+    array<double> constants;
+    Character()
     {
         debug("ctor");
-        register(name);
 
     }
     ~Character()
@@ -44,13 +41,13 @@ class Character : Object
 
     void init()
     {
-        timeOut = .25;
+        timeOut = 10.0;
         debug("init()");
     }
     void step(float dt)
     {
         timeOut -= dt;
-        debug("step()");
+//         debug("step()");
         if (timeOut <= 0.0) {
             destroy();
         }
@@ -59,40 +56,63 @@ class Character : Object
     {
         debug("cleanup()");
     }
-}
 
-void initServer()
-{
-    Character chara("geyloard1");
-    __rpcRegisterHandler(0, 16, "handleRpc", "IcL");
-    __rpcRegister(16, "sendChatMessage",  "L");
-}
-
-int counter = 0;
-
-void stepServer(float dt)
-{
-// 	debug("Step server simulation");
-// 	float bla = dt;
-// 	bla *= dt + 6;
-    counter += 1;
-    RPCPackage package(16);
-    package.push(6);
-    package.push(uint8(5));
-    package.push("Hallo");
-    if (counter % 10 ==  0) {
-        string b("Hallo Welt!");
-        rpc.sendChatMessage(0, "Hallo");
+    void handleRpc()
+    {
     }
 }
 
-void test(int a) {
-    debug("TEST");
+void registerObjects()
+{
+    gameObjectRegister("Character", "Character", "bla, blup,foo, constants", 0);
 }
 
-void handleRpc(int32 arg,  uint8 bla, string foo)
+void receiveChat(uint16 sender_id, string message)
 {
-    debug("Handle RPC");
-    debug(foo);
+    debug("Incoming chat Message: " + message);
+}
+
+weakref<Character> character;
+
+void initServer()
+{
+    registerObjects();
+    Character@ chara = cast<Character>(gameObjectCreate("Character", "geyloard"));
+    character = weakref<Character>(chara);
+    chara.bla = 1337;
+    chara.foo = "Hallo Sync";
+    chara.blup.insertLast("test");
+    chara.blup.insertLast("Harry");
+    chara.blup.insertLast("Wagen");
+    chara.constants.insertLast(3.141);
+    chara.constants.insertLast(1.6e-19);
+    __rpcRegisterHandler(0, 16, "receiveChat");
+}
+
+void stepServer(float dt)
+{
+//     Character@ chara = cast<Character>(gameObjectFind("geyloard"));
+    if (character.get() != null) {
+        if (character.get().timeOut < 5.0) {
+            character.get().foo = ":**:";
+        }
+    }
+}
+
+
+void initClient()
+{
+    registerObjects();
+    __rpcRegisterHandler(0, 16, "receiveChat");
+}
+
+void stepClient(float dt)
+{
+    if (gameObjectExists("geyloard")) {
+        Character@ chara = cast<Character>(gameObjectFind("geyloard"));
+        debug(chara.foo);
+    } else {
+        debug("geyloard does not exist! :(");
+    }
 }
 
