@@ -34,6 +34,8 @@ class NetworkClient : public UdpConnection<int, pb::S2CMessage, pb::C2SMessage, 
                       public RPCDispatcher
 {
 public:
+    typedef std::function<bool(uint32_t, uint32_t, bool, std::string, uint32_t)> join_accept_callback_t;
+
     NetworkClient(const udp::endpoint& serverEndpoint, const std::string& playerName);
     ~NetworkClient();
 
@@ -45,6 +47,8 @@ public:
     void send(const udp::endpoint& remoteEndpoint, const package_buffer_t& package, size_t nBytes);
 
     void sendJoinRequest();
+
+    void setJoinAcceptHandler(join_accept_callback_t callback);
 
 private:
     void listen();
@@ -61,6 +65,7 @@ private:
     udp::socket m_socket;
     package_buffer_t m_receiveBuffer;
     bool m_connectionActive;
+    join_accept_callback_t m_acceptCallback;
 
 };
 

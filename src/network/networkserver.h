@@ -71,6 +71,7 @@ private:
     void handle_send(const boost::system::error_code& error, std::size_t bytesTransferred, std::size_t bytesExcpected);
     void handle_timeoutCallback();
     void handle_joinRequest(uint16_t client_id, std::shared_ptr< network::RPCPackage > package);
+    void handle_joinAcknowledge(uint16_t client_id, std::shared_ptr< network::RPCPackage > package);
 
     void closeDeadConnections();
 

@@ -80,6 +80,10 @@ const rpc_id_t RPC_ID_JOIN_SERVER_RESP = 1;
 // RPC arguments: uint32 player_id, uint32 server_version, char player_accepted, string map_name, uint32 map_version
 static const char* RPC_ARGS_JOIN_SERVER_RESP = "iicLi";
 
+const rpc_id_t RPC_ID_JOIN_SERVER_ACK = 2;
+// RPC arguments: char accept
+static const char* RPC_ARGS_JOIN_SERVER_ACK = "c";
+
 typedef uint16_t ack_mask_t;
 const uint16_t NUM_ACKS = sizeof(ack_mask_t)*8;
 

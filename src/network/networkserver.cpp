@@ -56,7 +56,12 @@ int NetworkServer::RegisterNetworkSystem(std::shared_ptr< script::ScriptEngine >
                 ),
                   RPC_ARGS_JOIN_SERVER_REQ
     );
-    assert(r >= 0);
+    addRpcHandler(0, RPC_ID_JOIN_SERVER_ACK,
+                  std::bind(&NetworkServer::handle_joinAcknowledge, this,
+                            std::placeholders::_1, std::placeholders::_2
+                ),
+                  RPC_ARGS_JOIN_SERVER_ACK
+    );
     setRpcSendFunction(std::bind(&NetworkServer::remoteProcedureCall, this,
                                  std::placeholders::_1, std::placeholders::_2));
     return 0;
@@ -216,6 +221,29 @@ void NetworkServer::handle_joinRequest(uint16_t client_id, std::shared_ptr<RPCPa
     }
     remoteProcedureCall(client_id, response);
     assert(response->argString() == RPC_ARGS_JOIN_SERVER_RESP);
+
+}
+
+void NetworkServer::handle_joinAcknowledge(uint16_t client_id, std::shared_ptr<RPCPackage> package)
+{
+    bool accepted = static_cast<bool>(package->popValue<uint8_t>());
+    nDebug << "handle_joinAcknowledge: Client ID " << client_id << ", Accepted " << accepted << std::endl;
+    std::shared_ptr<ClientSession> client;
+    for(auto& kv: m_clients) {
+        if(kv.second->clientId() == client_id) {
+            client = kv.second;
+        }
+    }
+    if(accepted) {
+        auto msg = std::make_shared<pb::S2CMessage>();
+        m_objectManager->serializeFull(msg->mutable_world_state_update()->mutable_updated_objects());
+        client->isActive(true);
+        client->sendPackage(msg);
+        nDebug << "Join request of client " << client_id << " acknowledged!" << std::endl;
+    } else {
+        nDebug << "Join of client " << client_id << " refused by client." << std::endl;
+        m_clients.erase(client->getEndpoint());
+    }
 
 }
 

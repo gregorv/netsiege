@@ -114,6 +114,11 @@ void NetworkClient::sendJoinRequest()
     remoteProcedureCall(0, package);
 }
 
+void NetworkClient::setJoinAcceptHandler(join_accept_callback_t callback)
+{
+    m_acceptCallback = callback;
+}
+
 void NetworkClient::handle_receive(const boost::system::error_code& error,
                                    std::size_t bytesTransferred)
 {
@@ -135,7 +140,23 @@ void NetworkClient::handle_send(const boost::system::error_code& error, std::siz
 
 void NetworkClient::handleJoinResponse(uint16_t client_id, std::shared_ptr<RPCPackage> package)
 {
+    assert(m_acceptCallback);
     nDebug << "handleJoinResponse" << std::endl;
+    uint32_t player_id = package->popValue<uint32_t>();
+    uint32_t server_version = package->popValue<uint32_t>();
+    char player_accepted = package->popValue<char>();
+    std::string map_name = package->popString();
+    uint32_t map_version = package->popValue<uint32_t>();
+    nDebugVerbose << "Response arguments: " << "player_id " << player_id << ", "
+                                            << "server_version " << server_version << ", "
+                                            << "player_accepted " << (player_accepted? std::string("true"):std::string("false")) << ", "
+                                            << "map_name " << map_name << ", "
+                                            << "map_version " << map_version << std::endl;
+    bool loadSuccessfull = m_acceptCallback(player_id, server_version, player_accepted, map_name, map_version);
+    auto rpc = RPCPackage::make(RPC_ID_JOIN_SERVER_ACK);
+    rpc->push(static_cast<uint8_t>(loadSuccessfull));
+    assert(rpc->argString() == RPC_ARGS_JOIN_SERVER_ACK);
+    remoteProcedureCall(0, rpc);
 }
 
 }
