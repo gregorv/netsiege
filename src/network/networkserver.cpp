@@ -164,6 +164,9 @@ void NetworkServer::sync()
     if(m_objectManager.get() && m_clients.size() > 0) {
         auto msg = std::make_shared<pb::S2CMessage>();
         m_objectManager->serializeChanges(msg->mutable_world_state_update()->mutable_updated_objects());
+        for(auto id: m_objectManager->removedIds()) {
+            msg->mutable_world_state_update()->add_removed_ids(id);
+        }
         for(auto client: m_clients) {
             if(client.second->isActive()) {
                 client.second->sendPackage(msg);
