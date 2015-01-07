@@ -21,6 +21,7 @@
 #include "oms/objects.pb.h"
 #include "script/scriptengine.h"
 #include <angelscript.h>
+#include <boost/algorithm/string.hpp>
 
 #include <cassert>
 #include <stdexcept>
@@ -42,37 +43,89 @@ void ObjectManager::setScriptEngine(std::shared_ptr<script::ScriptEngine> engine
     m_scriptEngine = engine;
     int r;
     m_scriptEngine->engine()->RegisterInterface("IObject");
-    r = m_scriptEngine->engine()->RegisterGlobalFunction("int gameObjectCreate(IObject@,string)", asMETHOD(ObjectManager, createObjectRetId), asCALL_THISCALL_ASGLOBAL, this);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("IObject@ gameObjectCreate(string,string)", asMETHOD(ObjectManager, createObjectRet), asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
     r = m_scriptEngine->engine()->RegisterGlobalFunction("void gameObjectRemove(int)", asMETHODPR(ObjectManager, removeObject, (uint32_t), void), asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("IObject@ gameObjectFind(int)", asMETHODPR(ObjectManager, asFindObject, (GameObject::id_t), asIScriptObject*), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("IObject@ gameObjectFind(string)", asMETHODPR(ObjectManager, asFindObject, (const std::string&), asIScriptObject*), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("bool gameObjectExists(string)", asMETHODPR(ObjectManager, asObjectExists, (const std::string&), bool), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("bool gameObjectExists(int)", asMETHODPR(ObjectManager, asObjectExists, (GameObject::id_t), bool), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("int gameObjectRegister(string,string,string,uint32)", asMETHOD(ObjectManager, registerObject), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
 }
 
 
-std::shared_ptr< GameObject > ObjectManager::createObject(asIScriptObject* scriptObj, const std::string& name)
+std::shared_ptr< GameObject > ObjectManager::createObject(const std::string& typeName, const std::string& name)
 {
-    auto scriptObjPtr = script::shared(scriptObj);
-    asGetActiveContext()->PushState();
-    auto newObject = std::make_shared<GameObject>(scriptObjPtr, name);
+    return createObject(typeName, name, true, 0);
+}
+
+std::shared_ptr< GameObject > ObjectManager::createObject(const std::string& typeName, const std::string& name, bool autoId, GameObject::id_t id)
+{
+    bool saveState = asGetActiveContext() != nullptr;
+    if(saveState)
+        asGetActiveContext()->PushState();
+    assert(m_registeredTypes.find(typeName) != m_registeredTypes.end());
+    auto objectInfo = m_registeredTypes[typeName];
+    auto engine = m_scriptEngine->engine();
+    auto typeId = engine->GetModule("campaign")->GetTypeIdByDecl(objectInfo.className.c_str());
+    assert(typeId >= 0);
+    auto type = engine->GetObjectTypeById(typeId);
+    assert(type != nullptr);
+    std::string decl((objectInfo.className+" @"+objectInfo.className+"()"));
+    nDebugL(2) << "Factory declaration: " << decl << std::endl;
+    auto factory = type->GetFactoryByDecl(decl.c_str());
+    assert(factory != nullptr);
+    auto ctx = asGetActiveContext();
+    if(!ctx)
+        ctx = m_scriptEngine->context().get();
+    ctx->Prepare(factory);
+    ctx->Execute();
+    auto scriptObjPtr = script::shared_addref(*(asIScriptObject**)ctx->GetAddressOfReturnValue());
+    assert(scriptObjPtr.get() != nullptr);
+    std::shared_ptr<GameObject> newObject;
+    if(autoId)
+        newObject = std::make_shared<GameObject>(scriptObjPtr, objectInfo, name);
+    else
+        newObject = std::make_shared<GameObject>(id, scriptObjPtr, objectInfo, name);
+    for(size_t i=0; i<scriptObjPtr->GetPropertyCount(); i++) {
+        if(scriptObjPtr->GetPropertyName(i) != std::string("m_objectId"))
+            continue;
+        assert(scriptObjPtr->GetPropertyTypeId(i) == asTYPEID_UINT32);
+        auto objectId = reinterpret_cast<uint32_t*>(scriptObjPtr->GetAddressOfProperty(i));
+        *objectId = newObject->id();
+        break;
+    }
     newObject->setScriptEngine(m_scriptEngine);
     m_newObjects.insert(newObject);
-    asGetActiveContext()->PopState();
+    if(saveState)
+        asGetActiveContext()->PopState();
     m_objectsById[newObject->id()] = newObject;
-    return m_objectsById[newObject->id()];
+    return newObject;
 }
 
-id_t ObjectManager::createObjectRetId(asIScriptObject* scriptObj, const std::string& name)
+asIScriptObject* ObjectManager::createObjectRet(const std::string& type, const std::string& name)
 {
-    return createObject(scriptObj, name)->id();
+    auto obj = createObject(type, name)->getScriptObject().get();
+    obj->AddRef();
+    return obj;
 }
 
 void ObjectManager::removeObject(GameObject::id_t id)
 {
     auto it = m_objectsById.find(id);
     if(it != m_objectsById.end()) {
-        asGetActiveContext()->PushState();
+        // if this method was not called from AS script,
+        // we do not need to store the state, obviously.
+        bool asFunction = asGetActiveContext() != nullptr;
+        if(asFunction) asGetActiveContext()->PushState();
         it->second->_onRemove();
-        asGetActiveContext()->PopState();
+        if(asFunction) asGetActiveContext()->PopState();
         m_objectsById.erase(it);
         m_removedIds.insert(id);
     }
@@ -83,6 +136,27 @@ void ObjectManager::removeObject(const std::shared_ptr< GameObject >& obj)
     if(obj.get()) {
         removeObject(obj->id());
     }
+}
+
+bool ObjectManager::registerObject(const std::string& name, std::string& scriptObjClass, const std::string& syncProperties, uint32_t flags)
+{
+    assert(asGetActiveContext() != nullptr);
+    assert(m_registeredTypes.find(name) == m_registeredTypes.end());
+    auto props = m_scriptEngine->serializer()->getPropertyList(syncProperties);
+    GameObject::scriptObjectInfo_t obj = {name, scriptObjClass, props, flags};
+    auto typeId = m_scriptEngine->engine()->GetModule("campaign")->GetTypeIdByDecl(scriptObjClass.c_str());
+    if(typeId < 0) {
+        logError() << "Cannot find script class '" << scriptObjClass << "' for registering type '" << name << "'" << std::endl;
+        return false;
+    }
+    // TODO: check if all specified properties can be serialized
+//     auto objectType = m_scriptEngine->engine()->GetObjectTypeById(typeId);
+//     if(!m_scriptEngine->serializer().isSerializableType(objectType, props)) {
+//         return false;
+//     }
+    m_registeredTypes[name] = obj;
+    nDebug << "Registered game objectl type " << name << " with class " << scriptObjClass << std::endl;
+    return true;
 }
 
 void ObjectManager::clear()
@@ -153,6 +227,57 @@ void ObjectManager::deserialize(omsproto::GameObjectSet* object_set)
         else {
             m_objectsById[object.id()]->deserialize(&object);
         }
+    }
+
+asIScriptObject* ObjectManager::asFindObject(const std::string& name)
+{
+    assert(asGetActiveContext());
+    asGetActiveContext()->PushState();
+    try {
+        auto object = findObject(name);
+        asGetActiveContext()->PopState();
+        auto scriptObj = object->getScriptObject().get();
+        scriptObj->AddRef();
+        return scriptObj;
+    } catch(std::out_of_range) {
+        asGetActiveContext()->PopState();
+        return nullptr;
+    }
+}
+
+asIScriptObject* ObjectManager::asFindObject(GameObject::id_t id)
+{
+    assert(asGetActiveContext());
+    asGetActiveContext()->PushState();
+    try {
+        auto object = findObject(id);
+        asGetActiveContext()->PopState();
+        auto scriptObj = object->getScriptObject().get();
+        scriptObj->AddRef();
+        return scriptObj;
+    } catch(std::out_of_range) {
+        asGetActiveContext()->PopState();
+        return nullptr;
+    }
+}
+
+bool ObjectManager::asObjectExists(const std::string& name)
+{
+    try {
+        auto object = findObject(name);
+        return true;
+    } catch(std::out_of_range) {
+        return false;
+    }
+}
+
+bool ObjectManager::asObjectExists(GameObject::id_t id)
+{
+    try {
+        auto object = findObject(id);
+        return true;
+    } catch(std::out_of_range) {
+        return false;
     }
 }
 

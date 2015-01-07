@@ -29,13 +29,13 @@ namespace oms {
 
 id_t GameObject::nextId = 0;
 
-GameObject::GameObject(std::shared_ptr<asIScriptObject> scriptObject, const std::string& name)
-: GameObject(nextId++, scriptObject, name)
+GameObject::GameObject(std::shared_ptr<asIScriptObject> scriptObject, const GameObject::scriptObjectInfo_t& info, const std::string& name)
+: GameObject(nextId++, scriptObject, info, name)
 {
 }
 
-GameObject::GameObject(id_t id, std::shared_ptr<asIScriptObject> scriptObject, const std::string& name)
-: m_id(id), m_name(name), m_scriptObject(scriptObject)
+GameObject::GameObject(id_t id, std::shared_ptr< asIScriptObject > scriptObject, const GameObject::scriptObjectInfo_t& info, const std::string& name)
+: m_id(id), m_name(name), m_scriptObject(scriptObject), m_scriptInfo(info)
 {
     nDebugVerbose << "GameObject(" << m_id << ") " << m_name << " created!" << std::endl;
 }

@@ -44,8 +44,15 @@ class GameObject
 public:
     typedef uint32_t id_t;
 
-    GameObject(std::shared_ptr<asIScriptObject> scriptObject, const std::string& name);
-    GameObject(id_t id, std::shared_ptr<asIScriptObject> scriptObject, const std::string& name);
+    struct scriptObjectInfo_t {
+        std::string typeName;
+        std::string className;
+        std::vector<std::string> syncProperties;
+        uint32_t flags;
+    };
+
+    GameObject(std::shared_ptr<asIScriptObject> scriptObject, const scriptObjectInfo_t& info, const std::string& name);
+    GameObject(id_t id, std::shared_ptr<asIScriptObject> scriptObject, const scriptObjectInfo_t& info, const std::string& name);
     ~GameObject();
 
     void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
@@ -63,6 +70,8 @@ public:
     bool operator<(const GameObject& other) const { return id() < other.id(); }
     bool operator<(std::shared_ptr<GameObject> other) const { return id() < other->id(); }
 
+    std::shared_ptr<asIScriptObject> getScriptObject() { return m_scriptObject; }
+
 private:
     const id_t m_id;
     static id_t nextId;
@@ -71,6 +80,7 @@ private:
     bool m_isVisible = false;
     std::shared_ptr<asIScriptObject> m_scriptObject;
     std::shared_ptr<script::ScriptEngine> m_engine;
+    scriptObjectInfo_t m_scriptInfo;
 };
 
 }

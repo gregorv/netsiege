@@ -52,8 +52,8 @@ public:
 
     void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
 
-    std::shared_ptr< GameObject > createObject(asIScriptObject* scriptObj, const std::string& name);
-    id_t createObjectRetId(asIScriptObject* scriptObj, const std::string& name);
+    std::shared_ptr< GameObject > createObject(const std::string& type, const std::string& name);
+    asIScriptObject* createObjectRet(const std::string& type, const std::string& name);
     void removeObject(GameObject::id_t id);
     void removeObject(const std::shared_ptr<GameObject>& obj);
 
@@ -76,6 +76,16 @@ public:
     void step(float dt);
 
 private:
+    std::shared_ptr< GameObject > createObject(const std::string& typeName, const std::string& name, bool autoId, GameObject::id_t id);
+    asIScriptObject* asFindObject(const std::string& name);
+    asIScriptObject* asFindObject(GameObject::id_t id);
+    bool asObjectExists(const std::string& name);
+    bool asObjectExists(GameObject::id_t id);
+
+    bool registerObject(const std::string& name, std::string& scriptObjClass, const std::string& syncProperties, uint32_t flags);
+
+    std::map<std::string,GameObject::scriptObjectInfo_t> m_registeredTypes;
+
     objectSet_t m_alteredObjects;
     objectSet_t m_newObjects;
     idSet_t m_removedIds;
