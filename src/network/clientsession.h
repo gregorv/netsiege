@@ -49,6 +49,8 @@ public:
 
     size_t clientId() { return m_clientId; }
 
+    udp::endpoint getEndpoint() const { return m_remoteEndpoint; }
+
 private:
     size_t m_clientId;
     bool m_isActive = false;

@@ -22,6 +22,7 @@
 
 #include <memory>
 #include "debug/ndebug.h"
+#include "serializer.h"
 
 class asIScriptEngine;
 class asIScriptContext;

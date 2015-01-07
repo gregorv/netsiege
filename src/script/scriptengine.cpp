@@ -26,6 +26,7 @@
 #include "scriptany/scriptany.h"
 #include "scriptarray/scriptarray.h"
 #include "scripthandle/scripthandle.h"
+#include "weakref/weakref.h"
 #include "network/rpcpackage.h"
 #include "debug/ndebug.h"
 #include "serializer.h"
@@ -97,6 +98,7 @@ ScriptEngine::ScriptEngine()
 //     RegisterStdStringUtils(m_engine.get());
     RegisterScriptMath(m_engine.get());
     RegisterScriptHandle(m_engine.get());
+    RegisterScriptWeakRef(m_engine.get());
 //     registerOgreMath();
     r = m_engine->RegisterGlobalFunction("void debug(const string &in)", asFUNCTIONPR(debug, (const std::string&), void), asCALL_CDECL); assert( r >= 0 );
     r = m_engine->RegisterGlobalFunction("void debug(uint, const string &in)", asFUNCTIONPR(debug, (uint32_t, const std::string&), void), asCALL_CDECL); assert( r >= 0 );

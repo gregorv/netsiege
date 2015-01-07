@@ -123,6 +123,7 @@ void NetworkClient::sendJoinRequest()
 void NetworkClient::setJoinAcceptHandler(join_accept_callback_t callback)
 {
     m_acceptCallback = callback;
+}
 
 void NetworkClient::setObjectManager(std::shared_ptr<oms::ObjectManager> manager)
 {
