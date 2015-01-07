@@ -26,8 +26,6 @@ namespace campaign {
 
 class Manager;
 
-const std::string SERVER_AS_MODULE("server");
-
 class ServerLogic
 {
 public:

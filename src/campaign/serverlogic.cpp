@@ -33,7 +33,7 @@ ServerLogic::ServerLogic(const std::shared_ptr<Manager>& manager)
  : m_manager(manager)
 {
     m_manager->scriptEngine()->setPreprocessorDefine("SERVER");
-    m_manager->scriptEngine()->importModule(SERVER_AS_MODULE, "main.as");
+    m_manager->scriptEngine()->importModule("campaign", "main.as");
 }
 
 ServerLogic::~ServerLogic()
@@ -45,7 +45,7 @@ bool ServerLogic::init()
 {
     auto engine = m_manager->scriptEngine()->engine();
     auto ctx = m_manager->scriptEngine()->context();
-    auto func = engine->GetModule(SERVER_AS_MODULE.c_str())->GetFunctionByDecl("void initServer()");
+    auto func = engine->GetModule("campaign")->GetFunctionByDecl("void initServer()");
     if(!func) {
         logError() << "Cannot locate required AngelScript function 'initServer'" << std::endl;
         return false;
@@ -63,7 +63,7 @@ bool ServerLogic::step(float dt)
 {
     auto engine = m_manager->scriptEngine()->engine();
     auto ctx = m_manager->scriptEngine()->context();
-    auto func = engine->GetModule(SERVER_AS_MODULE.c_str())->GetFunctionByDecl("void stepServer(float)");
+    auto func = engine->GetModule("campaign")->GetFunctionByDecl("void stepServer(float)");
     if(!func) {
         logError() << "Cannot locate required AngelScript function 'stepServer'" << std::endl;
         return false;
