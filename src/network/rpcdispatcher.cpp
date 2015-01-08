@@ -346,11 +346,14 @@ std::pair< bool, std::string > RPCDispatcher::argSpecFromFunction(const asIScrip
     if(function->GetParamCount() == 0) {
         return std::make_pair(false, std::string{});
     }
-    if(function->GetParamTypeId(0) != asTYPEID_UINT16) {
+    int typeId = -1;
+    function->GetParam(0, &typeId);
+    if(typeId != asTYPEID_UINT16) {
         return std::make_pair(false, std::string{});
     }
     for(size_t i = 1; i < function->GetParamCount(); i++) {
-        auto type = function->GetParamTypeId(i);
+        int type = -1;
+        function->GetParam(i, &type);
         if(type == asTYPEID_UINT8) argSpec += 'c';
         else if(type == asTYPEID_INT8) argSpec += 'C';
         else if(type == asTYPEID_UINT16) argSpec += 's';
