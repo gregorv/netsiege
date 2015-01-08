@@ -31,7 +31,7 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINAR
 # leading to strange errors during compilation ("No input files", "File not found", etc).
 # To fix this, we replace the semicolons manualy..
 string(REPLACE ";" " " Ogre_CFLAGS "${Ogre_CFLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wall -Wno-deprecated-register ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wall -Wno-deprecated-register -DAS_CAN_USE_CPP11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Boost_CFLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Protobuf_CFLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OIS_CFlAGS}")
@@ -40,7 +40,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Ogre_CFLAGS}")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(netsiege_COMMON_LIBRARIES
-    oms network campaign ndebug script Angelscript
+    oms network campaign ndebug script Angelscript ogre
     ${Boost_LIBRARIES}
     ${Protobuf_LIBRARIES}
     ${Ogre_LIBRARIES}

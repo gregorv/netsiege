@@ -596,7 +596,7 @@ asUINT asGetTypeTraits()
 	// http://stackoverflow.com/questions/12702103/writing-code-that-works-when-has-trivial-destructor-is-defined-instead-of-is
 	// https://github.com/mozart/mozart2/issues/51
 	bool hasConstructor        = std::is_default_constructible<T>::value && !std::has_trivial_default_constructor<T>::value;
-	bool hasDestructor         = std::is_destructible<T>::value          && !std::has_trivial_destructor<T>::value;
+	bool hasDestructor         = std::is_destructible<T>::value          && !std::has_virtual_destructor<T>::value;
 	bool hasAssignmentOperator = std::is_copy_assignable<T>::value       && !std::has_trivial_copy_assign<T>::value;
 	bool hasCopyConstructor    = std::is_copy_constructible<T>::value    && !std::has_trivial_copy_constructor<T>::value;
 #endif
