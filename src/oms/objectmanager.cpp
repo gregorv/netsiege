@@ -29,6 +29,7 @@
 namespace oms {
 
 ObjectManager::ObjectManager()
+ : m_modeClient(false)
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 }
@@ -55,7 +56,18 @@ void ObjectManager::setScriptEngine(std::shared_ptr<script::ScriptEngine> engine
     assert(r >= 0);
     r = m_scriptEngine->engine()->RegisterGlobalFunction("bool gameObjectExists(int)", asMETHODPR(ObjectManager, asObjectExists, (GameObject::id_t), bool), asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
-    r = m_scriptEngine->engine()->RegisterGlobalFunction("int gameObjectRegister(string,string,string,uint32)", asMETHOD(ObjectManager, registerObject), asCALL_THISCALL_ASGLOBAL, this);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("bool gameObjectRegister(string,string,string,uint32)",
+                                                         asMETHODPR(ObjectManager,
+                                                                    registerObject,
+                                                                    ( const std::string&, const std::string&, const std::string&, uint32_t ), bool
+                                                                    ), asCALL_THISCALL_ASGLOBAL, this);
+    assert(r >= 0);
+    r = m_scriptEngine->engine()->RegisterGlobalFunction("bool gameObjectRegister(string,string,string,string,uint32)",
+                                                         asMETHODPR(ObjectManager,
+                                                                    registerObject,
+                                                                    ( const std::string&, const std::string&, const std::string&,
+                                                                      const std::string&, uint32_t ), bool
+                                                                    ), asCALL_THISCALL_ASGLOBAL, this);
     assert(r >= 0);
 }
 
@@ -138,15 +150,22 @@ void ObjectManager::removeObject(const std::shared_ptr< GameObject >& obj)
     }
 }
 
-bool ObjectManager::registerObject(const std::string& name, std::string& scriptObjClass, const std::string& syncProperties, uint32_t flags)
+bool ObjectManager::registerObject(const std::string& name, const std::string& className, const std::string& syncProperties, uint32_t flags)
+{
+    return registerObject(name, className, className, syncProperties, flags);
+}
+
+bool ObjectManager::registerObject(const std::string& name, const std::string& serverClass, const std::string& clientClass, const std::string& syncProperties, uint32_t flags)
 {
     assert(asGetActiveContext() != nullptr);
     assert(m_registeredTypes.find(name) == m_registeredTypes.end());
     auto props = m_scriptEngine->serializer()->getPropertyList(syncProperties);
-    GameObject::scriptObjectInfo_t obj = {name, scriptObjClass, props, flags};
-    auto typeId = m_scriptEngine->engine()->GetModule("campaign")->GetTypeIdByDecl(scriptObjClass.c_str());
+    nDebug << serverClass << " " << clientClass << " " << m_modeClient << std::endl;
+    auto scriptClass = m_modeClient? clientClass : serverClass;
+    GameObject::scriptObjectInfo_t obj = {name, scriptClass, props, flags};
+    auto typeId = m_scriptEngine->engine()->GetModule("campaign")->GetTypeIdByDecl(scriptClass.c_str());
     if(typeId < 0) {
-        logError() << "Cannot find script class '" << scriptObjClass << "' for registering type '" << name << "'" << std::endl;
+        logError() << "Cannot find script class '" << serverClass << "' for registering type '" << name << "'" << std::endl;
         return false;
     }
     // TODO: check if all specified properties can be serialized
@@ -155,7 +174,7 @@ bool ObjectManager::registerObject(const std::string& name, std::string& scriptO
 //         return false;
 //     }
     m_registeredTypes[name] = obj;
-    nDebug << "Registered game objectl type " << name << " with class " << scriptObjClass << std::endl;
+    nDebug << "Registered game objectl type " << name << " with class " << scriptClass << std::endl;
     return true;
 }
 

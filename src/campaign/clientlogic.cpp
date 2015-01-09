@@ -21,6 +21,7 @@
 #include "debug/ndebug.h"
 #include "script/scriptengine.h"
 #include "campaign/manager.h"
+#include "oms/objectmanager.h"
 #include "debug/ndebug.h"
 #include <angelscript.h>
 #include <cassert>
@@ -31,6 +32,7 @@ ClientLogic::ClientLogic(std::shared_ptr<Manager> manager)
  : m_manager(manager)
 {
     m_manager->scriptEngine()->setPreprocessorDefine("CLIENT");
+    m_manager->objectManager()->setModeClient(true);
     m_manager->scriptEngine()->importModule("campaign", "main.as");
 }
 

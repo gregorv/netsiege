@@ -51,6 +51,7 @@ public:
     ~ObjectManager();
 
     void setScriptEngine(std::shared_ptr<script::ScriptEngine> engine);
+    void setModeClient(bool isClientManager) { m_modeClient = isClientManager; }
 
     std::shared_ptr< GameObject > createObject(const std::string& type, const std::string& name);
     asIScriptObject* createObjectRet(const std::string& type, const std::string& name);
@@ -82,7 +83,8 @@ private:
     bool asObjectExists(const std::string& name);
     bool asObjectExists(GameObject::id_t id);
 
-    bool registerObject(const std::string& name, std::string& scriptObjClass, const std::string& syncProperties, uint32_t flags);
+    bool registerObject(const std::string& name, const std::string& className, const std::string& syncProperties, uint32_t flags);
+    bool registerObject(const std::string& name, const std::string& serverClass, const std::string& clientClass, const std::string& syncProperties, uint32_t flags);
 
     std::map<std::string,GameObject::scriptObjectInfo_t> m_registeredTypes;
 
@@ -91,6 +93,7 @@ private:
     idSet_t m_removedIds;
     objectIdMap_t m_objectsById;
     std::shared_ptr<script::ScriptEngine> m_scriptEngine;
+    bool m_modeClient;
 };
 
 }

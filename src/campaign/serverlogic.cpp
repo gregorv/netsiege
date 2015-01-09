@@ -33,6 +33,7 @@ ServerLogic::ServerLogic(const std::shared_ptr<Manager>& manager)
  : m_manager(manager)
 {
     m_manager->scriptEngine()->setPreprocessorDefine("SERVER");
+    m_manager->objectManager()->setModeClient(false);
     m_manager->scriptEngine()->importModule("campaign", "main.as");
 }
 
