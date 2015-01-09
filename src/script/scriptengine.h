@@ -127,6 +127,9 @@ public:
     std::shared_ptr<asIScriptContext> context() { return m_context; }
     Serializer* serializer() { return m_serializer.get(); }
 
+    void PrintException(std::shared_ptr<asIScriptContext> ctx) const;
+    void PrintException(asIScriptContext* ctx = nullptr) const;
+
 private:
     std::shared_ptr<asIScriptEngine> m_engine;
     std::shared_ptr<asIScriptContext> m_context;

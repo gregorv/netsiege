@@ -168,3 +168,17 @@ bool ScriptEngine::importModule(const std::string& moduleName, const std::string
     return true;
 }
 
+void ScriptEngine::PrintException(asIScriptContext* ctx) const
+{
+    // Determine the exception that occurred
+    logError() << "An AngelScript exception occured:" << ctx->GetExceptionString() << std::endl;
+    // Determine the function where the exception occurred
+    const asIScriptFunction *function = ctx->GetExceptionFunction();
+    logInfo() << function->GetModuleName() << " " << function->GetScriptSectionName() << ":" << ctx->GetExceptionLineNumber() << " : " << function->GetDeclaration() << std::endl;
+}
+
+void ScriptEngine::PrintException(std::shared_ptr< asIScriptContext > ctx) const
+{
+    PrintException(ctx.get());
+}
+
