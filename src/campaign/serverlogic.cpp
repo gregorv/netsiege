@@ -55,6 +55,7 @@ bool ServerLogic::init()
     int r = ctx->Execute();
     if(r != asEXECUTION_FINISHED) {
         logError() << "Calling function 'initServer' failed" << std::endl;
+        m_manager->scriptEngine()->PrintException(ctx);
         return false;
     }
     return true;
@@ -74,6 +75,7 @@ bool ServerLogic::step(float dt)
     int r = ctx->Execute();
     if(r != asEXECUTION_FINISHED) {
         logError() << "Calling function 'stepServer' failed" << std::endl;
+        m_manager->scriptEngine()->PrintException(ctx);
         return false;
     }
     m_manager->objectManager()->step(dt);

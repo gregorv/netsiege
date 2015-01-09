@@ -59,9 +59,18 @@ void GameObject::setScriptEngine(std::shared_ptr< script::ScriptEngine > engine)
 
     auto type = m_scriptObject->GetObjectType();
     auto ctx = m_engine->context();
-    ctx->Prepare(type->GetMethodByDecl("void init()"));
+    auto function = type->GetMethodByDecl("void init()");
+    if(!function) {
+        return; // it is no error if init() is not specified!
+    }
+    ctx->Prepare(function);
     ctx->SetObject(m_scriptObject.get());
-    ctx->Execute();
+    auto ret = ctx->Execute();
+    if(ret != asEXECUTION_FINISHED) {
+        logError() << "Calling method 'int' of Game Object " << m_name
+                   << " (class " << m_scriptInfo.className << ") failed!" << std::endl;
+        m_engine->PrintException(ctx);
+    }
 }
 
 void GameObject::step(float dt)
@@ -71,10 +80,19 @@ void GameObject::step(float dt)
 
     auto type = m_scriptObject->GetObjectType();
     auto ctx = m_engine->context();
-    ctx->Prepare(type->GetMethodByDecl("void step(float)"));
+    auto function = type->GetMethodByDecl("void step(float)");
+    if(!function) {
+        return; // it is no error if step() is not specified!
+    }
+    ctx->Prepare(function);
     ctx->SetObject(m_scriptObject.get());
     ctx->SetArgFloat(0, dt);
-    ctx->Execute();
+    auto ret = ctx->Execute();
+    if(ret != asEXECUTION_FINISHED) {
+        logError() << "Calling method 'step' of Game Object " << m_name
+                   << " (class " << m_scriptInfo.className << ") failed!" << std::endl;
+        m_engine->PrintException(ctx);
+    }
 }
 
 void GameObject::_onRemove()
@@ -82,9 +100,18 @@ void GameObject::_onRemove()
     if(m_scriptObject.get()) {
         auto type = m_scriptObject->GetObjectType();
         auto ctx = m_engine->context();
-        ctx->Prepare(type->GetMethodByDecl("void cleanup()"));
+        auto function = type->GetMethodByDecl("void cleanup()");
+        if(!function) {
+            return; // it is no error if cleanup() is not specified!
+        }
+        ctx->Prepare(function);
         ctx->SetObject(m_scriptObject.get());
-        ctx->Execute();
+        auto ret = ctx->Execute();
+        if(ret != asEXECUTION_FINISHED) {
+            logError() << "Calling method 'step' of Game Object " << m_name
+                       << " (class " << m_scriptInfo.className << ") failed!" << std::endl;
+            m_engine->PrintException(ctx);
+        }
         m_scriptObject.reset();
         m_engine.reset();
     }

@@ -55,6 +55,7 @@ bool ClientLogic::init()
     int r = ctx->Execute();
     if(r != asEXECUTION_FINISHED) {
         logError() << "Calling function 'initClient' failed" << std::endl;
+        m_manager->scriptEngine()->PrintException(ctx);
         return false;
     }
     return true;
@@ -73,6 +74,7 @@ bool ClientLogic::step(float dt)
     int r = ctx->Execute();
     if(r != asEXECUTION_FINISHED) {
         logError() << "Calling function 'stepClient' failed" << std::endl;
+        m_manager->scriptEngine()->PrintException(ctx);
         return false;
     }
     return true;
