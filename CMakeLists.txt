@@ -48,7 +48,7 @@ set(netsiege_COMMON_LIBRARIES
 set(netsiege_LIBRARIES ${netsiege_COMMON_LIBRARIES} ${OIS_LIBRARIES})
 set(netsiege_server_LIBRARIES ${netsiege_COMMON_LIBRARIES})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/src/extern/tinyxml/ ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/src)
 add_subdirectory(src)
 
 add_executable(netsiege src/main.cpp)
