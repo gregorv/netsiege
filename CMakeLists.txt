@@ -13,10 +13,9 @@ if(BUILD_TESTS)
 endif(BUILD_TESTS)
 
 
-include(FindPkgConfig REQUIRED)
-pkg_search_module(Ogre REQUIRED OGRE)
-pkg_search_module(OIS REQUIRED OIS)
-pkg_search_module(Protobuf REQUIRED protobuf)
+find_package(OGRE REQUIRED)
+find_package(OIS REQUIRED)
+find_package(Protobuf REQUIRED)
 
 find_package(Boost REQUIRED system filesystem)
 
@@ -40,15 +39,19 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Ogre_CFLAGS}")
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(netsiege_COMMON_LIBRARIES
-    oms network campaign ndebug script Angelscript ogre
+    oms network campaign ndebug script Angelscript
     ${Boost_LIBRARIES}
-    ${Protobuf_LIBRARIES}
-    ${Ogre_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${OIS_LIBRARIES}
+    ${OGRE_LIBRARIES}
 )
 set(netsiege_LIBRARIES ${netsiege_COMMON_LIBRARIES} ${OIS_LIBRARIES})
 set(netsiege_server_LIBRARIES ${netsiege_COMMON_LIBRARIES})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/src
+                    ${Boost_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIR} ${OGRE_INCLUDE_DIR} ${OIS_INCLUDE_DIR}
+	            )
+link_directories(${Boost_LIBRARY_DIR} ${PROTOBUF_LIBRARY_DIR} ${OGRE_LIBRARY_DIR} ${OIS_LIBRARY_DIR})
 add_subdirectory(src)
 
 add_executable(netsiege src/main.cpp)
