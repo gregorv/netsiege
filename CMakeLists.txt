@@ -3,6 +3,7 @@ project(netsiege)
 
 
 set(BUILD_TESTS FALSE CACHE BOOL "Build unittests for netsiege components. Requires Qt's QTestLib.")
+set(BUILD_EDITOR TRUE CACHE BOOL "Build Netsiege Editor. Requires Qt5.")
 set(PERMANENTLY_DISABLE_DEBUG_OUTPUT FALSE CACHE BOOL "Permanently disable debug output. Might be useful. Might be not useful.")
 set(PROTOBUF_COMPILER "/usr/bin/protoc" CACHE STRING "Google Protocol Buffer compiler, required for building netsiege.")
 
@@ -11,6 +12,10 @@ if(BUILD_TESTS)
 	find_package(Qt5 REQUIRED Core Test)
 	enable_testing()
 endif(BUILD_TESTS)
+
+if(BUILD_EDITOR)
+	add_subdirectory(editor)
+endif(BUILD_EDITOR)
 
 
 include(FindPkgConfig REQUIRED)

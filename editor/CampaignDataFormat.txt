@@ -1,0 +1,86 @@
+Directory Layout
+----------------
+Everything in ZIP-Archive or directory, added as a resource location in
+resource group "campaign".
+
+/
+
+/info.campaign
+
+/rpc.tab
+  Tabular description of available network RPCs
+
+/main.as
+  Entry point AngelScript file. This will initialize the server and client
+  environments and load more scripts as deemed fit.
+
+/world/world.scene
+  High-level description of game world.
+  For internal structure see description of world.scene in this document.
+
+/world/dungeons/
+  Contains subscenes describing a dungeon.
+  Each dungeon has one or more transition areas that connect the
+  dungeon to the outside world. The player is teleported (internaly
+  and transparently) if the transition areas relative positions in
+  the dungeon does not match the relative positions in the outside
+  world. This is rather convenient, since dungeon development and
+  design is decoupled from terrain design.
+  The scene files referenced implicitely by specifying transition areas
+  in the terrain scene files.
+
+/world/dungeonparts/
+  Contains numerous .scene files describing small dungeon subsets (e.g.
+  rooms, halls, corridors, …) that can be automaticaly build together by
+  an automated dungeon creator. For a part to be used, it has to be included
+  in the ./partslist.xml
+
+/world/dungeonparts/partslist.xml
+  A collection of all dungeon parts with a definition of their size (AABB)
+  and their openings ("portals") needed to connect the parts together.
+
+/world/terrain/
+  Contains all terrain tiles (each has a terrain datafile, a heightmap and one
+  or more blendmaps).
+
+  Naming-convention (XXX and YYY are location indices):
+    XXX_YYY.ter  -  Ogre3D Terrain File
+    XXX_YYY.scene  -  A scene file describing arbitrary objects on this tile
+
+/world/terrain/mat/
+  Terrain material files and textures. Will be referenced by the terrain files
+  in parent directory
+
+world.scene Format
+------------------
+The world.scene format is, as its name suggests, based on the dotScene format.
+
+The overal structure of the game world is a huge terrain, divided into smaller
+tiles, and underground dungeons that are decoupled from the terrain spatialy.
+
+Because the terrain is realy huge, only tiles in regions of interest (where
+players are…) are loaded. For graphics, only the tiles in a certain range
+around the camera (or the player) are required to be loaded. On the server,
+the situation is more complicated. We need the heightmap of the terrain below
+all moved objects. So, we only move NPCs close to players and we load all
+tiles that are in certain proximity to any player, but only their heightmap,
+which is the only thing we need for collision checks. Exceptions from those
+collisions are dungeon transition areas, "holes" in the terrain where one
+enters or exits a dungeon.
+
+For each terrain tile, we store a reference to a terrain file and a scene
+description. The terrain file, of Ogre3Ds internal format, contains all
+references to heightmaps, blendmaps and layer materials. It represents all
+that is to display a plain terrain. But we want more than an unpopulated,
+boring terrain, so we also have another dotScene file for each tile,
+describing the positioning of objects, NPCs, emitters, dungeon transition
+areas and any script-object (e.g. certain triggers or items or shit).
+
+With the given information, the structure of the world.scene file is very
+simple. We have a terrain-tag and a subscene-tag for each world tile. Each
+terrain will be added to the general campaign terrain group, each subscene
+will be the child of a separate scene node, so everything is nice and tidy.
+
+So this file is actually just a meta-description of the game world. Loading a
+world is as simple as running the dotScene loader on the world.scene, any
+reference to the actual data will be recursively loaded.
