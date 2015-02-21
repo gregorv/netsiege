@@ -9,8 +9,6 @@ add_custom_command(OUTPUT objects.pb.cc objects.pb.h PRE_BUILD
                    COMMAND ${PROTOBUF_COMPILER} ${CMAKE_SOURCE_DIR}/src/oms/objects.proto --cpp_out=${CMAKE_BINARY_DIR} -I${CMAKE_SOURCE_DIR}
                   )
 
-include_directories(${PROTOBUF_INCLUDE_DIRS} ${OGRE_INCLUDE_DIRS})
-
 add_library(oms STATIC ${oms_SRC})
 target_link_libraries(oms ${PROTOBUF_LIBRARIES} script)
 
