@@ -20,7 +20,7 @@
 #ifndef CAMPAIGN_SCRIPTFILEMANAGER_H
 #define CAMPAIGN_SCRIPTFILEMANAGER_H
 
-#include <OGRE/OgreResourceManager.h>
+#include <OgreResourceManager.h>
 #include "scriptfile.h"
 
 namespace script {

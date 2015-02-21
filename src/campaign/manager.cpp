@@ -22,7 +22,7 @@
 #include "oms/objectmanager.h"
 #include "debug/ndebug.h"
 #include <list>
-#include <OGRE/OgreResourceGroupManager.h>
+#include <OgreResourceGroupManager.h>
 
 using namespace campaign;
 using namespace boost::filesystem;

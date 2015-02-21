@@ -24,7 +24,7 @@
 #include "campaign/manager.h"
 #include "campaign/clientlogic.h"
 #include "debug/ndebug.h"
-#include <OGRE/Ogre.h>
+#include <Ogre.h>
 
 int main(int argc, char **argv) {
 
