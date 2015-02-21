@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.8)
 project(netsiege)
 
+set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/CMake/Packages/ ${CMAKE_MODULE_PATH})
 
 set(BUILD_TESTS FALSE CACHE BOOL "Build unittests for netsiege components. Requires Qt's QTestLib.")
 set(BUILD_EDITOR TRUE CACHE BOOL "Build Netsiege Editor. Requires Qt5.")
@@ -13,16 +14,10 @@ if(BUILD_TESTS)
 	enable_testing()
 endif(BUILD_TESTS)
 
-if(BUILD_EDITOR)
-	add_subdirectory(editor)
-endif(BUILD_EDITOR)
 
-
-include(FindPkgConfig REQUIRED)
-pkg_search_module(Ogre REQUIRED OGRE)
-pkg_search_module(OIS REQUIRED OIS)
-pkg_search_module(Protobuf REQUIRED protobuf)
-
+find_package(OGRE REQUIRED)
+find_package(OIS REQUIRED)
+find_package(Protobuf REQUIRED)
 find_package(Boost REQUIRED system filesystem)
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
@@ -32,29 +27,40 @@ else()
 endif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-# HACK: For some reason, the Ogre_CFLAGS list is strangely handled reagarding the separator,
-# leading to strange errors during compilation ("No input files", "File not found", etc).
-# To fix this, we replace the semicolons manualy..
-string(REPLACE ";" " " Ogre_CFLAGS "${Ogre_CFLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wall -Wno-deprecated-register -DAS_CAN_USE_CPP11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Boost_CFLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Protobuf_CFLAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OIS_CFlAGS}")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Ogre_CFLAGS}")
+include_directories(${Boost_INCLUDE_DIRS})
+include_directories(${OGRE_INCLUDE_DIRS})
+include_directories(${OGRE_Terrain_INCLUDE_DIRS})
+include_directories(${OGRE_Paging_INCLUDE_DIRS})
+include_directories(${OIS_INCLUDE_DIRS})
+include_directories(${PROTOBUF_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
+link_directories(${OGRE_LIBRARY_DIRS})
+link_directories(${PROTOBUF_INCLUDE_DIRS})
+
+
+if(BUILD_EDITOR)
+	add_subdirectory(editor)
+endif(BUILD_EDITOR)
+
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(netsiege_COMMON_LIBRARIES
-    oms network campaign ndebug script Angelscript ogre
+    oms network campaign ndebug script Angelscript
     ${Boost_LIBRARIES}
-    ${Protobuf_LIBRARIES}
-    ${Ogre_LIBRARIES}
+    ${PROTOBUF_LIBRARIES}
+    ${OGRE_LIBRARIES}
+    ${OGRE_Terrain_LIBRARIES}
+    ${OGRE_Paging_LIBRARIES}
 )
 set(netsiege_LIBRARIES ${netsiege_COMMON_LIBRARIES} ${OIS_LIBRARIES})
 set(netsiege_server_LIBRARIES ${netsiege_COMMON_LIBRARIES})
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/src/extern/tinyxml/ ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/src)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_BINARY_DIR} ${CMAKE_BINARY_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/src/extern/tinyxml/)
+
 add_subdirectory(src)
+
 
 add_executable(netsiege src/main.cpp)
 target_link_libraries(netsiege ${netsiege_LIBRARIES})

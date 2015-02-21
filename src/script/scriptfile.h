@@ -20,7 +20,7 @@
 #ifndef CAMPAIGN_SCRIPTFILE_H
 #define CAMPAIGN_SCRIPTFILE_H
 
-#include <OGRE/OgreResource.h>
+#include <OgreResource.h>
 #include <string.h>
 
 namespace script {

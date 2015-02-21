@@ -30,11 +30,11 @@
 #include "network/rpcpackage.h"
 #include "debug/ndebug.h"
 #include "serializer.h"
-#include <OGRE/OgreMatrix3.h>
-#include <OGRE/OgreMatrix4.h>
-#include <OGRE/OgreVector2.h>
-#include <OGRE/OgreVector3.h>
-#include <OGRE/OgreVector4.h>
+#include <OgreMatrix3.h>
+#include <OgreMatrix4.h>
+#include <OgreVector2.h>
+#include <OgreVector3.h>
+#include <OgreVector4.h>
 
 using namespace script;
 

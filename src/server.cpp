@@ -26,7 +26,7 @@
 #include "script/scriptfilemanager.h"
 #include "script/scriptengine.h"
 #include "oms/objectmanager.h"
-#include <OGRE/OgreRoot.h>
+#include <OgreRoot.h>
 
 int main(int argc, char **argv) {
     udp::endpoint listenInterface;

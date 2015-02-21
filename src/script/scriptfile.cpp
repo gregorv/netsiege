@@ -19,7 +19,7 @@
 
 #include "scriptfile.h"
 #include <cassert>
-#include <OGRE/OgreResourceGroupManager.h>
+#include <OgreResourceGroupManager.h>
 
 using namespace script;
 
