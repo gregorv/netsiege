@@ -20,9 +20,13 @@
 #include "ogrebase.h"
 #include "editorcamera.h"
 #include "brush.h"
+#include "editableterrainpagedworldsection.h"
 
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
+#include <OgrePageManager.h>
+#include <OgreTerrain.h>
+#include <OgreTerrainPaging.h>
 
 #include <QTimer>
 #include <QApplication>
@@ -52,6 +56,22 @@ OgreBase::OgreBase(QWidget* window)
     m_updateTimer->start();
     QObject::connect(m_updateTimer, &QTimer::timeout, [=]() { this->viewUpdate(); });
     m_camera->setUpdateInterval(interval_ms/1000.0f);
+
+    auto globalOptions = OGRE_NEW Ogre::TerrainGlobalOptions();
+    globalOptions->setMaxPixelError(8);
+    globalOptions->setCompositeMapAmbient(Ogre::ColourValue(0.1f, 0.1f, 0.1f, 1.0f));
+    globalOptions->setCastsDynamicShadows(true);
+//     globalOptions->setLightMapDirection(lightDir);
+    globalOptions->setCompositeMapDistance(1.0f);
+    globalOptions->setCompositeMapSize(128);
+    globalOptions->setSkirtSize(2.0f);
+
+
+    m_pageManager = new Ogre::PageManager;
+    m_pageManager->addCamera(m_camera->getCamera());
+    m_pageManager->setDebugDisplayLevel(100);
+    m_pageManager->addWorldSectionFactory(new EditableTerrainPagedWorldSection::SectionFactory);
+    m_terrainPaging = new Ogre::TerrainPaging(m_pageManager);
 }
 
 OgreBase::~OgreBase()
@@ -148,7 +168,6 @@ void OgreBase::viewUpdate()
         }
         m_prevMousePosition = pos;
         m_camera->mouseMove(pos/Ogre::Vector2(m_window->width(), m_window->height()), delta);
-        std::cout << m_camera->getPickRay().getDirection() << " " << m_camera->getPickRay().getOrigin() << std::endl;
         if(QApplication::mouseButtons() & Qt::LeftButton) {
             m_brush->update(m_camera->getPickRay());
         } else  {

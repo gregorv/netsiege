@@ -53,6 +53,9 @@ public:
     void pointerUpdate(const Ogre::Ray& pickray);
     void stopStroke();
 
+    void setEnabled(bool enabled);
+    bool enabled() const { return m_enabled; }
+
     BrushDrawer* getDrawer() { return m_drawer; }
 
 public slots:

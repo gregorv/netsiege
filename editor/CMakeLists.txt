@@ -48,7 +48,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5EXECUTABLE_COMPILE_FLAGS} -fPIC ")
 
 qt5_wrap_ui(UI_HEADERS ui/main.ui ui/layereditor.ui ui/new.ui)
 
-set(nedit_SRCS main.cpp ogrebase.cpp qogrewidget.cpp editorviewwidget.cpp editorcamera.cpp undocommands.cpp brush.cpp brushdrawer.cpp terrainlayerlistmodel.cpp terrainlayer.cpp campaignmanager.cpp)
+set(nedit_SRCS main.cpp ogrebase.cpp qogrewidget.cpp editorviewwidget.cpp editorcamera.cpp undocommands.cpp brush.cpp brushdrawer.cpp terrainlayerlistmodel.cpp editableterrainpagedworldsection.cpp terrainlayer.cpp campaignmanager.cpp)
 
 # qt5_automoc(${nedit_SRCS})
 add_executable(nedit ${nedit_SRCS} ${UI_HEADERS})

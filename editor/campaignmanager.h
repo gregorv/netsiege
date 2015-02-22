@@ -22,18 +22,28 @@
 
 #include <string>
 #include <memory>
+#include <vector>
+#include <QObject>
+#include <OgreRectangle2D.h>
 
 namespace Ogre {
     class SceneManager;
     class TerrainGroup;
-    class PageManager;
-    class TerrainPaging;
+    class PagedWorld;
+    class TerrainPagedWorldSection;
 }
 class QUndoStack;
 
-class CampaignManager
+class CampaignManager : public QObject
 {
+    Q_OBJECT
 public:
+    struct edited_tile_t {
+        long x;
+        long y;
+        bool unpaged;
+    };
+
     CampaignManager(const std::string& campaignPath);
     ~CampaignManager();
 
@@ -41,11 +51,32 @@ public:
     void load();
     void save();
 
+    void setTileModified(long x, long y);
+    void setTileUnpaged(long x, long y);
+    void clearTileModified(long x, long y);
+    void clearAllTileModified();
+    bool isTileModified(long x, long y) const;
+    bool isTileUnpaged(long x, long y) const;
+    const std::vector<edited_tile_t>& getTileModified() const;
+
+    static CampaignManager* getOpenDocument() { return s_openDocument; }
+
+signals:
+    void initProgress(std::string, int, bool disable);
+    void stepProgress();
+    void doneProgress();
+
 private:
+    static CampaignManager* s_openDocument;
+
+    std::vector<edited_tile_t> m_editedTiles;
     std::string m_campaignPath;
     Ogre::SceneManager* m_sceneManager;
     std::unique_ptr<Ogre::TerrainGroup> m_group;
-    std::unique_ptr<Ogre::TerrainPaging> m_terrainPaging;
+    std::unique_ptr<Ogre::PagedWorld> m_pagedWorld;
+    std::unique_ptr<Ogre::TerrainPagedWorldSection> m_pagedTerrain;
+    Ogre::Rect m_terrainBoundary;
+    std::vector<uint32_t> m_definedTerrainSlots;
 };
 
 #endif // CAMPAIGNMANAGER_H

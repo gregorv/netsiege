@@ -22,6 +22,7 @@
 #include <QDoubleSpinBox>
 #include <QStringListModel>
 #include <QMessageBox>
+#include <QProgressBar>
 #include "ui_main.h"
 #include "ui_layereditor.h"
 #include "terrainlayerlistmodel.h"
@@ -104,6 +105,13 @@ public:
        layerEditor(this)
     {
         ui.setupUi(this);
+        progressMessage = new QLabel(this);
+        progressBar = new QProgressBar(this);
+        statusBar()->addPermanentWidget(progressBar);
+        statusBar()->addPermanentWidget(progressMessage);
+        progressBar->setVisible(false);
+//         initProgress("", 1);
+
         auto redoSeparator = ui.menuEdit->actions()[0];
         auto actionUndo = OgreBase::getSingleton().getStack()->createUndoAction(this, QApplication::translate("EditorWindow", "Undo", 0));
         actionUndo->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Z));
@@ -164,6 +172,9 @@ public:
         connect(ui.actionBrushAdd, &QAction::triggered, [=](){ brush->setBlendLayer(2); });
         connect(ui.actionBrushMix, &QAction::triggered, [=](){ brush->setBlendLayer(1); });
         connect(ui.actionBrushSubtract, &QAction::triggered, [=](){ brush->setBlendLayer(3); });
+        ui.layerNum->setMaximum(7);
+        connect(ui.layerNum, SIGNAL(valueChanged(int)), brush, SLOT(setBlendLayer(int)));
+//         connect(ui.layerNum, &QSpinBox::valueChanged, [=](int i){  });
 
 //         connect(brush, SIGNAL(strenghChanged(float)), ui.brushStrength, SLOT(setValue(int)));
 //         connect(ui.openGLWidget->getBrush(), SIGNAL(sizeChanged(float)), ui.brushSize, SLOT(setValue(int)));
@@ -171,6 +182,8 @@ public:
 
         ui.cameraToolbar->addWidget(camLabel);
         ui.cameraToolbar->addWidget(camSpeedSpin);
+
+        connect(ui.actionSave, &QAction::triggered, [=](){ campaign->save(); });
 //         ui.cameraToolbar->addWidget(camSpeedSlider);
 
         auto layers = new TerrainLayerListModel;
@@ -181,7 +194,10 @@ public:
 //         ui.listView_2->setModel(model);
         
         campaign = new CampaignManager("/home/gregor/projekte/netsiege/testmedia/");
-        campaign->load();
+        campaign->initialize(513, 200);
+        connect(campaign, &CampaignManager::initProgress, this, &EditorWindow::initProgress);
+        connect(campaign, &CampaignManager::stepProgress, this, &EditorWindow::stepProgress);
+        connect(campaign, &CampaignManager::doneProgress, this, &EditorWindow::doneProgress);
     }
     void changeEvent(QEvent *e)
     {
@@ -194,11 +210,48 @@ public:
             break;
     }
  }
+
+ void enableEditing(bool enabled)
+ {
+     OgreBase::getSingleton().getBrush()->setEnabled(enabled);
+ }
+
+public slots:
+    void initProgress(std::string message, int numSteps, bool disable)
+    {
+        if(disable)
+            enableEditing(false);
+        progressBar->setMaximum(numSteps);
+        progressBar->setValue(0);
+        progressBar->setVisible(true);
+        progressMessage->setText(message.c_str());
+        statusBar()->updateGeometry();
+        statusBar()->repaint();
+    }
+
+    void stepProgress()
+    {
+        progressBar->setValue(progressBar->value()+1);
+        statusBar()->repaint();
+    }
+
+    void doneProgress()
+    {
+        enableEditing(true);
+        progressMessage->setText(QApplication::translate("EditorWindow", "Done", 0));
+        progressBar->setVisible(false);
+        progressBar->setValue(progressBar->maximum());
+        statusBar()->updateGeometry();
+        statusBar()->repaint();
+    }
+
 private:
     Ui::EditorWindow ui;
     QActionGroup groupCursorMode;
     QActionGroup groupBrushMode;
     LayerEditor layerEditor;
+    QLabel* progressMessage;
+    QProgressBar* progressBar;
     CampaignManager* campaign;
 };
 

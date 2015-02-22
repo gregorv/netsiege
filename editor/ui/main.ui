@@ -210,6 +210,16 @@
          </layout>
         </item>
         <item>
+         <widget class="QSpinBox" name="layerNum">
+          <property name="minimum">
+           <number>1</number>
+          </property>
+          <property name="maximum">
+           <number>5</number>
+          </property>
+         </widget>
+        </item>
+        <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
            <widget class="QToolButton" name="toolButtonBrushMix">

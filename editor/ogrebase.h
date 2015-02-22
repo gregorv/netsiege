@@ -25,7 +25,9 @@
 
 namespace Ogre {
     class SceneManager;
-    class PagingManager;
+    class PageManager;
+    class TerrainPaging;
+    class TerrainPagedWorldSection;
 }
 class EditorCamera;
 class Brush;
@@ -51,6 +53,8 @@ public:
     static OgreBase& getSingleton() { return *s_singleton; }
 
     Ogre::SceneManager* getSceneManager() const { return m_sceneManager; }
+    Ogre::PageManager* getPageManager() const { return m_pageManager; }
+    Ogre::TerrainPaging* getTerrainPaging() const { return m_terrainPaging; }
     Brush* getBrush() const { return m_brush; }
     EditorCamera* getCamera() const { return m_camera; }
     QUndoStack* getStack() const { return m_stack; }
@@ -67,6 +71,8 @@ private:
     QUndoStack* m_stack;
 
     Ogre::SceneManager* m_sceneManager;
+    Ogre::PageManager* m_pageManager;
+    Ogre::TerrainPaging* m_terrainPaging;
     EditorCamera* m_camera;
     Brush* m_brush;
     static OgreBase* s_singleton;

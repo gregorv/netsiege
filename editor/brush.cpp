@@ -49,7 +49,8 @@ Brush::Brush(Ogre::TerrainGroup* group, Ogre::SceneManager* sceneMgr, QUndoStack
  m_stack(stack),
  m_drawer(new BrushDrawer("Brush", group)),
  m_group(group),
- m_currentCommand(nullptr)
+ m_currentCommand(nullptr),
+ m_enabled(true)
 {
     auto rootNode = sceneMgr->getRootSceneNode();
     rootNode->attachObject(m_drawer);
@@ -88,7 +89,7 @@ void Brush::setMode(Brush::mode_t mode)
 
 void Brush::startStroke()
 {
-    if(!m_group) return;
+    if(!m_group || !m_enabled) return;
     stopStroke();
     assert(m_currentCommand == nullptr);
     if(m_mode & M_HEIGHT) {
@@ -140,12 +141,11 @@ void Brush::pointerUpdate(const Ogre::Ray& pickray)
     pointerUpdate(result.hit, result.position);
 }
 
-void Brush::pointerUpdate(bool hit, const Ogre::Vector3 position)
+void Brush::pointerUpdate(bool hit, const Ogre::Vector3& position)
 {
-    std::cout << hit << " " << position << std::endl;
     if(hit) {
         m_drawer->setPosition(position);
-        m_drawer->setVisible(true);
+        m_drawer->setVisible(m_enabled);
     } else {
         m_drawer->setVisible(false);
     }
@@ -319,4 +319,11 @@ void Brush::setBlendLayer(int layer)
     m_blendLayer = layer;
 }
 
+void Brush::setEnabled(bool enabled)
+{
+    m_enabled = enabled;
+    if(!m_enabled)
+        stopStroke();
+    m_drawer->setVisible(m_enabled);
+}
 
