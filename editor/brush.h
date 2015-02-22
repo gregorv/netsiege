@@ -81,7 +81,9 @@ protected:
         float size;
         float hardness;
     };
-    void pointerUpdate(bool hit, const Ogre::Vector3 position);
+    void pointerUpdate(bool hit, const Ogre::Vector3& position);
+    void applyHeightBrush(long x, long y, const Ogre::Vector3& position);
+    void applyLayerBrush(long x, long y, const Ogre::Vector3& position);
     mode_t m_mode;
     float m_height;
     QUndoStack* m_stack;
@@ -90,6 +92,7 @@ protected:
     undo::Command* m_currentCommand;
     std::map<mode_t, settings_t> m_settings;
     int m_blendLayer;
+    bool m_enabled;
 };
 
 #endif // BRUSH_H

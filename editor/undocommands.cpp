@@ -18,17 +18,20 @@
  */
 
 #include "undocommands.h"
+#include "campaignmanager.h"
 
 #include <QApplication>
 #include <Terrain/OgreTerrain.h>
 #include <Terrain/OgreTerrainGroup.h>
 #include <cassert>
+#include <algorithm>
+#include "campaignmanager.h"
 
 using namespace undo;
 
 HeightmapEdit::HeightmapEdit(Ogre::TerrainGroup* terrainGroup)
- : Command(), m_firstRedo(true),
- m_terrainGroup(terrainGroup)
+ : Command(),
+ m_terrainGroup(terrainGroup), m_firstRedo(true)
 {
     setText(QApplication::translate("EditorWindow", "modify heightmap", 0));
 }
@@ -37,17 +40,24 @@ HeightmapEdit::~HeightmapEdit()
 {
 }
 
-void HeightmapEdit::monitorTerrain(int x, int y)
+void HeightmapEdit::monitorTerrain(int x, int y, const Ogre::Rect& bounds)
 {
     for(auto& change: m_changes) {
         if(x == change.x && y == change.y) {
+            // terrain already monitored, extend rect
+            change.bounds.top = std::min(change.bounds.top, bounds.top);
+            change.bounds.left = std::min(change.bounds.left, bounds.left);
+            change.bounds.right = std::max(change.bounds.right, bounds.right);
+            change.bounds.bottom = std::max(change.bounds.bottom, bounds.bottom);
             return;
         }
     }
+    CampaignManager::getOpenDocument()->setTileModified(x, y);
     _change_t change;
     auto terrain = m_terrainGroup->getTerrain(x, y);
     change.x = x;
     change.y = y;
+    change.bounds = bounds;
     change.delta_map.resize(terrain->getSize() * terrain->getSize());
     memcpy(&change.delta_map[0], terrain->getHeightData(), change.delta_map.size()*sizeof(float));
     m_changes.push_back(change);
@@ -62,9 +72,6 @@ void HeightmapEdit::finalize()
         for(size_t i=0; i < change.delta_map.size(); i++) {
             change.delta_map[i] = data[i] - change.delta_map[i];
         }
-        terrain->dirty();
-        terrain->dirtyLightmap();
-        terrain->update();
     }
 }
 
@@ -75,7 +82,15 @@ void HeightmapEdit::applyDeltas(bool add)
         return;
     }
     for(auto& change: m_changes) {
+        bool unload = false;
+        CampaignManager::getOpenDocument()->setTileModified(change.x, change.y);
         auto ter = m_terrainGroup->getTerrain(change.x, change.y);
+        if(!ter) {
+            unload = true;
+            m_terrainGroup->defineTerrain(change.x, change.y);
+            m_terrainGroup->loadTerrain(change.x, change.y, true);
+            ter = m_terrainGroup->getTerrain(change.x, change.y);
+        }
         assert(ter->getSize()*ter->getSize() == change.delta_map.size());
         auto heightmap = ter->getHeightData();
         if(add) {
@@ -85,17 +100,22 @@ void HeightmapEdit::applyDeltas(bool add)
             for(size_t i=0; i<change.delta_map.size(); i++)
                 heightmap[i] -= change.delta_map[i];
         }
-        ter->dirty();
-        ter->dirtyLightmap();
-        ter->update();
+        ter->dirtyRect(change.bounds);
+        if(unload) {
+            ter->update(true);
+            ter->save(m_terrainGroup->generateFilename(change.x, change.y));
+            ter->unload();
+        } else {
+            ter->update();
+        }
     }
 }
 
 
 
 BlendmapEdit::BlendmapEdit(Ogre::TerrainGroup* terrainGroup, int layerIndex)
- : Command(), m_firstRedo(true),
- m_terrainGroup(terrainGroup), m_layerIndex(layerIndex)
+ : Command(),
+ m_terrainGroup(terrainGroup), m_layerIndex(layerIndex), m_firstRedo(true)
 {
     setText(QApplication::translate("EditorWindow", "blend layer modification", 0));
 }
@@ -111,6 +131,7 @@ void BlendmapEdit::monitorTerrain(int x, int y)
             return;
         }
     }
+    CampaignManager::getOpenDocument()->setTileModified(x, y);
     _change_t change;
     auto ter = m_terrainGroup->getTerrain(x, y);
     auto layer = ter->getLayerBlendMap(m_layerIndex);
@@ -133,8 +154,6 @@ void BlendmapEdit::finalize()
         for(size_t i=0; i < change.delta_map.size(); i++) {
             change.delta_map[i] = data[i] - change.delta_map[i];
         }
-        layer->dirty();
-        layer->update();
     }
 }
 
@@ -145,7 +164,15 @@ void BlendmapEdit::applyDeltas(bool add)
         return;
     }
     for(auto& change: m_changes) {
+        bool unload = false;
         auto terrain = m_terrainGroup->getTerrain(change.x, change.y);
+        CampaignManager::getOpenDocument()->setTileModified(change.x, change.y);
+        if(!terrain) {
+            unload = true;
+            m_terrainGroup->defineTerrain(change.x, change.y);
+            m_terrainGroup->loadTerrain(change.x, change.y, true);
+            terrain = m_terrainGroup->getTerrain(change.x, change.y);
+        }
         auto layer = terrain->getLayerBlendMap(m_layerIndex);
         auto layerSize = terrain->getLayerBlendMapSize();
         assert(layerSize*layerSize == change.delta_map.size());
@@ -157,8 +184,14 @@ void BlendmapEdit::applyDeltas(bool add)
             for(size_t i=0; i<change.delta_map.size(); i++)
                 heightmap[i] -= change.delta_map[i];
         }
-        layer->dirty();
-        layer->update();
+        terrain->dirty();
+        if(unload) {
+            terrain->update(true);
+            terrain->save(m_terrainGroup->generateFilename(change.x, change.y));
+            terrain->unload();
+        } else {
+            terrain->update();
+        }
     }
 }
 

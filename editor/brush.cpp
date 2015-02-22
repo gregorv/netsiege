@@ -107,102 +107,28 @@ void Brush::update(const Ogre::Ray& pickray)
     auto result = m_group->rayIntersects(pickray);
     pointerUpdate(result.hit, result.position);
     if(result.hit) {
-        auto ter = result.terrain;
-        auto indices = (result.position - ter->getPosition())/ter->getWorldSize();
-        indices += 0.5;
+        long slotX, slotY;
+        m_group->convertWorldPositionToTerrainSlot(result.position, &slotX, &slotY);
         if(m_mode & M_HEIGHT) {
-            auto cmd = dynamic_cast<undo::HeightmapEdit*>(m_currentCommand);
-            assert(cmd != nullptr);
-            cmd->monitorTerrain(0, 0);
-            indices.z = 1.0f - indices.z;
-            indices *= ter->getSize();
-//             std::cout << m_settings[m_mode].size << " " << m_settings[m_mode].strength << " " << m_settings[m_mode].hardness << std::endl;
-            float* heightdata = ter->getHeightData();
-            float brushSize = m_settings[m_mode].size/ter->getWorldSize() * ter->getSize();
-            size_t terSize = ter->getSize();
-//             std::cout << "indices " << indices << ", brush size" << brushSize << std::endl;
-            if(m_mode == M_HEIGHT_RAISE) {
-                float strength = m_settings[m_mode].strength *
-                              ((QApplication::queryKeyboardModifiers()
-                              & Qt::ShiftModifier)? -0.1f : 0.1f);
-                for(int ix=MAX(indices.x-brushSize/2, 0); ix<MIN(indices.x+brushSize/2, terSize); ix++) {
-                    for(int iy=MAX(indices.z-brushSize/2, 0); iy<MIN(indices.z+brushSize/2, terSize); iy++) {
-                        float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
-                        heightdata[iy*terSize+ix] += brushFunction(dist/brushSize*2,
-                                                                        m_settings[m_mode].hardness) * strength;
-                    }
-                }
-            } else if(m_mode == M_HEIGHT_SMOOTH) {
-                float avgHeight = 0.0;
-                float area = 0.0f;
-                for(int ix=MAX(indices.x-brushSize/2, 0); ix<MIN(indices.x+brushSize/2, terSize); ix++) {
-                    for(int iy=MAX(indices.z-brushSize/2, 0); iy<MIN(indices.z+brushSize/2, terSize); iy++) {
-                        float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
-                        float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
-                        area += weight;
-                        avgHeight += heightdata[iy*terSize+ix] * weight;
-                    }
-                }
-                avgHeight /= area;
-                for(int ix=MAX(indices.x-brushSize/2, 0); ix<MIN(indices.x+brushSize/2, terSize); ix++) {
-                    for(int iy=MAX(indices.z-brushSize/2, 0); iy<MIN(indices.z+brushSize/2, terSize); iy++) {
-                        float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
-                        float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
-                        float difference = avgHeight - heightdata[iy*terSize+ix];
-                        difference *= m_settings[m_mode].strength/10.0f;
-                        heightdata[iy*terSize+ix] += weight*difference;
-                    }
-                }
-            } else if(m_mode == M_HEIGHT_FLATTEN) {
-                if(QApplication::queryKeyboardModifiers() & Qt::ShiftModifier) {
-                    m_height = result.position.y;
-                    m_drawer->setBrushOptions(m_settings[m_mode].size,
-                                              m_settings[m_mode].hardness,
-                                              m_height);
-                } else {
-                    for(int ix=MAX(indices.x-brushSize/2, 0); ix<MIN(indices.x+brushSize/2, terSize); ix++) {
-                        for(int iy=MAX(indices.z-brushSize/2, 0); iy<MIN(indices.z+brushSize/2, terSize); iy++) {
-                            float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
-                            float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
-                            float difference = m_height - heightdata[iy*terSize+ix];
-                            difference *= m_settings[m_mode].strength/10.0f;
-                            heightdata[iy*terSize+ix] += weight*difference;
-                        }
-                    }
-                }
-            }
-            ter->dirty();
-            ter->updateGeometry();
+            applyHeightBrush(slotX, slotY, result.position);
+            applyHeightBrush(slotX-1, slotY-1, result.position);
+            applyHeightBrush(slotX+1, slotY-1, result.position);
+            applyHeightBrush(slotX-1, slotY+1, result.position);
+            applyHeightBrush(slotX+1, slotY+1, result.position);
+            applyHeightBrush(slotX+1, slotY, result.position);
+            applyHeightBrush(slotX-1, slotY, result.position);
+            applyHeightBrush(slotX, slotY+1, result.position);
+            applyHeightBrush(slotX, slotY-1, result.position);
         } else if(m_mode == M_LAYER_PAINT) {
-            auto cmd = dynamic_cast<undo::BlendmapEdit*>(m_currentCommand);
-            assert(cmd != nullptr);
-            cmd->monitorTerrain(0, 0);
-            size_t size = ter->getLayerBlendMapSize();
-            indices *= size;
-            float brushSize = m_settings[m_mode].size/ter->getWorldSize() * size;
-            float strength = m_settings[m_mode].strength * ((QApplication::queryKeyboardModifiers() & Qt::ShiftModifier)? -0.01f : 0.01f);
-            auto layer = result.terrain->getLayerBlendMap(cmd->getLayerIndex());
-//             if(QApplication::queryKeyboardModifiers() & Qt::ControlModifier) {
-//                 layer = result.terrain->getLayerBlendMap(2);
-//             }
-            auto data = layer->getBlendPointer();
-//             std::cout << "indices " << indices << ", brush size" << brushSize << " " << strength << " " << size << std::endl;
-            for(int ix=MAX(indices.x-brushSize/2, 0); ix<MIN(indices.x+brushSize/2, size); ix++) {
-                for(int iy=MAX(indices.z-brushSize/2, 0); iy<MIN(indices.z+brushSize/2, size); iy++) {
-                    float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
-                    float distWeight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
-//                             std::cout << dist << " " << brushSize/2 << " " << distWeight << std::endl;
-                    data[iy*size+ix] += distWeight*strength;
-//                             data[iy*size+ix] -= 0.1;
-                    if(data[iy*size+ix] > 1.0)
-                        data[iy*size+ix] = 1.0;
-                    if(data[iy*size+ix] < 0.0)
-                        data[iy*size+ix] = 0.0;
-//                             std::cout << data[iy*size+ix] << " ";
-                }
-            }
-            layer->dirty();
-            layer->update();
+            applyLayerBrush(slotX, slotY, result.position);
+            applyLayerBrush(slotX-1, slotY-1, result.position);
+            applyLayerBrush(slotX+1, slotY-1, result.position);
+            applyLayerBrush(slotX-1, slotY+1, result.position);
+            applyLayerBrush(slotX+1, slotY+1, result.position);
+            applyLayerBrush(slotX+1, slotY, result.position);
+            applyLayerBrush(slotX-1, slotY, result.position);
+            applyLayerBrush(slotX, slotY+1, result.position);
+            applyLayerBrush(slotX, slotY-1, result.position);
         }
     }
 }
@@ -225,6 +151,118 @@ void Brush::pointerUpdate(bool hit, const Ogre::Vector3 position)
     }
 }
 
+void Brush::applyHeightBrush(long x, long y, const Ogre::Vector3& position)
+{
+    auto ter = m_group->getTerrain(x, y);
+    if(!ter)
+        return;
+    auto indices = (position - ter->getPosition())/ter->getWorldSize();
+    indices += 0.5;
+    auto cmd = dynamic_cast<undo::HeightmapEdit*>(m_currentCommand);
+    assert(cmd != nullptr);
+    indices.z = 1.0f - indices.z;
+    indices *= ter->getSize();
+    float* heightdata = ter->getHeightData();
+    float brushSize = m_settings[m_mode].size/ter->getWorldSize() * ter->getSize();
+    size_t terSize = ter->getSize();
+    Ogre::Rect rect(MIN(MAX(indices.x-brushSize/2, 0), terSize), MIN(MAX(indices.z-brushSize/2, 0), terSize),
+                    MAX(MIN(indices.x+brushSize/2, terSize), 0), MAX(MIN(indices.z+brushSize/2, terSize), 0));
+    if(rect.bottom == rect.top || rect.left == rect.right)
+        // brush does not reach this terrain
+        return;
+    cmd->monitorTerrain(x, y, rect);
+    if(m_mode == M_HEIGHT_RAISE) {
+        float strength = m_settings[m_mode].strength *
+                        ((QApplication::queryKeyboardModifiers()
+                        & Qt::ShiftModifier)? -0.1f : 0.1f);
+        for(int ix=rect.left; ix<rect.right; ix++) {
+            for(int iy=rect.top; iy<rect.bottom; iy++) {
+                float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
+                heightdata[iy*terSize+ix] += brushFunction(dist/brushSize*2,
+                                                                m_settings[m_mode].hardness) * strength;
+            }
+        }
+    } else if(m_mode == M_HEIGHT_SMOOTH) {
+        float avgHeight = 0.0;
+        float area = 0.0f;
+        for(int ix=rect.left; ix<rect.right; ix++) {
+            for(int iy=rect.top; iy<rect.bottom; iy++) {
+                float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
+                float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
+                area += weight;
+                avgHeight += heightdata[iy*terSize+ix] * weight;
+            }
+        }
+        avgHeight /= area;
+        for(int ix=rect.left; ix<rect.right; ix++) {
+            for(int iy=rect.top; iy<rect.bottom; iy++) {
+                float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
+                float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
+                float difference = avgHeight - heightdata[iy*terSize+ix];
+                difference *= m_settings[m_mode].strength/10.0f;
+                heightdata[iy*terSize+ix] += weight*difference;
+            }
+        }
+    } else if(m_mode == M_HEIGHT_FLATTEN) {
+        if(QApplication::queryKeyboardModifiers() & Qt::ShiftModifier) {
+            m_height = position.y;
+            m_drawer->setBrushOptions(m_settings[m_mode].size,
+                                        m_settings[m_mode].hardness,
+                                        m_height);
+        } else {
+            for(int ix=rect.left; ix<rect.right; ix++) {
+                for(int iy=rect.top; iy<rect.bottom; iy++) {
+                    float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
+                    float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
+                    float difference = m_height - heightdata[iy*terSize+ix];
+                    difference *= m_settings[m_mode].strength/10.0f;
+                    heightdata[iy*terSize+ix] += weight*difference;
+                }
+            }
+        }
+    }
+    ter->dirtyRect(rect);
+    ter->update();
+}
+
+void Brush::applyLayerBrush(long int x, long int y, const Ogre::Vector3& position)
+{
+    auto ter = m_group->getTerrain(x, y);
+    if(!ter)
+        return;
+    auto indices = (position - ter->getPosition())/ter->getWorldSize();
+    indices += 0.5;
+    auto cmd = dynamic_cast<undo::BlendmapEdit*>(m_currentCommand);
+    assert(cmd != nullptr);
+    cmd->monitorTerrain(x, y);
+    size_t size = ter->getLayerBlendMapSize();
+    indices *= size;
+    float brushSize = m_settings[m_mode].size/ter->getWorldSize() * size;
+    float strength = m_settings[m_mode].strength * ((QApplication::queryKeyboardModifiers() & Qt::ShiftModifier)? -0.01f : 0.01f);
+    auto layer = ter->getLayerBlendMap(cmd->getLayerIndex());
+    auto data = layer->getBlendPointer();
+    Ogre::Rect rect(MIN(MAX(indices.x-brushSize/2, 0), size), MIN(MAX(indices.z-brushSize/2, 0), size),
+                    MAX(MIN(indices.x+brushSize/2, size), 0), MAX(MIN(indices.z+brushSize/2, size), 0));
+    if(rect.bottom == rect.top || rect.left == rect.right)
+        // brush does not reach this terrain
+        return;
+    for(int ix=rect.left; ix<rect.right; ix++) {
+        for(int iy=rect.top; iy<rect.bottom; iy++) {
+            float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
+            float distWeight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
+//                             std::cout << dist << " " << brushSize/2 << " " << distWeight << std::endl;
+            data[iy*size+ix] += distWeight*strength;
+//                             data[iy*size+ix] -= 0.1;
+            if(data[iy*size+ix] > 1.0)
+                data[iy*size+ix] = 1.0;
+            if(data[iy*size+ix] < 0.0)
+                data[iy*size+ix] = 0.0;
+//                             std::cout << data[iy*size+ix] << " ";
+        }
+    }
+    layer->dirtyRect(rect);
+    layer->update();
+}
 
 void Brush::stopStroke()
 {

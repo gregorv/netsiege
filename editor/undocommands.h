@@ -21,6 +21,7 @@
 #define UNDO_HEIGHTMAPEDIT_H
 
 #include <QUndoCommand>
+#include <OgreRectangle2D.h>
 
 namespace Ogre {
     class TerrainGroup;
@@ -41,7 +42,7 @@ public:
     ~HeightmapEdit();
 
     virtual void finalize();
-    void monitorTerrain(int x, int y);
+    void monitorTerrain(int x, int y, const Ogre::Rect& bounds);
 
     virtual void redo() { applyDeltas(true); }
     virtual void undo() { applyDeltas(false); }
@@ -51,6 +52,7 @@ private:
         std::vector<float> delta_map;
         int x;
         int y;
+        Ogre::Rect bounds;
     };
     std::vector<_change_t> m_changes;
     Ogre::TerrainGroup* m_terrainGroup;
