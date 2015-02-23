@@ -138,6 +138,15 @@ void CampaignManager::initialize(uint16_t terrainSize, float realWorldSize)
     defaultimp.worldSize = realWorldSize;
     m_group->setTerrainSize(terrainSize);
     m_group->setTerrainWorldSize(realWorldSize);
+    m_definedTerrainSlots.push_back(m_group->packIndex(0, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(1, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(0, 1));
+    m_definedTerrainSlots.push_back(m_group->packIndex(-1, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(-2, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(-3, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(-4, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(-5, 0));
+    m_definedTerrainSlots.push_back(m_group->packIndex(-6, 0));
 //     m_group->defineTerrain(0, 0, 0.0f);
 //     m_group->defineTerrain(1, 0, 0.0f);
 //     m_group->defineTerrain(0, 1, 0.0f);
