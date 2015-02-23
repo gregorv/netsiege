@@ -169,12 +169,15 @@ public:
         connect(ui.brushSize, SIGNAL(valueChanged(int)), brush, SLOT(setSize(int)));
         connect(ui.brushStrength, SIGNAL(valueChanged(int)), brush, SLOT(setStrength(int)));
         connect(ui.brushHardness, SIGNAL(valueChanged(int)), brush, SLOT(setHardness(int)));
+        connect(ui.displaySize, SIGNAL(valueChanged(double)), brush, SLOT(setSize(double)));
+        connect(ui.displayStrength, SIGNAL(valueChanged(double)), brush, SLOT(setStrength(double)));
+        connect(ui.displayHardness, SIGNAL(valueChanged(double)), brush, SLOT(setHardness(double)));
         connect(brush, SIGNAL(strengthChangedInt(int)), ui.brushStrength, SLOT(setValue(int)));
         connect(brush, SIGNAL(sizeChangedInt(int)), ui.brushSize, SLOT(setValue(int)));
         connect(brush, SIGNAL(hardnessChangedInt(int)), ui.brushHardness, SLOT(setValue(int)));
-        connect(brush, &Brush::strengthChanged, [=](float x){ ui.displayStrength->setText(QString::number(x)); });
-        connect(brush, &Brush::sizeChanged, [=](float x){ ui.displaySize->setText(QString::number(x)); });
-        connect(brush, &Brush::hardnessChanged, [=](float x){ ui.displayHardness->setText(QString::number(x)); });
+        connect(brush, &Brush::strengthChanged, [=](float x){ ui.displayStrength->setValue(x); });
+        connect(brush, &Brush::sizeChanged, [=](float x){ ui.displaySize->setValue(x); });
+        connect(brush, &Brush::hardnessChanged, [=](float x){ ui.displayHardness->setValue(x); });
 
         connect(ui.actionBrushAdd, &QAction::triggered, [=](){ brush->setBlendLayer(2); });
         connect(ui.actionBrushMix, &QAction::triggered, [=](){ brush->setBlendLayer(1); });

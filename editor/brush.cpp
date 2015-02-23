@@ -307,6 +307,10 @@ void Brush::setHardness(float x)
     m_drawer->setBrushOptions(m_settings[m_mode].size, m_settings[m_mode].hardness, m_height);
 }
 
+void Brush::setStrength(double x) { setStrength(static_cast<float>(x)); }
+void Brush::setSize(double x) { setSize(static_cast<float>(x)); }
+void Brush::setHardness(double x) { setHardness(static_cast<float>(x)); }
+
 void Brush::setStrength(int x)
 {
     setStrength(static_cast<float>(x)/10.0f);

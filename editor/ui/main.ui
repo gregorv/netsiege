@@ -131,23 +131,13 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
-           <widget class="QSlider" name="brushHardness">
-            <property name="maximum">
-             <number>100</number>
-            </property>
-            <property name="orientation">
-             <enum>Qt::Horizontal</enum>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="1">
            <widget class="QSlider" name="brushSize">
             <property name="minimum">
              <number>1</number>
             </property>
             <property name="maximum">
-             <number>200</number>
+             <number>500</number>
             </property>
             <property name="value">
              <number>10</number>
@@ -157,16 +147,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QSlider" name="brushStrength">
-            <property name="minimum">
-             <number>1</number>
-            </property>
+          <item row="2" column="1">
+           <widget class="QSlider" name="brushHardness">
             <property name="maximum">
              <number>100</number>
-            </property>
-            <property name="value">
-             <number>10</number>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
@@ -187,24 +171,43 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="1">
+           <widget class="QSlider" name="brushStrength">
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>200</number>
+            </property>
+            <property name="value">
+             <number>10</number>
+            </property>
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="2">
-           <widget class="QLabel" name="displaySize">
-            <property name="text">
-             <string>TextLabel</string>
+           <widget class="QDoubleSpinBox" name="displaySize">
+            <property name="maximum">
+             <double>50.000000000000000</double>
             </property>
            </widget>
           </item>
           <item row="1" column="2">
-           <widget class="QLabel" name="displayStrength">
-            <property name="text">
-             <string>TextLabel</string>
+           <widget class="QDoubleSpinBox" name="displayStrength">
+            <property name="maximum">
+             <double>20.000000000000000</double>
             </property>
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QLabel" name="displayHardness">
-            <property name="text">
-             <string>TextLabel</string>
+           <widget class="QDoubleSpinBox" name="displayHardness">
+            <property name="maximum">
+             <double>1.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>

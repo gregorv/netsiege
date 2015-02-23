@@ -63,6 +63,10 @@ public slots:
     void setSize(float x);
     void setHardness(float x);
 
+    void setStrength(double x);
+    void setSize(double x);
+    void setHardness(double x);
+
     void setStrength(int x);
     void setSize(int x);
     void setHardness(int x);
