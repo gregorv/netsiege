@@ -100,12 +100,15 @@ void HeightmapEdit::applyDeltas(bool add)
             for(size_t i=0; i<change.delta_map.size(); i++)
                 heightmap[i] -= change.delta_map[i];
         }
-        ter->dirtyRect(change.bounds);
+//         ter->dirtyRect(change.bounds);
+        ter->dirty();
         if(unload) {
+            ter->updateGeometryWithoutNotifyNeighbours();
             ter->update(true);
             ter->save(m_terrainGroup->generateFilename(change.x, change.y));
             ter->unload();
         } else {
+            ter->updateGeometryWithoutNotifyNeighbours();
             ter->update();
         }
     }

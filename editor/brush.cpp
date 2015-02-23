@@ -24,6 +24,7 @@
 #include <Terrain/OgreTerrainGroup.h>
 #include <OgreRoot.h>
 #include <OgreSceneNode.h>
+#include <OgreMath.h>
 #include "undocommands.h"
 #include "brushdrawer.h"
 
@@ -165,8 +166,12 @@ void Brush::applyHeightBrush(long x, long y, const Ogre::Vector3& position)
     float* heightdata = ter->getHeightData();
     float brushSize = m_settings[m_mode].size/ter->getWorldSize() * ter->getSize();
     size_t terSize = ter->getSize();
-    Ogre::Rect rect(MIN(MAX(indices.x-brushSize/2, 0), terSize), MIN(MAX(indices.z-brushSize/2, 0), terSize),
-                    MAX(MIN(indices.x+brushSize/2, terSize), 0), MAX(MIN(indices.z+brushSize/2, terSize), 0));
+    // LEFT  TOP  RIGHT  BOTTOM
+    Ogre::Rect rect(Ogre::Math::Clamp<int>(indices.x-brushSize/2, 0, terSize),  // left
+                    Ogre::Math::Clamp<int>(indices.z-brushSize/2, 0, terSize),  // top
+                    Ogre::Math::Clamp<int>(indices.x+brushSize/2, 0, terSize),  // right
+                    Ogre::Math::Clamp<int>(indices.z+brushSize/2, 0, terSize)); // bottom
+    std::cout << rect << std::endl;
     if(rect.bottom == rect.top || rect.left == rect.right)
         // brush does not reach this terrain
         return;
@@ -222,6 +227,7 @@ void Brush::applyHeightBrush(long x, long y, const Ogre::Vector3& position)
         }
     }
     ter->dirtyRect(rect);
+    ter->updateGeometryWithoutNotifyNeighbours();
     ter->update();
 }
 
