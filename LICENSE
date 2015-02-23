@@ -1,7 +1,9 @@
 Netsiege source code is released under the GPL3 License (attached below).
+
 Made possible by
-   Gregor Vollmer <gregor@celement.de>
-   Alexander Kraus
+
+* Gregor Vollmer <gregor@celement.de>
+* Alexander Kraus
 
 Angelscript
 -----------
@@ -35,6 +37,7 @@ Released under the zlib License by the TinyXML team.
 
 
 GNU GENERAL PUBLIC LICENSE
+--------------------------
                        Version 3, 29 June 2007
 
  Copyright (C) 2007 Free Software Foundation, Inc. <http://fsf.org/>
