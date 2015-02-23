@@ -112,15 +112,19 @@ void Brush::update(const Ogre::Ray& pickray)
         long slotX, slotY;
         m_group->convertWorldPositionToTerrainSlot(result.position, &slotX, &slotY);
         if(m_mode & M_HEIGHT) {
-            applyHeightBrush(slotX, slotY, result.position);
-            applyHeightBrush(slotX-1, slotY-1, result.position);
-            applyHeightBrush(slotX+1, slotY-1, result.position);
-            applyHeightBrush(slotX-1, slotY+1, result.position);
-            applyHeightBrush(slotX+1, slotY+1, result.position);
-            applyHeightBrush(slotX+1, slotY, result.position);
-            applyHeightBrush(slotX-1, slotY, result.position);
-            applyHeightBrush(slotX, slotY+1, result.position);
-            applyHeightBrush(slotX, slotY-1, result.position);
+            float average = 0.0f;
+            if(m_mode & M_HEIGHT_SMOOTH) {
+                average = getAverageHeight(result.position);
+            }
+            applyHeightBrush(slotX, slotY, result.position, average);
+            applyHeightBrush(slotX-1, slotY-1, result.position, average);
+            applyHeightBrush(slotX+1, slotY-1, result.position, average);
+            applyHeightBrush(slotX-1, slotY+1, result.position, average);
+            applyHeightBrush(slotX+1, slotY+1, result.position, average);
+            applyHeightBrush(slotX+1, slotY, result.position, average);
+            applyHeightBrush(slotX-1, slotY, result.position, average);
+            applyHeightBrush(slotX, slotY+1, result.position, average);
+            applyHeightBrush(slotX, slotY-1, result.position, average);
         } else if(m_mode == M_LAYER_PAINT) {
             applyLayerBrush(slotX, slotY, result.position);
             applyLayerBrush(slotX-1, slotY-1, result.position);
@@ -152,7 +156,7 @@ void Brush::pointerUpdate(bool hit, const Ogre::Vector3& position)
     }
 }
 
-void Brush::applyHeightBrush(long x, long y, const Ogre::Vector3& position)
+void Brush::applyHeightBrush(long int x, long int y, const Ogre::Vector3& position, float average)
 {
     auto ter = m_group->getTerrain(x, y);
     if(!ter)
@@ -188,22 +192,11 @@ void Brush::applyHeightBrush(long x, long y, const Ogre::Vector3& position)
             }
         }
     } else if(m_mode == M_HEIGHT_SMOOTH) {
-        float avgHeight = 0.0;
-        float area = 0.0f;
         for(int ix=rect.left; ix<rect.right; ix++) {
             for(int iy=rect.top; iy<rect.bottom; iy++) {
                 float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
                 float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
-                area += weight;
-                avgHeight += heightdata[iy*terSize+ix] * weight;
-            }
-        }
-        avgHeight /= area;
-        for(int ix=rect.left; ix<rect.right; ix++) {
-            for(int iy=rect.top; iy<rect.bottom; iy++) {
-                float dist = std::sqrt(std::pow(ix-indices.x, 2) + std::pow(iy-indices.z, 2));
-                float weight = brushFunction(dist/brushSize*2, m_settings[m_mode].hardness);
-                float difference = avgHeight - heightdata[iy*terSize+ix];
+                float difference = average - heightdata[iy*terSize+ix];
                 difference *= m_settings[m_mode].strength/10.0f;
                 heightdata[iy*terSize+ix] += weight*difference;
             }
@@ -270,6 +263,22 @@ void Brush::applyLayerBrush(long int x, long int y, const Ogre::Vector3& positio
     }
     layer->dirtyRect(rect);
     layer->update();
+}
+
+float Brush::getAverageHeight(const Ogre::Vector3& position)
+{
+    Ogre::Terrain* ptr;
+    float average = 0.0f;
+    size_t num_samples = 0;
+    float ds = m_group->getTerrainWorldSize()/m_group->getTerrainSize();
+    Ogre::Vector3 pos {0.0f, 0.0f, 0.0f};
+    for(pos.x = -m_settings[m_mode].size/2; pos.x <= m_settings[m_mode].size/2; pos.x += ds) {
+        for(pos.y = -m_settings[m_mode].size/2; pos.y <= m_settings[m_mode].size/2; pos.y += ds) {
+            average += m_group->getHeightAtWorldPosition(position+pos, &ptr);
+            if(ptr) num_samples++;
+        }
+    }
+    return average / num_samples;
 }
 
 void Brush::stopStroke()

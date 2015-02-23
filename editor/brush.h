@@ -89,8 +89,9 @@ protected:
         float hardness;
     };
     void pointerUpdate(bool hit, const Ogre::Vector3& position);
-    void applyHeightBrush(long x, long y, const Ogre::Vector3& position);
+    void applyHeightBrush(long x, long y, const Ogre::Vector3& position, float average);
     void applyLayerBrush(long x, long y, const Ogre::Vector3& position);
+    float getAverageHeight(const Ogre::Vector3& position);
     mode_t m_mode;
     float m_height;
     QUndoStack* m_stack;
