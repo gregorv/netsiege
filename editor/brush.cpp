@@ -247,8 +247,10 @@ void Brush::applyLayerBrush(long int x, long int y, const Ogre::Vector3& positio
     float strength = m_settings[m_mode].strength * ((QApplication::queryKeyboardModifiers() & Qt::ShiftModifier)? -0.01f : 0.01f);
     auto layer = ter->getLayerBlendMap(cmd->getLayerIndex());
     auto data = layer->getBlendPointer();
-    Ogre::Rect rect(MIN(MAX(indices.x-brushSize/2, 0), size), MIN(MAX(indices.z-brushSize/2, 0), size),
-                    MAX(MIN(indices.x+brushSize/2, size), 0), MAX(MIN(indices.z+brushSize/2, size), 0));
+    Ogre::Rect rect(Ogre::Math::Clamp<int>(indices.x-brushSize/2, 0, size),
+                    Ogre::Math::Clamp<int>(indices.z-brushSize/2, 0, size),
+                    Ogre::Math::Clamp<int>(indices.x+brushSize/2, 0, size),
+                    Ogre::Math::Clamp<int>(indices.z+brushSize/2, 0, size));
     if(rect.bottom == rect.top || rect.left == rect.right)
         // brush does not reach this terrain
         return;
