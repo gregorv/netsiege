@@ -79,8 +79,8 @@ CampaignManager::CampaignManager(const std::string& campaignPath)
     auto worldSection = m_pagedWorld->createSection(OgreBase::getSingleton().getSceneManager(), "EditTerrain", Ogre::String(""));
     m_pagedTerrain.reset(dynamic_cast<EditableTerrainPagedWorldSection*>(worldSection));
     m_pagedTerrain->init(m_group.get());
-    m_pagedTerrain->setLoadRadius(m_group->getTerrainSize());
-    m_pagedTerrain->setHoldRadius(m_group->getTerrainSize()*2);
+    m_pagedTerrain->setLoadRadius(m_group->getTerrainSize()*4);
+    m_pagedTerrain->setHoldRadius(m_group->getTerrainSize()*5);
     m_pagedTerrain->setPageRange(-10, -10, 10, 10);
     m_pagedTerrain->setLoadingIntervalMs(10);
     m_pagedTerrain->setDefiner(&g_terrainDefiner);
