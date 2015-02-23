@@ -61,6 +61,8 @@ public:
 
     static CampaignManager* getOpenDocument() { return s_openDocument; }
 
+    bool isSlotDefined(long x, long y) const;
+
 signals:
     void initProgress(std::string, int, bool disable);
     void stepProgress();

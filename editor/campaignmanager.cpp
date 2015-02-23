@@ -38,12 +38,17 @@ class TerrainDefiner : public Ogre::TerrainPagedWorldSection::TerrainDefiner
 public:
     virtual void define(Ogre::TerrainGroup* terrainGroup, long x, long y)
     {
-        std::string tmpfile(std::string("~")+terrainGroup->generateFilename(x, y));
+        std::string filename(terrainGroup->generateFilename(x, y));
+        std::string tmpfile("~"+filename);
+        auto packed = terrainGroup->packIndex(x, y);
+        auto campaignManager = CampaignManager::getOpenDocument();
         if(boost::filesystem::exists(tmpfile)) {
             std::cout << "Load temporary tile " << tmpfile << std::endl;
             terrainGroup->defineTerrain(x, y, tmpfile);
-        } else {
+        } else if(boost::filesystem::exists(filename)) {
             terrainGroup->defineTerrain(x, y);
+        } else if(campaignManager->isSlotDefined(x, y)) {
+            terrainGroup->defineTerrain(x, y, 0.0f);
         }
     }
 } g_terrainDefiner;
@@ -242,4 +247,16 @@ bool CampaignManager::isTileUnpaged(long int x, long int y) const
     }
     return false;
 }
+
+bool CampaignManager::isSlotDefined(long int x, long int y) const
+{
+    auto packedIdx = m_group->packIndex(x, y);
+    for(const auto& slotIdx: m_definedTerrainSlots) {
+        if(slotIdx == packedIdx) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
