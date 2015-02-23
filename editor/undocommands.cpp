@@ -230,6 +230,7 @@ void ModifyTerrainSlot::add()
     }
     campaign->updateSlotBoundary();
     group->defineTerrain(m_x, m_y, 0.0f);
+    group->loadTerrain(m_x, m_y);
 }
 
 void ModifyTerrainSlot::remove()
