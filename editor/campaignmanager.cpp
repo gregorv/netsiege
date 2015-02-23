@@ -40,15 +40,15 @@ public:
     {
         std::string filename(terrainGroup->generateFilename(x, y));
         std::string tmpfile("~"+filename);
-        auto packed = terrainGroup->packIndex(x, y);
         auto campaignManager = CampaignManager::getOpenDocument();
-        if(boost::filesystem::exists(tmpfile)) {
-            std::cout << "Load temporary tile " << tmpfile << std::endl;
-            terrainGroup->defineTerrain(x, y, tmpfile);
-        } else if(boost::filesystem::exists(filename)) {
-            terrainGroup->defineTerrain(x, y);
-        } else if(campaignManager->isSlotDefined(x, y)) {
-            terrainGroup->defineTerrain(x, y, 0.0f);
+        if(campaignManager->isSlotDefined(x, y)) {
+            if(boost::filesystem::exists(tmpfile)) {
+                terrainGroup->defineTerrain(x, y, tmpfile);
+            } else if(boost::filesystem::exists(filename)) {
+                terrainGroup->defineTerrain(x, y);
+            } else {
+                terrainGroup->defineTerrain(x, y, 0.0f);
+            }
         }
     }
 } g_terrainDefiner;
@@ -147,6 +147,7 @@ void CampaignManager::initialize(uint16_t terrainSize, float realWorldSize)
     m_definedTerrainSlots.push_back(m_group->packIndex(-4, 0));
     m_definedTerrainSlots.push_back(m_group->packIndex(-5, 0));
     m_definedTerrainSlots.push_back(m_group->packIndex(-6, 0));
+    updateSlotBoundary();
 //     m_group->defineTerrain(0, 0, 0.0f);
 //     m_group->defineTerrain(1, 0, 0.0f);
 //     m_group->defineTerrain(0, 1, 0.0f);
@@ -268,4 +269,31 @@ bool CampaignManager::isSlotDefined(long int x, long int y) const
     return false;
 }
 
+Ogre::Rect CampaignManager::getSlotBoundary() const
+{
+    return m_slotBoundary;
+}
+
+void CampaignManager::updateSlotBoundary()
+{
+    if(m_definedTerrainSlots.size() == 0) {
+        m_slotBoundary = Ogre::Rect(0, 0, 0, 0);
+    } else {
+        long x, y;
+        m_group->unpackIndex(m_definedTerrainSlots[0], &x, &y);
+        m_slotBoundary = Ogre::Rect(x, y, x, y);
+        for(auto& idx: m_definedTerrainSlots) {
+            m_group->unpackIndex(idx, &x, &y);
+            if(m_slotBoundary.left > x) m_slotBoundary.left = x;
+            if(m_slotBoundary.right < x) m_slotBoundary.right = x;
+            if(m_slotBoundary.top > y) m_slotBoundary.top = y;
+            if(m_slotBoundary.bottom < y) m_slotBoundary.bottom = y;
+        }
+    }
+}
+
+void CampaignManager::unpackSlotIndex(uint32_t key, long* x, long* y) const
+{
+    m_group->unpackIndex(key, x, y);
+}
 

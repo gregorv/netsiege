@@ -24,12 +24,14 @@
 #include <QMessageBox>
 #include <QProgressBar>
 #include "ui_main.h"
+#include "ui_sloteditor.h"
 #include "ui_layereditor.h"
 #include "terrainlayerlistmodel.h"
 #include "brush.h"
 #include "campaignmanager.h"
 #include "ogrebase.h"
 #include "editorcamera.h"
+#include "sloteditor.h"
 
 class LayerEditor : public QDialog {
 public:
@@ -96,13 +98,16 @@ private:
     bool m_currentAltered;
 };
 
+
 class EditorWindow : public QMainWindow {
+    Q_OBJECT
 public:
     EditorWindow(QWidget* parent)
      : QMainWindow(parent),
        groupCursorMode(this),
        groupBrushMode(this),
-       layerEditor(this)
+       layerEditor(this),
+       slotEditor(this)
     {
         ui.setupUi(this);
         progressMessage = new QLabel(this);
@@ -158,6 +163,8 @@ public:
         connect(ui.actionCursorSelect, &QAction::triggered, [=](){ brush->setMode(Brush::M_NONE); });
 
         connect(ui.actionLayerEditor, &QAction::triggered, &layerEditor, &LayerEditor::open);
+        connect(ui.actionSlotEditor, &QAction::triggered, &slotEditor, &SlotEditor::setVisible);
+        connect(&slotEditor, &SlotEditor::close, [=](){ ui.actionSlotEditor->setChecked(false); });
 
         connect(ui.brushSize, SIGNAL(valueChanged(int)), brush, SLOT(setSize(int)));
         connect(ui.brushStrength, SIGNAL(valueChanged(int)), brush, SLOT(setStrength(int)));
@@ -195,6 +202,7 @@ public:
         
         campaign = new CampaignManager("/home/gregor/projekte/netsiege/testmedia/");
         campaign->initialize(513, 200);
+        slotEditor.populate();
         connect(campaign, &CampaignManager::initProgress, this, &EditorWindow::initProgress);
         connect(campaign, &CampaignManager::stepProgress, this, &EditorWindow::stepProgress);
         connect(campaign, &CampaignManager::doneProgress, this, &EditorWindow::doneProgress);
@@ -250,6 +258,7 @@ private:
     QActionGroup groupCursorMode;
     QActionGroup groupBrushMode;
     LayerEditor layerEditor;
+    SlotEditor slotEditor;
     QLabel* progressMessage;
     QProgressBar* progressBar;
     CampaignManager* campaign;
@@ -263,3 +272,5 @@ int main(int argc, char** argv)
     window.show();
     return app.exec();
 }
+
+#include "main.moc"

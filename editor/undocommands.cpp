@@ -195,3 +195,54 @@ void BlendmapEdit::applyDeltas(bool add)
     }
 }
 
+ModifyTerrainSlot::ModifyTerrainSlot(bool add, long int x, long int y)
+: QUndoCommand(), m_directionAdd(add), m_x(x), m_y(y)
+{
+}
+
+ModifyTerrainSlot::~ModifyTerrainSlot()
+{
+}
+
+void ModifyTerrainSlot::redo()
+{
+    if(m_directionAdd) add();
+    else remove();
+}
+
+void ModifyTerrainSlot::undo()
+{
+    if(m_directionAdd) remove();
+    else add();
+}
+
+void ModifyTerrainSlot::add()
+{
+    auto campaign = CampaignManager::getOpenDocument();
+    auto& definedSlots = campaign->m_definedTerrainSlots;
+    auto& group = campaign->m_group;
+    uint32_t packed = group->packIndex(m_x, m_y);
+    if(!campaign->isSlotDefined(m_x, m_y)) {
+        definedSlots.push_back(packed);
+    }
+    campaign->updateSlotBoundary();
+    group->defineTerrain(m_x, m_y, 0.0f);
+}
+
+void ModifyTerrainSlot::remove()
+{
+    auto campaign = CampaignManager::getOpenDocument();
+    auto& definedSlots = campaign->m_definedTerrainSlots;
+    auto& group = campaign->m_group;
+    uint32_t packed = group->packIndex(m_x, m_y);
+    for(size_t i=0; i<definedSlots.size(); i++) {
+        if(packed == definedSlots[i]) {
+            definedSlots.erase(definedSlots.begin() + i);
+        }
+    }
+    campaign->updateSlotBoundary();
+}
+
+
+
+

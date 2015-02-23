@@ -89,6 +89,23 @@ private:
     void applyDeltas(bool add);
 };
 
+class ModifyTerrainSlot : public QUndoCommand
+{
+public:
+    ModifyTerrainSlot(bool add, long x, long y);
+    ~ModifyTerrainSlot();
+
+    virtual void redo();
+    virtual void undo();
+private:
+    virtual void add();
+    virtual void remove();
+    bool m_directionAdd;
+    long m_x;
+    long m_y;
+
+};
+
 }
 
 #endif // UNDO_HEIGHTMAPEDIT_H

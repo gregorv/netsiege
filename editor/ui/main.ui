@@ -53,6 +53,7 @@
     </property>
     <addaction name="actionSettings"/>
     <addaction name="actionLayerEditor"/>
+    <addaction name="actionSlotEditor"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -514,6 +515,14 @@
   <action name="actionCampaign_Settings">
    <property name="text">
     <string>Campaign &amp;Settings</string>
+   </property>
+  </action>
+  <action name="actionSlotEditor">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Slot Editor</string>
    </property>
   </action>
  </widget>

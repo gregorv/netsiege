@@ -25,6 +25,7 @@
 #include <vector>
 #include <QObject>
 #include <OgreRectangle2D.h>
+#include "undocommands.h"
 
 namespace Ogre {
     class SceneManager;
@@ -38,6 +39,8 @@ class CampaignManager : public QObject
 {
     Q_OBJECT
 public:
+    friend undo::ModifyTerrainSlot;
+
     struct edited_tile_t {
         long x;
         long y;
@@ -62,6 +65,9 @@ public:
     static CampaignManager* getOpenDocument() { return s_openDocument; }
 
     bool isSlotDefined(long x, long y) const;
+    std::vector<uint32_t> getDefinedSlots() const { return m_definedTerrainSlots; }
+    Ogre::Rect getSlotBoundary() const;
+    void unpackSlotIndex(uint32_t key, long* x, long* y) const;
 
 signals:
     void initProgress(std::string, int, bool disable);
@@ -71,13 +77,15 @@ signals:
 private:
     static CampaignManager* s_openDocument;
 
+    void updateSlotBoundary();
+
     std::vector<edited_tile_t> m_editedTiles;
     std::string m_campaignPath;
     Ogre::SceneManager* m_sceneManager;
     std::unique_ptr<Ogre::TerrainGroup> m_group;
     std::unique_ptr<Ogre::PagedWorld> m_pagedWorld;
     std::unique_ptr<Ogre::TerrainPagedWorldSection> m_pagedTerrain;
-    Ogre::Rect m_terrainBoundary;
+    Ogre::Rect m_slotBoundary;
     std::vector<uint32_t> m_definedTerrainSlots;
 };
 
