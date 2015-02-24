@@ -25,6 +25,7 @@
 #include <vector>
 #include <QObject>
 #include <OgreRectangle2D.h>
+#include <boost/filesystem.hpp>
 #include "undocommands.h"
 
 namespace Ogre {
@@ -47,7 +48,7 @@ public:
         bool unpaged;
     };
 
-    CampaignManager(const std::string& campaignPath);
+    CampaignManager(const boost::filesystem::path& campaignPath);
     ~CampaignManager();
 
     void initialize(uint16_t terrainSize, float realWorldSize);
@@ -69,6 +70,10 @@ public:
     Ogre::Rect getSlotBoundary() const;
     void unpackSlotIndex(uint32_t key, long* x, long* y) const;
 
+    boost::filesystem::path getTileFilepath(long x, long y) const;
+    boost::filesystem::path getTmpTileFilepath(long x, long y) const;
+    boost::filesystem::path getWorldSceneFilepath() const;
+
 signals:
     void initProgress(std::string, int, bool disable);
     void stepProgress();
@@ -80,7 +85,7 @@ private:
     void updateSlotBoundary();
 
     std::vector<edited_tile_t> m_editedTiles;
-    std::string m_campaignPath;
+    boost::filesystem::path m_campaignPath;
     Ogre::SceneManager* m_sceneManager;
     std::unique_ptr<Ogre::TerrainGroup> m_group;
     std::unique_ptr<Ogre::PagedWorld> m_pagedWorld;

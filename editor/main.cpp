@@ -107,7 +107,8 @@ public:
        groupCursorMode(this),
        groupBrushMode(this),
        layerEditor(this),
-       slotEditor(this)
+       slotEditor(this),
+       campaign(nullptr)
     {
         ui.setupUi(this);
         progressMessage = new QLabel(this);
@@ -193,7 +194,27 @@ public:
         ui.cameraToolbar->addWidget(camLabel);
         ui.cameraToolbar->addWidget(camSpeedSpin);
 
-        connect(ui.actionSave, &QAction::triggered, [=](){ campaign->save(); });
+        connect(ui.actionNe, &QAction::triggered, [=](){
+            campaign = new CampaignManager("/home/gregor/projekte/netsiege/testmedia/");
+            campaign->initialize(513, 200);
+            slotEditor.populate();
+            connect(campaign, &CampaignManager::initProgress, this, &EditorWindow::initProgress);
+            connect(campaign, &CampaignManager::stepProgress, this, &EditorWindow::stepProgress);
+            connect(campaign, &CampaignManager::doneProgress, this, &EditorWindow::doneProgress);
+            OgreBase::getSingleton().getBrush()->setEnabled(true);
+            ui.actionSave->setEnabled(true);
+        });
+        connect(ui.actionOpen, &QAction::triggered, [=](){
+            campaign = new CampaignManager("/home/gregor/projekte/netsiege/testmedia/");
+            campaign->load();
+            slotEditor.populate();
+            connect(campaign, &CampaignManager::initProgress, this, &EditorWindow::initProgress);
+            connect(campaign, &CampaignManager::stepProgress, this, &EditorWindow::stepProgress);
+            connect(campaign, &CampaignManager::doneProgress, this, &EditorWindow::doneProgress);
+            OgreBase::getSingleton().getBrush()->setEnabled(true);
+            ui.actionSave->setEnabled(true);
+        });
+        connect(ui.actionSave, &QAction::triggered, [=](){ if(campaign) campaign->save(); });
 //         ui.cameraToolbar->addWidget(camSpeedSlider);
 
         auto layers = new TerrainLayerListModel;
@@ -202,13 +223,8 @@ public:
         auto model = new QStringListModel(list);
         ui.listView->setModel(layers);
 //         ui.listView_2->setModel(model);
-        
-        campaign = new CampaignManager("/home/gregor/projekte/netsiege/testmedia/");
-        campaign->initialize(513, 200);
-        slotEditor.populate();
-        connect(campaign, &CampaignManager::initProgress, this, &EditorWindow::initProgress);
-        connect(campaign, &CampaignManager::stepProgress, this, &EditorWindow::stepProgress);
-        connect(campaign, &CampaignManager::doneProgress, this, &EditorWindow::doneProgress);
+        OgreBase::getSingleton().getBrush()->setEnabled(false);
+        ui.actionSave->setEnabled(false);
     }
     void changeEvent(QEvent *e)
     {

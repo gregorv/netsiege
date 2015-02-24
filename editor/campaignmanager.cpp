@@ -21,6 +21,7 @@
 #include "ogrebase.h"
 #include "brush.h"
 #include "editableterrainpagedworldsection.h"
+#include "tinyxml.h"
 #include <boost/filesystem.hpp>
 #include <QApplication>
 #include <OgreRoot.h>
@@ -38,14 +39,14 @@ class TerrainDefiner : public Ogre::TerrainPagedWorldSection::TerrainDefiner
 public:
     virtual void define(Ogre::TerrainGroup* terrainGroup, long x, long y)
     {
-        std::string filename(terrainGroup->generateFilename(x, y));
-        std::string tmpfile("~"+filename);
+        auto filename = CampaignManager::getOpenDocument()->getTileFilepath(x, y);
+        auto tmpfile = CampaignManager::getOpenDocument()->getTmpTileFilepath(x, y);
         auto campaignManager = CampaignManager::getOpenDocument();
         if(campaignManager->isSlotDefined(x, y)) {
             if(boost::filesystem::exists(tmpfile)) {
-                terrainGroup->defineTerrain(x, y, tmpfile);
+                terrainGroup->defineTerrain(x, y, tmpfile.string());
             } else if(boost::filesystem::exists(filename)) {
-                terrainGroup->defineTerrain(x, y);
+                terrainGroup->defineTerrain(x, y, filename.string());
             } else {
                 terrainGroup->defineTerrain(x, y, 0.0f);
             }
@@ -55,7 +56,7 @@ public:
 
 CampaignManager* CampaignManager::s_openDocument = nullptr;
 
-CampaignManager::CampaignManager(const std::string& campaignPath)
+CampaignManager::CampaignManager(const boost::filesystem::path& campaignPath)
 : m_campaignPath(campaignPath)
 {
     if(s_openDocument) {
@@ -65,9 +66,8 @@ CampaignManager::CampaignManager(const std::string& campaignPath)
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_campaignPath.c_str(), "FileSystem", "campaign");
     m_sceneManager = OgreBase::getSingleton().getSceneManager();
     m_group.reset(new Ogre::TerrainGroup(m_sceneManager, Ogre::Terrain::ALIGN_X_Z, 127, 30.0f));
-    m_group->setFilenameConvention("qwertz", ".ter");
+    m_group->setFilenameConvention("tile", "ter");
 //     m_group->
-    auto terrainPaging = OgreBase::getSingleton().getTerrainPaging();
     auto pageManager = OgreBase::getSingleton().getPageManager();
     m_pagedWorld.reset(pageManager->createWorld());
 //     m_pagedTerrain.reset(terrainPaging->createWorldSection(m_pagedWorld.get(),
@@ -139,42 +139,68 @@ void CampaignManager::initialize(uint16_t terrainSize, float realWorldSize)
     m_group->setTerrainSize(terrainSize);
     m_group->setTerrainWorldSize(realWorldSize);
     m_definedTerrainSlots.push_back(m_group->packIndex(0, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(1, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(0, 1));
-    m_definedTerrainSlots.push_back(m_group->packIndex(-1, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(-2, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(-3, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(-4, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(-5, 0));
-    m_definedTerrainSlots.push_back(m_group->packIndex(-6, 0));
     updateSlotBoundary();
-//     m_group->defineTerrain(0, 0, 0.0f);
-//     m_group->defineTerrain(1, 0, 0.0f);
-//     m_group->defineTerrain(0, 1, 0.0f);
-//     m_group->defineTerrain(-1, 0, 0.0f);
-//     m_group->defineTerrain(-2, 0, 0.0f);
-//     m_group->defineTerrain(-3, 0, 0.0f);
-//     m_group->defineTerrain(-4, 0, 0.0f);
-//     m_group->defineTerrain(-5, 0, 0.0f);
-//     m_group->defineTerrain(-6, 0, 0.0f);
-    std::cout << "Load" << std::endl;
-//     m_group->loadAllTerrains(true);
-    std::cout << "Updage" << std::endl;
-//     m_group->update(true);
-    std::cout << "Save" << std::endl;
-//     m_group->saveAllTerrains(false);
-    std::cout << "Done" << std::endl;
     m_pagedTerrain->getGridStrategyData()->setCellSize(realWorldSize);
-//     m_group->unload();
 }
 
 void CampaignManager::load()
 {
+    TiXmlDocument worldScene;
+    worldScene.LoadFile(getWorldSceneFilepath().string());
+    auto sceneTag = worldScene.FirstChildElement();
+    assert(sceneTag->ValueStr() == "scene");
+    TiXmlElement* tilesTag = nullptr;
+    for(auto tag = sceneTag->FirstChildElement(); tag; tag = tag->NextSiblingElement()) {
+        if(tag->ValueStr() != "tiles") {
+            continue;
+        }
+        tilesTag = tag;
+        break;
+    }
 
+    Ogre::Terrain::ImportData& defaultimp = m_group->getDefaultImportSettings();
+    int terrainSize;
+    tilesTag->QueryIntAttribute("size", &terrainSize);
+    defaultimp.terrainSize = terrainSize;
+    tilesTag->QueryFloatAttribute("worldsize", &defaultimp.worldSize);
+    m_pagedTerrain->getGridStrategyData()->setCellSize(defaultimp.worldSize);
+    m_group->setTerrainSize(terrainSize);
+    m_group->setTerrainWorldSize(defaultimp.worldSize);
+
+    for(auto tileTag=tilesTag->FirstChildElement(); tileTag; tileTag = tileTag->NextSiblingElement()) {
+        int x,y;
+        tileTag->QueryIntAttribute("x", &x);
+        tileTag->QueryIntAttribute("y", &y);
+        m_definedTerrainSlots.push_back(m_group->packIndex(x, y));
+    }
+    updateSlotBoundary();
+    assert(m_definedTerrainSlots.size() > 0);
 }
 
 void CampaignManager::save()
 {
+    auto slotFilePath = getWorldSceneFilepath();
+    std::cout << "Slot file: " << slotFilePath << std::endl;
+    TiXmlDocument doc;
+    TiXmlDeclaration * decl = new TiXmlDeclaration( "1.0", "", "" );
+    TiXmlElement* tagScene = new TiXmlElement("scene");
+    TiXmlElement* tagTiles = new TiXmlElement("tiles");
+    Ogre::Terrain::ImportData& defaultimp = m_group->getDefaultImportSettings();
+    tagTiles->SetAttribute("size", defaultimp.terrainSize);
+    tagTiles->SetDoubleAttribute("worldsize", defaultimp.worldSize);
+    tagScene->LinkEndChild(tagTiles);
+    for(auto& idx: m_definedTerrainSlots) {
+        long x,y;
+        m_group->unpackIndex(idx, &x, &y);
+        TiXmlElement* tagTile = new TiXmlElement("tile");
+        tagTile->SetAttribute("x", x);
+        tagTile->SetAttribute("y", y);
+        tagTiles->LinkEndChild(tagTile);
+    }
+    doc.LinkEndChild(decl);
+    doc.LinkEndChild(tagScene);
+    doc.SaveFile(slotFilePath.c_str());
+
     emit initProgress(QApplication::translate("CampaignManager", "Waiting for terrain updates", 0).toStdString(), 0, true);
     while(m_group->isDerivedDataUpdateInProgress()) {
             OGRE_THREAD_SLEEP(25);
@@ -184,22 +210,45 @@ void CampaignManager::save()
     for(auto& edited: m_editedTiles) {
         auto ter = m_group->getTerrain(edited.x, edited.y);
         std::string filename = m_group->generateFilename(edited.x, edited.y);
+        auto filePath = getTileFilepath(edited.x, edited.y);
+        auto tmpFilePath = getTmpTileFilepath(edited.x, edited.y);
         if(ter) {
-            ter->save(filename);
-            if(boost::filesystem::exists("~"+filename)) {
-                boost::filesystem::remove("~"+filename);
+            ter->save(filePath.string());
+            if(boost::filesystem::exists(tmpFilePath)) {
+                boost::filesystem::remove(tmpFilePath);
             }
-        } else if(boost::filesystem::exists("~"+filename)) {
-            if(boost::filesystem::exists(filename)) {
-                boost::filesystem::remove(filename);
+        } else if(boost::filesystem::exists(tmpFilePath)) {
+            if(boost::filesystem::exists(filePath)) {
+                boost::filesystem::remove(filePath);
             }
-            boost::filesystem::rename("~"+filename, filename);
+            boost::filesystem::rename(tmpFilePath, filePath);
         }
         emit stepProgress();
     }
     m_editedTiles.clear();
     emit doneProgress();
 }
+
+boost::filesystem::path CampaignManager::getWorldSceneFilepath() const
+{
+    auto path = m_campaignPath; path /= "world/world.scene";
+    return path;
+}
+
+boost::filesystem::path CampaignManager::getTileFilepath(long int x, long int y) const
+{
+    std::string filename = m_group->generateFilename(x, y);
+    auto path = m_campaignPath; path /= "world"; path /= filename;
+    return path;
+}
+
+boost::filesystem::path CampaignManager::getTmpTileFilepath(long int x, long int y) const
+{
+    std::string filename = m_group->generateFilename(x, y);
+    auto path = m_campaignPath; path /= "world"; path /= "~"+filename;
+    return path;
+}
+
 
 void CampaignManager::clearAllTileModified()
 {
