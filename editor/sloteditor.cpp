@@ -21,20 +21,28 @@
 #include "campaignmanager.h"
 #include "undocommands.h"
 #include "ogrebase.h"
+#include <sstream>
 
 
 SlotWidget::SlotWidget(long int x, long int y): QPushButton(), m_x(x), m_y(y), m_defined(false)
 {
     connect(this, &SlotWidget::clicked, this, &SlotWidget::myClicked);
+    std::ostringstream stream;
+    stream << m_x << " " << m_y;
+    setText(stream.str().c_str());
 }
 
 void SlotWidget::setDefined(bool defined)
 {
     m_defined = defined;
     if(m_defined) {
-        setText("TER");
+        std::ostringstream stream;
+        stream << "X" << m_x << " " << m_y << "X";
+        setText(stream.str().c_str());
     } else {
-        setText("");
+        std::ostringstream stream;
+        stream << m_x << " " << m_y;
+        setText(stream.str().c_str());
     }
 }
 

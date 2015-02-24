@@ -21,6 +21,7 @@
 #include "editorcamera.h"
 #include "brush.h"
 #include "editableterrainpagedworldsection.h"
+#include "terrainmaterial.h"
 
 #include <OgreRoot.h>
 #include <OgreSceneManager.h>
@@ -57,6 +58,14 @@ OgreBase::OgreBase(QWidget* window)
     QObject::connect(m_updateTimer, &QTimer::timeout, [=]() { this->viewUpdate(); });
     m_camera->setUpdateInterval(interval_ms/1000.0f);
 
+    // Init custom materialgenerator
+    Ogre::TerrainMaterialGeneratorPtr terrainMaterialGenerator;
+
+    // Set Ogre Material  with the name "TerrainMaterial" in constructor
+    TerrainMaterial *terrainMaterial = OGRE_NEW TerrainMaterial("TerrainMaterial");
+    terrainMaterialGenerator.bind(terrainMaterial);
+
+
     auto globalOptions = OGRE_NEW Ogre::TerrainGlobalOptions();
     globalOptions->setMaxPixelError(8);
     globalOptions->setCompositeMapAmbient(Ogre::ColourValue(0.1f, 0.1f, 0.1f, 1.0f));
@@ -65,6 +74,7 @@ OgreBase::OgreBase(QWidget* window)
     globalOptions->setCompositeMapDistance(1.0f);
     globalOptions->setCompositeMapSize(128);
     globalOptions->setSkirtSize(2.0f);
+    globalOptions->setDefaultMaterialGenerator(terrainMaterialGenerator);
 
 
     m_pageManager = new Ogre::PageManager;

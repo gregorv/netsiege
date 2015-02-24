@@ -91,7 +91,7 @@ CampaignManager::CampaignManager(const boost::filesystem::path& campaignPath)
     defaultimp.maxBatchSize = 65;
     defaultimp.constantHeight = 0.0f;
 
-    defaultimp.layerList.resize(5);
+    defaultimp.layerList.resize(6);
     defaultimp.layerList[0].worldSize = 10;
     defaultimp.layerList[0].textureNames.push_back("checkers.png");
     defaultimp.layerList[0].textureNames.push_back("checkers_normal.png");
@@ -113,9 +113,9 @@ CampaignManager::CampaignManager(const boost::filesystem::path& campaignPath)
     defaultimp.layerList[4].textureNames.push_back("CliffRock.JPG");
     defaultimp.layerList[4].textureNames.push_back("CliffRock_N.jpg");
 
-//     defaultimp.layerList[5].worldSize = 5;
-//     defaultimp.layerList[5].textureNames.push_back("Ancient Flooring.JPG");
-//     defaultimp.layerList[5].textureNames.push_back("Ancient Flooring_N.jpg");
+    defaultimp.layerList[5].worldSize = 5;
+    defaultimp.layerList[5].textureNames.push_back("Ancient Flooring.JPG");
+    defaultimp.layerList[5].textureNames.push_back("Ancient Flooring_N.jpg");
 
 //     defaultimp.layerList[6].worldSize = 5;
 //     defaultimp.layerList[6].textureNames.push_back("Boards.JPG");
