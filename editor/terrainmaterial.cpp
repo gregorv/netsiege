@@ -66,6 +66,7 @@ Ogre::MaterialPtr TerrainMaterial::Profile::generate(const Ogre::Terrain* terrai
 
     // Set Ogre material
     mat = Ogre::MaterialManager::getSingleton().getByName(parent->mMaterialName);
+
     assert(mat.get());
 
     // Clone material
