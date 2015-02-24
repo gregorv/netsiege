@@ -26,6 +26,7 @@
 #include <cassert>
 #include <algorithm>
 #include "campaignmanager.h"
+#include "ogrebase.h"
 
 using namespace undo;
 
@@ -172,9 +173,8 @@ void BlendmapEdit::applyDeltas(bool add)
         CampaignManager::getOpenDocument()->setTileModified(change.x, change.y);
         if(!terrain) {
             unload = true;
-            m_terrainGroup->defineTerrain(change.x, change.y);
-            m_terrainGroup->loadTerrain(change.x, change.y, true);
-            terrain = m_terrainGroup->getTerrain(change.x, change.y);
+            terrain = new Ogre::Terrain(OgreBase::getSingleton().getSceneManager());
+            terrain->prepare(CampaignManager::getOpenDocument()->getTileFilepath(change.x, change.y).string());
         }
         auto layer = terrain->getLayerBlendMap(m_layerIndex);
         auto layerSize = terrain->getLayerBlendMapSize();
@@ -187,13 +187,14 @@ void BlendmapEdit::applyDeltas(bool add)
             for(size_t i=0; i<change.delta_map.size(); i++)
                 heightmap[i] -= change.delta_map[i];
         }
-        terrain->dirty();
+        layer->dirty();
         if(unload) {
-            terrain->update(true);
+            layer->update();
             terrain->save(m_terrainGroup->generateFilename(change.x, change.y));
             terrain->unload();
+            delete terrain;
         } else {
-            terrain->update();
+            layer->update();
         }
     }
 }
