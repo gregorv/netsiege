@@ -21,6 +21,7 @@
 #include "ogrebase.h"
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
+#include <OgreTerrainGroup.h>
 
 Walker::Walker(const std::string& name)
 : m_node(nullptr), m_entity(nullptr), m_animationState(nullptr),
@@ -79,8 +80,9 @@ void Walker::setPointList(const std::deque< Ogre::Vector3 >& pointList)
     m_pointList = pointList;
 }
 
-void Walker::update(float dt)
+void Walker::update(float dt, Ogre::TerrainGroup* group)
 {
+    assert(group != nullptr);
     if(m_animationState) {
         m_animationState->addTime(dt*m_speedFactor);
     }
@@ -100,6 +102,19 @@ void Walker::update(float dt)
                 stop();
             }
         }
+        if(group) {
+            auto pos = m_node->getPosition();
+            pos.y = group->getHeightAtWorldPosition(pos);
+            m_node->setPosition(pos);
+        }
+        Ogre::Quaternion orient(m_node->getOrientation());
+        auto currentDir = orient.xAxis();
+        currentDir.y = dir.y = 0;
+//         orient = orient * currentDir.getRotationTo(dir);
+//         orient.getYaw();
+        auto yawDelta = currentDir.getRotationTo(dir).getYaw();
+        orient = orient * Ogre::Quaternion(yawDelta*0.4f, Ogre::Vector3::UNIT_Y);
+        m_node->setOrientation(orient);
     }
 }
 

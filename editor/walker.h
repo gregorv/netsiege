@@ -28,6 +28,7 @@ namespace Ogre {
     class SceneNode;
     class Entity;
     class AnimationState;
+    class TerrainGroup;
 }
 
 class Walker
@@ -47,7 +48,7 @@ public:
     virtual void stop();
     virtual void addPoint(const Ogre::Vector3& point);
     virtual void setPointList(const std::deque<Ogre::Vector3>& pointList);
-    virtual void update(float dt);
+    virtual void update(float dt, Ogre::TerrainGroup* group);
     virtual Ogre::Vector3 getPosition() const;
 
 protected:
