@@ -148,6 +148,8 @@ public:
 
         auto camLabel = new QLabel(QApplication::translate("EditorWindow", "Cam Speed", 0), nullptr);
         auto camSpeedSpin = new QDoubleSpinBox(nullptr);
+        auto walkerButton = new QPushButton(nullptr);
+        walkerButton->setCheckable(true);
         camSpeedSpin->setMaximum(100);
         camSpeedSpin->setMinimum(1.0);
         camSpeedSpin->setValue(10);
@@ -156,6 +158,7 @@ public:
 //         auto camSpeedSlider = new QSlider(Qt::Horizontal, nullptr);
 //         connect(camSpeedSlider, SIGNAL(valueChanged(int)), camSpeedSpin, SLOT(setValue(double)));
         camera->setSpeed(camSpeedSpin->value());
+        connect(walkerButton, &QPushButton::toggled, [=](bool enabled){ camera->setWalkerMode(enabled); });
         connect(camSpeedSpin, SIGNAL(valueChanged(double)), camera, SLOT(setSpeed(double)));
         connect(ui.actionLayerPaint, &QAction::triggered, [=](){ brush->setMode(Brush::M_LAYER_PAINT); });
         connect(ui.actionTerrainRaiseLower, &QAction::triggered, [=](){ brush->setMode(Brush::M_HEIGHT_RAISE); });
@@ -193,6 +196,7 @@ public:
 
         ui.cameraToolbar->addWidget(camLabel);
         ui.cameraToolbar->addWidget(camSpeedSpin);
+        ui.cameraToolbar->addWidget(walkerButton);
 
         connect(ui.actionNe, &QAction::triggered, [=](){
             campaign = new CampaignManager("/home/gregor/projekte/netsiege/testmedia/");
