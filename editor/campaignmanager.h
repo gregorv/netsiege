@@ -73,6 +73,7 @@ public:
     boost::filesystem::path getTileFilepath(long x, long y) const;
     boost::filesystem::path getTmpTileFilepath(long x, long y) const;
     boost::filesystem::path getWorldSceneFilepath() const;
+    Ogre::TerrainGroup* getTerrainGroup() const { return m_group.get(); }
 
 signals:
     void initProgress(std::string, int, bool disable);

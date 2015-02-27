@@ -20,6 +20,8 @@
 #ifndef EDITORCAMERA_H
 #define EDITORCAMERA_H
 
+#include "walker.h"
+#include "walkercamera.h"
 #include <OgreVector2.h>
 #include <OgreMath.h>
 #include <QObject>
@@ -30,7 +32,7 @@ namespace Ogre {
 class QKeyEvent;
 class QMouseEvent;
 
-class EditorCamera : public QObject
+class EditorCamera : public QObject, protected Walker, protected WalkerCamera
 {
     Q_OBJECT
 public:
@@ -67,9 +69,11 @@ public:
     bool isMouseInWindow() const;
     Ogre::Ray getPickRay() const;
 
-    Ogre::Camera* getCamera() { return m_camera; }
+    Ogre::Camera* getCamera() const { return WalkerCamera::getCamera(); }
 
     void setUpdateInterval(float dt) { m_dt = dt; }
+
+    void setWalkerMode(bool enabled);
 
 public slots:
     void setSpeed(double speed) { m_speed = speed; }
@@ -86,6 +90,7 @@ private:
     Ogre::Radian m_pitch;
     Ogre::Radian m_yaw;
     float m_dt;
+    bool m_walkerMode;
 };
 
 #endif // EDITORCAMERA_H
