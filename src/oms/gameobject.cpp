@@ -28,7 +28,7 @@
 
 namespace oms {
 
-id_t GameObject::nextId = 0;
+GameObject::id_t GameObject::nextId = 0;
 
 GameObject::GameObject(std::shared_ptr<asIScriptObject> scriptObject, const GameObject::scriptObjectInfo_t& info, const std::string& name)
 : GameObject(nextId++, scriptObject, info, name)

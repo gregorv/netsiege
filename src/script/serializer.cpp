@@ -219,7 +219,7 @@ bool Serializer::deserializeProperty(const pb::Property& source, asIScriptObject
 
 bool Serializer::registerClass(const std::string& className, const std::string& properties)
 {
-
+	return true;
 }
 
 std::vector< std::string > Serializer::getPropertyList(const std::string& properties) const

@@ -25,9 +25,24 @@
 #include "campaign/clientlogic.h"
 #include "debug/ndebug.h"
 #include <Ogre.h>
+#if defined(_WIN32) || defined(WIN32)
+#include <Windows.h>
+#endif // WIN32
 
-int main(int argc, char **argv) {
+#ifdef __cplusplus
+extern "C" {
+#endif // __cplusplus
 
+#if defined(_WIN32) || defined(WIN32)
+INT WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT)
+{
+    udp::endpoint serverEndpoint;
+    boost::asio::ip::address addr(boost::asio::ip::address::from_string("127.0.0.1"));
+    serverEndpoint.address(addr);
+    serverEndpoint.port(6370);
+#else
+int main(int argc, char **argv)
+{
     if(argc != 3) {
         std::cerr << argv[0] << " ServerIpV4 Port" << std::endl;
         return -1;
@@ -37,6 +52,7 @@ int main(int argc, char **argv) {
     boost::asio::ip::address addr(boost::asio::ip::address::from_string(argv[1]));
     serverEndpoint.address(addr);
     serverEndpoint.port(atoi(argv[2]));
+#endif
     Ogre::Root root;
     nDebug << "ResourceGroupManager Pointer: " << std::hex << Ogre::ResourceGroupManager::getSingletonPtr() << std::dec << std::endl;
     new script::ScriptFileManager;
@@ -69,7 +85,11 @@ int main(int argc, char **argv) {
         while(1) {
             logic->step(0.1);
             client.poll();
+#if defined(_WIN32) || defined(WIN32)
+            Sleep(1);
+#else
             usleep(1000);
+#endif // WIN32
         }
     } else {
         nDebug << "Join request failed :(" << std::endl;
@@ -77,3 +97,7 @@ int main(int argc, char **argv) {
     delete Ogre::ResourceGroupManager::getSingleton()._getResourceManager("ScriptFile");
     return 0;
 }
+
+#ifdef __cplusplus
+}
+#endif // __cplusplus

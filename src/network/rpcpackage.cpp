@@ -57,14 +57,14 @@ int RPCPackage::RegisterType(std::shared_ptr< asIScriptEngine > engine)
     r = engine->RegisterObjectMethod("RPCPackage", "bool push(const string)", asMETHODPR(RPCPackage, push, (const std::string), bool), asCALL_THISCALL);
     assert(r >= 0);
 
-    r = engine->RegisterObjectMethod("RPCPackage", "uint8 uint8Pop()", asMETHOD(RPCPackage, popValue<uint8_t>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "int8 int8Pop()", asMETHOD(RPCPackage, popValue<int8_t>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "uint16 uint16Pop()", asMETHOD(RPCPackage, popValue<uint16_t>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "int16 int16Pop()", asMETHOD(RPCPackage, popValue<int16_t>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "uint32 uint32Pop()", asMETHOD(RPCPackage, popValue<uint32_t>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "int32 int32Pop()", asMETHOD(RPCPackage, popValue<int32_t>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "float floatPop()", asMETHOD(RPCPackage, popValue<float>), asCALL_THISCALL); assert(r >= 0);
-    r = engine->RegisterObjectMethod("RPCPackage", "double doublePop()", asMETHOD(RPCPackage, popValue<double>), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "uint8 uint8Pop()", asMETHOD(RPCPackage, popUint8), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "int8 int8Pop()", asMETHOD(RPCPackage, popInt8), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "uint16 uint16Pop()", asMETHOD(RPCPackage, popUint16), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "int16 int16Pop()", asMETHOD(RPCPackage, popInt16), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "uint32 uint32Pop()", asMETHOD(RPCPackage, popUint32), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "int32 int32Pop()", asMETHOD(RPCPackage, popInt32), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "float floatPop()", asMETHOD(RPCPackage, popFloat), asCALL_THISCALL); assert(r >= 0);
+    r = engine->RegisterObjectMethod("RPCPackage", "double doublePop()", asMETHOD(RPCPackage, popDouble), asCALL_THISCALL); assert(r >= 0);
     r = engine->RegisterObjectMethod("RPCPackage", "string strPop()", asMETHOD(RPCPackage, popString), asCALL_THISCALL); assert(r >= 0);
 
     r = engine->RegisterObjectMethod("RPCPackage", "uint16 rpcId()", asMETHOD(RPCPackage, rpcId), asCALL_THISCALL); assert(r >= 0);

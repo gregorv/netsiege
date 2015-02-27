@@ -175,7 +175,13 @@ bool RPCDispatcher::addRpcHandler(uint16_t client_id, rpc_id_t id, RPCDispatcher
                    << std::endl;
         return false;
     }
-    m_handlers[id] = handler_t { id, 0, 0, function, argspec, client_id };
+    // m_handlers[id] = handler_t { id, 0, 0, function, argspec, client_id };
+	m_handlers[m_nextHandlerId].id = id;
+	m_handlers[m_nextHandlerId].function = 0;
+	m_handlers[m_nextHandlerId].object = 0;
+	m_handlers[m_nextHandlerId].cppFunction = function;
+	m_handlers[m_nextHandlerId].argSpec = argspec;
+	m_handlers[m_nextHandlerId].client_id = client_id;
     return true;
 }
 
@@ -210,7 +216,13 @@ RPCDispatcher::handler_id_t RPCDispatcher::addRpcHandler(uint16_t client_id, rpc
                    << std::endl;
         return 0;
     }
-    m_handlers[m_nextHandlerId] = handler_t { id, function, 0, 0, argspec, client_id };
+    // m_handlers[m_nextHandlerId] = handler_t { id, function, 0, 0, argspec, client_id };
+	m_handlers[m_nextHandlerId].id = id;
+	m_handlers[m_nextHandlerId].function = function;
+	m_handlers[m_nextHandlerId].object = 0;
+	// m_handlers[m_nextHandlerId].cppFunction = 0;
+	m_handlers[m_nextHandlerId].argSpec = argspec;
+	m_handlers[m_nextHandlerId].client_id = client_id;
     return m_nextHandlerId++;
 }
 
@@ -243,7 +255,13 @@ RPCDispatcher::handler_id_t RPCDispatcher::addRpcHandler(uint16_t client_id, rpc
                   << "::" << funcname << "', argspec '" << argspec << "'" << std::endl;
         return 0;
     }
-    m_handlers[m_nextHandlerId] = handler_t { id, function, object, 0, argspec, client_id };
+    // m_handlers[m_nextHandlerId] = handler_t { id, function, object, 0, argspec, client_id };
+	m_handlers[m_nextHandlerId].id = id;
+	m_handlers[m_nextHandlerId].function = function;
+	m_handlers[m_nextHandlerId].object = object;
+	// m_handlers[m_nextHandlerId].cppFunction = 0;
+	m_handlers[m_nextHandlerId].argSpec = argspec;
+	m_handlers[m_nextHandlerId].client_id = client_id;
     return m_nextHandlerId++;
 }
 

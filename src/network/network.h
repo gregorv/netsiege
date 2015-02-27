@@ -58,8 +58,8 @@ const float SYNC_PERIOD = 0.1f;
 
 typedef std::array<char, MAX_PACKAGE_SIZE> package_buffer_t;
 typedef std::array<char, MAX_RPC_DATA_SIZE> rpc_data_t;
-typedef std::chrono::time_point<std::chrono::steady_clock> steady_time_point_t;
-typedef std::chrono::duration<std::chrono::steady_clock> steady_time_duration_t;
+typedef std::chrono::steady_clock::time_point steady_time_point_t;
+typedef std::chrono::steady_clock::duration steady_time_duration_t;
 
 typedef uint16_t seq_id_t;
 const seq_id_t MAX_SEQ_ID = 0xFFFF;

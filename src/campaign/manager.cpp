@@ -66,12 +66,12 @@ bool Manager::loadCampaignPath()
         zipPath /= (m_campaignName+".zip");
         if(exists(dirPath) && is_directory(dirPath)) {
             m_path = dirPath;
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_path.c_str(), "FileSystem", m_campaignName);
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_path.string(), "FileSystem", m_campaignName);
             return true;
         }
         if(exists(zipPath) && is_regular_file(zipPath)) {
             m_path = zipPath;
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_path.c_str(), "Zip", m_campaignName);
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(m_path.string(), "Zip", m_campaignName);
             return true;
         }
     }

@@ -68,7 +68,7 @@ int NetworkServer::RegisterNetworkSystem(std::shared_ptr< script::ScriptEngine >
 }
 
 NetworkServer::NetworkServer(const udp::endpoint& interface)
-: m_ioservice(), m_syncTimer(m_ioservice, boost::posix_time::milliseconds(SYNC_PERIOD*1000.0)),
+: m_ioservice(), m_syncTimer(m_ioservice, boost::posix_time::milliseconds(static_cast<int64_t>(SYNC_PERIOD*1000.0))),
   m_callbackTimer(m_ioservice, boost::posix_time::milliseconds(2000)),
   m_signals(m_ioservice, SIGINT, SIGTERM),
   m_socket(m_ioservice, interface)
@@ -102,7 +102,7 @@ void NetworkServer::setTimeoutCallback(float timeout, NetworkServer::timeoutCall
 {
     m_callbackTimerTimeout = timeout;
     m_callback = callback;
-    m_callbackTimer.expires_from_now(boost::posix_time::milliseconds(m_callbackTimerTimeout*1000.0));
+    m_callbackTimer.expires_from_now(boost::posix_time::milliseconds(static_cast<int64_t>(m_callbackTimerTimeout*1000.0)));
     m_callbackTimer.async_wait(boost::bind(&NetworkServer::handle_timeoutCallback, this));
 }
 
@@ -117,7 +117,7 @@ void NetworkServer::send(const udp::endpoint& remoteEndpoint, const package_buff
         remoteEndpoint,
         boost::bind(&NetworkServer::handle_send, this,
             boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred(),
+            boost::asio::placeholders::bytes_transferred,
             nBytes
         )
     );
@@ -131,7 +131,7 @@ void NetworkServer::listen()
         m_remoteEndpoint,
         boost::bind(&NetworkServer::handle_receive, this,
             boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred()
+            boost::asio::placeholders::bytes_transferred
         )
     );
 }
@@ -174,7 +174,7 @@ void NetworkServer::sync()
         }
     }
     m_objectManager->flushUpdateCache();
-    m_syncTimer.expires_from_now(boost::posix_time::milliseconds(SYNC_PERIOD*1000.0));
+    m_syncTimer.expires_from_now(boost::posix_time::milliseconds(static_cast<int64_t>(SYNC_PERIOD*1000.0)));
     m_syncTimer.async_wait(boost::bind(&NetworkServer::syncTimeout, this));
     closeDeadConnections();
 }
@@ -201,7 +201,7 @@ void NetworkServer::handle_send(const boost::system::error_code& error, std::siz
 void NetworkServer::handle_timeoutCallback()
 {
     m_callback();
-    m_callbackTimer.expires_from_now(boost::posix_time::milliseconds(m_callbackTimerTimeout*1000.0));
+    m_callbackTimer.expires_from_now(boost::posix_time::milliseconds(static_cast<int64_t>(m_callbackTimerTimeout*1000.0)));
     m_callbackTimer.async_wait(boost::bind(&NetworkServer::handle_timeoutCallback, this));
 }
 

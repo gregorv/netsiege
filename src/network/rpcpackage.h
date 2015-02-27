@@ -69,6 +69,14 @@ public:
         m_readOffset += sizeof(T);
         return val;
     }
+    uint8_t popUint8() { return popValue<uint8_t>(); }
+    int8_t popInt8() { return popValue<int8_t>(); }
+    uint16_t popUint16() { return popValue<uint16_t>(); }
+    int16_t popInt16() { return popValue<int16_t>(); }
+    uint32_t popUint32() { return popValue<uint32_t>(); }
+    int32_t popInt32() { return popValue<int32_t>(); }
+    float popFloat() { return popValue<float>(); }
+    double popDouble() { return popValue<double>(); }
     std::string popString();
 
     void AddRef();

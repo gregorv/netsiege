@@ -60,7 +60,7 @@ void NetworkClient::listen()
         m_remoteEndpoint,
         boost::bind(&NetworkClient::handle_receive, this,
             boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred()
+            boost::asio::placeholders::bytes_transferred
         )
     );
 }
@@ -74,7 +74,7 @@ void NetworkClient::send(const udp::endpoint& remoteEndpoint, const package_buff
         remoteEndpoint,
         boost::bind(&NetworkClient::handle_send, this,
             boost::asio::placeholders::error,
-            boost::asio::placeholders::bytes_transferred(),
+            boost::asio::placeholders::bytes_transferred,
             package.size()
             )
     );

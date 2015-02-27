@@ -27,6 +27,7 @@
 #include <exception>
 #include <cstring>
 #include <map>
+#include <functional>
 
 class asIScriptFunction;
 class asIScriptGeneric;

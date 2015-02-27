@@ -8,7 +8,7 @@ set(BUILD_EDITOR TRUE CACHE BOOL "Build Netsiege Editor. Requires Qt5.")
 set(PERMANENTLY_DISABLE_DEBUG_OUTPUT FALSE CACHE BOOL "Permanently disable debug output. Might be useful. Might be not useful.")
 set(PROTOBUF_COMPILER "/usr/bin/protoc" CACHE STRING "Google Protocol Buffer compiler, required for building netsiege.")
 
- 
+
 if(BUILD_TESTS)
 	find_package(Qt5 REQUIRED Core Test)
 	enable_testing()
@@ -16,7 +16,7 @@ endif(BUILD_TESTS)
 
 
 find_package(OGRE REQUIRED)
-find_package(OIS REQUIRED)
+#find_package(OIS REQUIRED)
 find_package(Protobuf REQUIRED)
 find_package(Boost REQUIRED system filesystem)
 
@@ -27,7 +27,12 @@ else()
 endif(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "MinSizeRel" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
 
 CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/src/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/config.h)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11 -Wall -Wno-deprecated-register -DAS_CAN_USE_CPP11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DAS_CAN_USE_CPP11")
+if(WIN32)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D_WIN32_WINNT=0x0601")
+else(WIN32)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-register --std=c++11 -Wall ")
+endif(WIN32)
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${OGRE_INCLUDE_DIRS})
 include_directories(${OGRE_Terrain_INCLUDE_DIRS})
@@ -37,6 +42,8 @@ include_directories(${PROTOBUF_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 link_directories(${OGRE_LIBRARY_DIRS})
 link_directories(${PROTOBUF_INCLUDE_DIRS})
+
+message(STATUS "-+-+-++-+ ${OGRE_LIBRARIES}")
 
 
 if(BUILD_EDITOR)
@@ -63,6 +70,7 @@ add_subdirectory(src)
 
 
 add_executable(netsiege src/main.cpp)
+message(STATUS "${netsiege_LIBRARIES}")
 target_link_libraries(netsiege ${netsiege_LIBRARIES})
 
 add_executable(netsiege-server src/server.cpp)
