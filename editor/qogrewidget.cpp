@@ -31,11 +31,11 @@
 
 
 QOgreWidget::QOgreWidget(Ogre::Root* ogreRoot, IOgreEventHandler *ogreEventHandler, QWidget* parent) : 
-  QGLWidget(parent), 
-  mOgreEventHandler(ogreEventHandler),
-  mOgreRoot(ogreRoot), 
-  mOgreRenderWindow(NULL) {
-      
+  QGLWidget(parent),
+  mOgreRoot(ogreRoot),
+  mOgreRenderWindow(NULL),
+  mOgreEventHandler(ogreEventHandler)
+{
     if (!parent) {
         throw std::runtime_error("Parent widget supplied was uninitialised!"); // interface requirement
     }

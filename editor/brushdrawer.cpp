@@ -24,6 +24,8 @@
 #define NUM_SEGMENTS 64
 #define Y_OFFSET 0.1f
 
+Ogre::String s_movableType("EditBrush");
+
 BrushDrawer::BrushDrawer(const Ogre::String& name, Ogre::TerrainGroup* group)
 : ManualObject(name), m_group(group), m_marker(false)
 {
@@ -60,7 +62,7 @@ BrushDrawer::BrushDrawer(const Ogre::String& name, Ogre::TerrainGroup* group)
 
 const Ogre::String& BrushDrawer::getMovableType(void ) const
 {
-    return Ogre::String("EditBrush");
+    return s_movableType;
 }
 
 void BrushDrawer::setBrushOptions(float size, float hardness, float height)

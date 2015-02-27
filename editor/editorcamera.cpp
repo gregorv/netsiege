@@ -28,6 +28,7 @@
 EditorCamera::EditorCamera(Ogre::SceneManager* scenemgr)
  : QObject(nullptr), Walker("walkerCam"),
  WalkerCamera(scenemgr, nullptr, this),
+ m_camera(WalkerCamera::getCamera()),
  m_relMousePosition(0.0f, 0.0f),
  m_mouseDelta(0.0f, 0.0f),
  m_directions(EditorCamera::D_NONE),
@@ -37,8 +38,7 @@ EditorCamera::EditorCamera(Ogre::SceneManager* scenemgr)
  m_pitch(0.0f),
  m_yaw(0.0f),
  m_dt(0.0f),
- m_walkerMode(false),
- m_camera(WalkerCamera::getCamera())
+ m_walkerMode(false)
 {
     m_camera->setNearClipDistance(0.01f);
     m_camera->lookAt(0.0, 0.0, 0.0);

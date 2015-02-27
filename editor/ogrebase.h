@@ -39,7 +39,7 @@ class OgreBase : public IOgreEventHandler
 {
 public:
     OgreBase(QWidget* window);
-    ~OgreBase();
+    virtual ~OgreBase();
     virtual void ogreKeyReleaseEvent(QKeyEvent* event);
     virtual void ogreKeyPressEvent(QKeyEvent* event);
     virtual void ogreMouseMoveEvent(QMouseEvent* event);

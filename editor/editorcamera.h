@@ -61,7 +61,7 @@ public:
 
     void setPitch(float pitch) { m_pitch = Ogre::Radian(pitch); }
     void setYaw(float yaw) { m_yaw = Ogre::Radian(yaw); }
-    void setOrientation(float pitch, float yaw) { setPitch(pitch); setYaw(yaw); }
+    virtual void setOrientation(float pitch, float yaw) { setPitch(pitch); setYaw(yaw); }
 
     void addPitch(float pitch) { m_pitch += Ogre::Radian(pitch); }
     void addYaw(float yaw) { m_yaw += Ogre::Radian(yaw); }
@@ -77,7 +77,7 @@ public:
 
 public slots:
     void setSpeed(double speed) { m_speed = speed; }
-    void update();
+    virtual void update();
 
 private:
     Ogre::Camera* m_camera;

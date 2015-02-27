@@ -39,7 +39,7 @@
 OgreBase* OgreBase::s_singleton = nullptr;
 
 OgreBase::OgreBase(QWidget* window)
-: m_stack(new QUndoStack), m_window(window)
+: m_window(window), m_stack(new QUndoStack)
 {
     if(s_singleton) {
         throw std::runtime_error("Created second OgreBase object! Supposed to be singleton...");

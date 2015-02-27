@@ -44,7 +44,7 @@ add_definitions(${Qt5Widgets_DEFINITIONS})
 
 # Executables fail to build with Qt 5 in the default configuration
 # without -fPIE. We add that here.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5EXECUTABLE_COMPILE_FLAGS} -fPIC ")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5EXECUTABLE_COMPILE_FLAGS} -fPIC -Wno-overloaded-virtual")
 
 qt5_wrap_ui(UI_HEADERS ui/main.ui ui/layereditor.ui ui/new.ui ui/sloteditor.ui)
 

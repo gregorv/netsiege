@@ -31,7 +31,7 @@ class BrushDrawer : public Ogre::ManualObject
 {
 public:
     BrushDrawer(const Ogre::String& name, Ogre::TerrainGroup* group);
-    virtual const Ogre::String& getMovableType(void ) const;
+    const Ogre::String& getMovableType(void ) const;
     void setBrushOptions(float size, float hardness, float height);
     void setPosition(Ogre::Vector3 position);
     void showHeightMarker(bool show);

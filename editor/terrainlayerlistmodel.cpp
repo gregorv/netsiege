@@ -70,6 +70,7 @@ const TerrainLayer& TerrainLayerListModel::layer(const QModelIndex& idx) const
 {
     if(idx.row() < rowCount(idx))
         return m_layers[idx.row()];
+    return m_layers[0];
 }
 
 // QModelIndex TerrainLayerListModel::parent(const QModelIndex& child) const

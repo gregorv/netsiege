@@ -42,7 +42,7 @@ public:
         auto layers = new TerrainLayerListModel;
         QStringList list;
         list << "Hallo" << "Welt!" << ":D";
-        auto model = new QStringListModel(list);
+//         auto model = new QStringListModel(list);
         ui.layerList->setModel(layers);
         connect(ui.layerList, &QListView::activated, this, &LayerEditor::selectLayer);
         connect(ui.newLayerButton, &QPushButton::clicked, this, &LayerEditor::newLayer);
@@ -94,7 +94,7 @@ private:
         return true;
     }
     Ui_LayerEditor ui;
-    size_t m_currentLayerIdx;
+//     size_t m_currentLayerIdx;
     bool m_currentAltered;
 };
 
@@ -224,7 +224,7 @@ public:
         auto layers = new TerrainLayerListModel;
         QStringList list;
         list << "Hallo" << "Welt!" << ":D";
-        auto model = new QStringListModel(list);
+//         auto model = new QStringListModel(list);
         ui.listView->setModel(layers);
 //         ui.listView_2->setModel(model);
         OgreBase::getSingleton().getBrush()->setEnabled(false);
