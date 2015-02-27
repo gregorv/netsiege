@@ -126,3 +126,8 @@ void Walker::setAnimation(Walker::animation_t anim)
         m_animationState->setEnabled(true);
     }
 }
+
+Ogre::Vector3 Walker::getPosition() const
+{
+    return m_node->getPosition();
+}

@@ -48,6 +48,7 @@ public:
     virtual void addPoint(const Ogre::Vector3& point);
     virtual void setPointList(const std::deque<Ogre::Vector3>& pointList);
     virtual void update(float dt);
+    virtual Ogre::Vector3 getPosition() const;
 
 protected:
     virtual void setAnimation(animation_t anim);
