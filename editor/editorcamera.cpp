@@ -38,7 +38,6 @@ EditorCamera::EditorCamera(Ogre::SceneManager* scenemgr)
  m_speed(1.0f),
  m_pitch(0.0f),
  m_yaw(0.0f),
- m_dt(0.0f),
  m_walkerMode(false)
 {
     m_camera->setNearClipDistance(0.01f);
@@ -117,7 +116,7 @@ void EditorCamera::mouseRelease(QMouseEvent* ev)
     }
 }
 
-void EditorCamera::update()
+void EditorCamera::update(float dt)
 {
     if(m_rotation == R_ROTATE) {
         m_yaw -= Ogre::Radian(m_mouseDelta.x);
@@ -125,8 +124,8 @@ void EditorCamera::update()
         WalkerCamera::addOrientation(m_mouseDelta.y, m_mouseDelta.x);
     }
     if(m_walkerMode && CampaignManager::getOpenDocument()) {
-        Walker::update(m_dt, CampaignManager::getOpenDocument()->getTerrainGroup());
-        WalkerCamera::update(m_dt, CampaignManager::getOpenDocument()->getTerrainGroup());
+        Walker::update(dt, CampaignManager::getOpenDocument()->getTerrainGroup());
+        WalkerCamera::update(dt, CampaignManager::getOpenDocument()->getTerrainGroup());
 //         auto camRot = Ogre::Quaternion(-m_yaw, Ogre::Vector3::UNIT_Y) * Ogre::Quaternion(m_pitch, Ogre::Vector3::UNIT_Z) * Ogre::Vector3::UNIT_X;
 //         auto camPos = pos + camRot*20.0f;
 //         m_camera->setPosition(camPos);
@@ -140,16 +139,16 @@ void EditorCamera::update()
         auto pos = m_camera->getPosition();
         float speed = m_speedBoost? m_speed*5 : m_speed;
         if(m_directions & EditorCamera::D_FORWARD) {
-            pos += fwd*speed*m_dt;
+            pos += fwd*speed*dt;
         }
         if(m_directions & EditorCamera::D_BACKWARD) {
-            pos -= fwd*speed*m_dt;
+            pos -= fwd*speed*dt;
         }
         if(m_directions & EditorCamera::D_LEFT) {
-            pos -= left*speed*m_dt;
+            pos -= left*speed*dt;
         }
         if(m_directions & EditorCamera::D_RIGHT) {
-            pos += left*speed*m_dt;
+            pos += left*speed*dt;
         }
         if(m_directions & EditorCamera::D_PAN) {
             if(m_speedBoost) {

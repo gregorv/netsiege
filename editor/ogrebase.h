@@ -22,6 +22,7 @@
 
 #include "iogreeventhandler.hpp"
 #include <OgreVector2.h>
+#include <OgreFrameListener.h>
 
 namespace Ogre {
     class SceneManager;
@@ -35,7 +36,7 @@ class QUndoStack;
 class QTimer;
 class QWidget;
 
-class OgreBase : public IOgreEventHandler
+class OgreBase : public IOgreEventHandler, public Ogre::FrameListener
 {
 public:
     OgreBase(QWidget* window);
@@ -59,6 +60,8 @@ public:
     EditorCamera* getCamera() const { return m_camera; }
     QUndoStack* getStack() const { return m_stack; }
 
+    virtual bool frameStarted(const Ogre::FrameEvent& evt);
+    virtual bool frameEnded(const Ogre::FrameEvent& evt);
 
 private:
     void viewUpdate();

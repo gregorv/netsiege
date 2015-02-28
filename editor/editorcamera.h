@@ -71,13 +71,11 @@ public:
 
     Ogre::Camera* getCamera() const { return WalkerCamera::getCamera(); }
 
-    void setUpdateInterval(float dt) { m_dt = dt; }
-
     void setWalkerMode(bool enabled);
 
 public slots:
     void setSpeed(double speed) { m_speed = speed; }
-    virtual void update();
+    virtual void update(float dt);
 
 private:
     Ogre::Camera* m_camera;
@@ -89,7 +87,6 @@ private:
     float m_speed;
     Ogre::Radian m_pitch;
     Ogre::Radian m_yaw;
-    float m_dt;
     bool m_walkerMode;
 };
 
