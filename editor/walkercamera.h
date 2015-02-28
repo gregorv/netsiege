@@ -44,7 +44,10 @@ public:
     void setDistanceLimits(float minDist, float maxDist);
 
     void update(float dt, Ogre::TerrainGroup* group = nullptr);
-    
+
+    float getDistance() const { return m_dist; }
+    float getYaw() const { return m_yaw; }
+    float getPitch() const { return m_pitch; }
     Ogre::Camera* getCamera() const { return m_camera; }
 
 private:
