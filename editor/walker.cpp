@@ -103,11 +103,6 @@ void Walker::update(float dt, Ogre::TerrainGroup* group)
                 stop();
             }
         }
-        if(group) {
-            auto pos = m_node->getPosition();
-            pos.y = group->getHeightAtWorldPosition(pos);
-            m_node->setPosition(pos);
-        }
         Ogre::Quaternion orient(m_node->getOrientation());
         auto currentDir = orient.xAxis();
         currentDir.y = dir.y = 0;
@@ -116,6 +111,11 @@ void Walker::update(float dt, Ogre::TerrainGroup* group)
         auto yawDelta = currentDir.getRotationTo(dir).getYaw();
         orient = orient * Ogre::Quaternion(yawDelta*0.4f, Ogre::Vector3::UNIT_Y);
         m_node->setOrientation(orient);
+    }
+    if(group) {
+        auto pos = m_node->getPosition();
+        pos.y = group->getHeightAtWorldPosition(pos);
+        m_node->setPosition(pos);
     }
 }
 
