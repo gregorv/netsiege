@@ -46,6 +46,7 @@ OgreBase::OgreBase(QWidget* window)
     }
     s_singleton = this;
     m_sceneManager = Ogre::Root::getSingleton().createSceneManager(Ogre::ST_GENERIC, "");
+    Ogre::Root::getSingleton().addFrameListener(this);
     m_camera = new EditorCamera(m_sceneManager);
     m_brush = new Brush(nullptr, m_sceneManager, m_stack);
 
@@ -55,7 +56,6 @@ OgreBase::OgreBase(QWidget* window)
     m_updateTimer->setSingleShot(false);
     m_updateTimer->start();
     QObject::connect(m_updateTimer, &QTimer::timeout, [=]() { this->viewUpdate(); });
-    m_camera->setUpdateInterval(interval_ms/1000.0f);
 
     auto globalOptions = OGRE_NEW Ogre::TerrainGlobalOptions();
     globalOptions->setMaxPixelError(8);
@@ -174,7 +174,17 @@ void OgreBase::viewUpdate()
             m_brush->pointerUpdate(m_camera->getPickRay());
         }
     }
-    m_camera->update();
+}
+
+bool OgreBase::frameStarted(const Ogre::FrameEvent& evt)
+{
+    m_camera->update(evt.timeSinceLastFrame);
+    return true;
+}
+
+bool OgreBase::frameEnded(const Ogre::FrameEvent& evt)
+{
+    return true;
 }
 
 
