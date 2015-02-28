@@ -119,9 +119,13 @@ void EditorCamera::mouseRelease(QMouseEvent* ev)
 void EditorCamera::update(float dt)
 {
     if(m_rotation == R_ROTATE) {
-        m_yaw -= Ogre::Radian(m_mouseDelta.x);
-        m_pitch -= Ogre::Radian(m_mouseDelta.y);
-        WalkerCamera::addOrientation(m_mouseDelta.y, m_mouseDelta.x);
+        if(m_walkerMode) {
+            WalkerCamera::addOrientation(m_mouseDelta.y, m_mouseDelta.x);
+        } else {
+            m_yaw -= Ogre::Radian(m_mouseDelta.x);
+            m_pitch -= Ogre::Radian(m_mouseDelta.y);
+            m_pitch = Ogre::Math::Clamp<Ogre::Radian>(m_pitch, Ogre::Radian(-3.141f/2), Ogre::Radian(3.141f/2));
+        }
     }
     if(m_walkerMode && CampaignManager::getOpenDocument()) {
         Walker::update(dt, CampaignManager::getOpenDocument()->getTerrainGroup());
@@ -158,6 +162,7 @@ void EditorCamera::update(float dt)
             }
         }
         m_camera->setPosition(pos);
+        Walker::setPosition(pos + WalkerCamera::getDistance()*fwd);
     }
     m_mouseDelta = Ogre::Vector2::ZERO;
 }
@@ -181,6 +186,10 @@ void EditorCamera::setWalkerMode(bool enabled)
     m_walkerMode = enabled;
     m_node->setVisible(m_walkerMode);
     if(!m_walkerMode) {
+        m_yaw = Ogre::Radian(WalkerCamera::getYaw() + 3.141f);
+        m_pitch = -Ogre::Radian(WalkerCamera::getPitch());
         stop();
+    } else {
+        WalkerCamera::setOrientation(-m_pitch.valueRadians(), m_yaw.valueRadians() + 3.141f);
     }
 }
