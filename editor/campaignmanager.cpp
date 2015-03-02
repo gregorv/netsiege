@@ -31,6 +31,7 @@
 #include <OgreTerrainGroup.h>
 #include <OgreTerrainPaging.h>
 #include <OgreTerrainPagedWorldSection.h>
+#include <OgrePageManager.h>
 #include <OgreGrid2DPageStrategy.h>
 
 

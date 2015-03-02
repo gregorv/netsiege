@@ -39,6 +39,7 @@
 #include <OgreEntity.h>
 #include <OgreMovableObject.h>
 #include <OgreRoot.h>
+#include <OgreTextureManager.h>
 #include <Terrain/OgreTerrain.h>
 #include <Terrain/OgreTerrainGroup.h>
 

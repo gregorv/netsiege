@@ -21,6 +21,7 @@
 #include "ogrebase.h"
 #include <OgreSceneManager.h>
 #include <OgreEntity.h>
+#include <OgreSceneNode.h>
 #include <OgreTerrainGroup.h>
 
 Walker::Walker(const std::string& name)

@@ -21,6 +21,7 @@
 #include "campaignmanager.h"
 #include <OgreCamera.h>
 #include <OgreSceneManager.h>
+#include <OgreSceneNode.h>
 #include <OgreTerrainGroup.h>
 #include <QKeyEvent>
 #include <QMouseEvent>

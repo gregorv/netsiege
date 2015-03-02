@@ -23,6 +23,7 @@
 #include <cassert>
 #include <OgreMath.h>
 #include <OgreTerrainGroup.h>
+#include <OgreCamera.h>
 
 WalkerCamera::WalkerCamera(Ogre::SceneManager* sceneMgr, Ogre::Camera* camera, Walker* walker)
 :m_camera(camera), m_externalCamera(true),
