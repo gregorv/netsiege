@@ -60,11 +60,12 @@ EditorViewWidget::EditorViewWidget(QWidget *parent)
     Ogre::RenderSystemList::const_iterator availableRendererIt = m_root->getAvailableRenderers().begin();
     m_root->setRenderSystem(*availableRendererIt);
     m_root->initialise(false);
-    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
-    Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(3);
     setupWidgets();
     new OgreBase(m_widget);
     m_widget->setEventHandler(OgreBase::getSingletonPtr());
+
+    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+    Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(3);
 
     auto sceneManager = OgreBase::getSingleton().getSceneManager();
     sceneManager->setSkyDome(true, "CloudySky", 5, 8);
