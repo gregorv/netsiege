@@ -186,7 +186,9 @@ public:
         connect(ui.actionBrushAdd, &QAction::triggered, [=](){ brush->setBlendLayer(2); });
         connect(ui.actionBrushMix, &QAction::triggered, [=](){ brush->setBlendLayer(1); });
         connect(ui.actionBrushSubtract, &QAction::triggered, [=](){ brush->setBlendLayer(3); });
-        ui.layerNum->setMaximum(7);
+        ui.layerNum->setMaximum(8);
+        ui.layerNum->setMinimum(1);
+        ui.layerNum->setValue(1);
         connect(ui.layerNum, SIGNAL(valueChanged(int)), brush, SLOT(setBlendLayer(int)));
 //         connect(ui.layerNum, &QSpinBox::valueChanged, [=](int i){  });
 
