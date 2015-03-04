@@ -1,0 +1,206 @@
+
+vertex_program TerrainSimpleVPGLSL glsl
+{
+	source TerrainSimpleVP.glsl
+	//syntax glsl120
+
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+		param_named_auto world world_matrix
+//		param_named_auto vertex vertex
+//		param_named_auto uv uv0
+	}
+}
+
+fragment_program TerrainSimpleFPGLSL glsl
+{
+	source TerrainSimpleFP.glsl
+	default_params
+	{
+		param_named_auto lightPositionWorld light_position 0
+		param_named_auto lightDiffuse light_diffuse_colour 0
+		param_named_auto lightAttenuation light_attenuation 0
+		param_named_auto eyePosition camera_position_object_space
+		param_named_auto lightNumber pass_iteration_number
+		param_named normalMap int 0
+		param_named blendMap0 int 1
+		param_named blendMap1 int 2
+		param_named layer0 int 3
+		param_named layer1 int 4
+		param_named layer2 int 5
+		param_named layer3 int 6
+		param_named layer4 int 7
+		param_named layer5 int 8
+		param_named layer6 int 9
+		param_named layer7 int 10
+		param_named layer8 int 11
+		param_named texScale0 float 1.0
+		param_named texScale1 float 1.0
+		param_named texScale2 float 1.0
+		param_named texScale3 float 1.0
+		param_named texScale4 float 1.0
+		param_named texScale5 float 1.0
+		param_named texScale6 float 1.0
+		param_named texScale7 float 1.0
+		param_named texScale8 float 1.0
+	}
+	//syntax glsl120
+}
+
+vertex_program TerrainSimpleAmbientVPGLSL glsl
+{
+	preprocessor_defines AMBIENT
+	source TerrainSimpleVP.glsl
+	//syntax glsl120
+
+	default_params
+	{
+		param_named_auto worldViewProj worldviewproj_matrix
+		param_named_auto world world_matrix
+//		param_named_auto vertex vertex
+//		param_named_auto uv uv0
+	}
+}
+
+fragment_program TerrainSimpleAmbientFPGLSL glsl
+{
+	preprocessor_defines AMBIENT
+	source TerrainSimpleAmbientFP.glsl
+	default_params
+	{
+		param_named_auto lightPositionWorld light_position 0
+		param_named_auto lightDiffuse light_diffuse_colour 0
+		param_named_auto lightAttenuation light_attenuation 0
+		param_named_auto eyePosition camera_position_object_space
+		param_named_auto lightNumber pass_iteration_number
+		param_named normalMap int 0
+		param_named blendMap0 int 1
+		param_named blendMap1 int 2
+		param_named layer0 int 3
+		param_named layer1 int 4
+		param_named layer2 int 5
+		param_named layer3 int 6
+		param_named layer4 int 7
+		param_named layer5 int 8
+		param_named layer6 int 9
+		param_named layer7 int 10
+		param_named layer8 int 11
+		param_named texScale0 float 1.0
+		param_named texScale1 float 1.0
+		param_named texScale2 float 1.0
+		param_named texScale3 float 1.0
+		param_named texScale4 float 1.0
+		param_named texScale5 float 1.0
+		param_named texScale6 float 1.0
+		param_named texScale7 float 1.0
+		param_named texScale8 float 1.0
+	}
+	//syntax glsl120
+}
+
+vertex_program TerrainSimpleVP unified
+{
+	delegate TerrainSimpleVPGLSL
+}
+
+fragment_program TerrainSimpleFP unified
+{
+	delegate TerrainSimpleFPGLSL
+}
+
+vertex_program TerrainSimpleAmbientVP unified
+{
+	delegate TerrainSimpleAmbientVPGLSL
+}
+
+fragment_program TerrainSimpleAmbientFP unified
+{
+	delegate TerrainSimpleAmbientFPGLSL
+}
+
+//shared_params lighting
+//{
+//    shared_param_named diffuse float4 0 0.5 0 1
+//    shared_param_named specular float4 0.3 0.5 0.3 1.0
+//}
+
+material TerrainMaterial
+{
+	technique
+	{
+		pass
+		{
+			vertex_program_ref TerrainSimpleAmbientVP
+			{
+			}
+			fragment_program_ref TerrainSimpleAmbientFP
+			{
+			}
+			// TEXTURE UNITS
+			// 0 - normals
+			texture_unit normalMap { texture neutral_normals.png 2d }
+			// 1 - lightmap
+			// 2 - blendmap 0
+			texture_unit blendMap0 { texture neutral_normals.png 2d }
+			// 3 - blendmap 1
+			texture_unit blendMap1 { texture neutral_normals.png 2d }
+			// 4 - splat layer 0
+			texture_unit layer0 { texture checkers.png 2d }
+			// 5 - splat layer 1
+			texture_unit layer1 { texture checkers.png 2d }
+			// 6 - splat layer 2
+			texture_unit layer2 { texture checkers.png 2d }
+			// 7 - splat layer 3
+			texture_unit layer3 { texture checkers.png 2d }
+			// 8 - splat layer 4
+			texture_unit layer4 { texture checkers.png 2d }
+			// 9 - splat layer 5
+			texture_unit layer5 { texture checkers.png 2d }
+			// 10 - splat layer 6
+			texture_unit layer6 { texture checkers.png 2d }
+			// 11 - splat layer 7
+			texture_unit layer7 { texture checkers.png 2d }
+			// 11 - splat layer 8
+			texture_unit layer8 { texture checkers.png 2d }
+		}
+		pass
+		{
+			vertex_program_ref TerrainSimpleVP
+			{
+			}
+			fragment_program_ref TerrainSimpleFP
+			{
+			}
+			// TEXTURE UNITS
+			// 0 - normals
+			texture_unit normalMap { texture neutral_normals.png 2d }
+			// 1 - lightmap
+			// 2 - blendmap 0
+			texture_unit blendMap0 { texture neutral_normals.png 2d }
+			// 3 - blendmap 1
+			texture_unit blendMap1 { texture neutral_normals.png 2d }
+			// 4 - splat layer 0
+			texture_unit layer0 { texture checkers.png 2d }
+			// 5 - splat layer 1
+			texture_unit layer1 { texture checkers.png 2d }
+			// 6 - splat layer 2
+			texture_unit layer2 { texture checkers.png 2d }
+			// 7 - splat layer 3
+			texture_unit layer3 { texture checkers.png 2d }
+			// 8 - splat layer 4
+			texture_unit layer4 { texture checkers.png 2d }
+			// 9 - splat layer 5
+			texture_unit layer5 { texture checkers.png 2d }
+			// 10 - splat layer 6
+			texture_unit layer6 { texture checkers.png 2d }
+			// 11 - splat layer 7
+			texture_unit layer7 { texture checkers.png 2d }
+			// 11 - splat layer 8
+			texture_unit layer8 { texture checkers.png 2d }
+			iteration once_per_light 
+			scene_blend add
+		}
+	}
+
+}

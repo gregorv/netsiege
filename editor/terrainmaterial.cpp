@@ -66,25 +66,54 @@ Ogre::MaterialPtr TerrainMaterial::Profile::generate(const Ogre::Terrain* terrai
 
     // Set Ogre material
     mat = Ogre::MaterialManager::getSingleton().getByName(parent->mMaterialName);
+    assert(mat.get());
 
     // Clone material
-    if(parent->mCloneMaterial) {
+//     if(parent->mCloneMaterial) {
         mat = mat->clone(matName);
-        parent->mMaterialName = matName;
-    }
+//         parent->mMaterialName = matName;
+//     }
 
     // Add normalmap
-    if(parent->mAddNormalMap) {
+//     if(parent->mAddNormalMap) {
         // Get default pass
-        Ogre::Pass *p = mat->getTechnique(0)->getPass(0);
+        for(uint8_t i=0; i<2; i++) {
+            Ogre::Pass *p = mat->getTechnique(0)->getPass(i);
+            Ogre::GpuProgramParametersSharedPtr pParams = p->getFragmentProgramParameters();
+            std::cout << "Num texture unit states " << p->getNumTextureUnitStates() << std::endl;
+            assert(p->getNumTextureUnitStates() >= 4);
 
-        // Add terrain's global normalmap to renderpass so the fragment program can find it.
-        Ogre::TextureUnitState *tu = p->createTextureUnitState(matName+"/nm");
+            /// TEXTURE UNIT 0 - NORMAL MAP
+            // Add terrain's global normalmap to renderpass so the fragment program can find it.
+            Ogre::TextureUnitState *tu = p->getTextureUnitState(0);
 
-        Ogre::TexturePtr nmtx = terrain->getTerrainNormalMap();
-        tu->_setTexturePtr(nmtx);
-    }
+            Ogre::TexturePtr nmtx = terrain->getTerrainNormalMap();
+            tu->_setTexturePtr(nmtx);
 
+
+            /// TEXTURE UNIT 1 - BLEND LAYER 0
+            tu = p->getTextureUnitState(1);
+            tu->_setTexturePtr(terrain->getLayerBlendTexture(0));
+            /// TEXTURE UNIT 2 - BLEND LAYER 1
+            tu = p->getTextureUnitState(2);
+            tu->_setTexturePtr(terrain->getLayerBlendTexture(1));
+            /// TEXTURE UNIT 3+i - LAYER i
+            for(uint8_t i=0; i<terrain->getLayerCount() && i<p->getNumTextureUnitStates()-3; i++) {
+                auto layerTexture = terrain->getLayerTextureName(i, 0);
+                std::cout << "Layer " << (int)i << ": " << layerTexture << std::endl;
+                tu = p->getTextureUnitState(i+3);
+                auto tex = Ogre::TextureManager::getSingleton().getByName(layerTexture, "");
+                if(!tex.getPointer()) {
+                    tex = Ogre::TextureManager::getSingleton().load(layerTexture, "");
+                }
+                assert(tex.getPointer() != nullptr);
+                tu->_setTexturePtr(tex);
+                pParams->setNamedConstant(Ogre::String("texScale")+Ogre::StringConverter::toString(i),
+                                        1.0f/terrain->getLayerWorldSize(i));
+            }
+        }
+//     }
+    assert(mat.get());
     return mat;
 };
 
