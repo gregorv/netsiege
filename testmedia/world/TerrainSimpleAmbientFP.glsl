@@ -1,4 +1,4 @@
-#version 150
+#version 110
 
 /* Cel shading fragment program for single-pass rendering */
 // uniform vec4 diffuse;
@@ -16,9 +16,9 @@ uniform sampler2D layer6;
 uniform sampler2D layer7;
 uniform sampler2D layer8;
 
-in vec2 texcoordNormal;
-in vec2 texcoord;
-in vec4 pixelPos;
+varying vec2 texcoordNormal;
+varying vec2 texcoord;
+varying vec4 pixelPos;
 uniform float texScale0;
 uniform float texScale1;
 uniform float texScale2;
@@ -55,16 +55,16 @@ float blendStrength(vec4 b0, vec4 b1, float layerIdx)
 
 void main()
 {
-     vec4 blend0 = texture(blendMap0, texcoordNormal);
-     vec4 blend1 = texture(blendMap1, texcoordNormal);
-     vec3 color = texture(layer0, texcoord*texScale0).xyz * blendStrength(blend0, blend1, 0)
-		+ texture(layer1, texcoord*texScale1).xyz * blendStrength(blend0, blend1, 1) * blend0.x
-		+ texture(layer2, texcoord*texScale2).xyz * blendStrength(blend0, blend1, 2) * blend0.y
-		+ texture(layer3, texcoord*texScale3).xyz * blendStrength(blend0, blend1, 3) * blend0.z
-		+ texture(layer4, texcoord*texScale4).xyz * blendStrength(blend0, blend1, 4) * blend0.w
-		+ texture(layer5, texcoord*texScale5).xyz * blendStrength(blend0, blend1, 5) * blend1.x
-		+ texture(layer6, texcoord*texScale6).xyz * blendStrength(blend0, blend1, 6) * blend1.y
-		+ texture(layer7, texcoord*texScale7).xyz * blendStrength(blend0, blend1, 7) * blend1.z
-		+ texture(layer8, texcoord*texScale8).xyz * blend1.w;
+     vec4 blend0 = texture2D(blendMap0, texcoordNormal);
+     vec4 blend1 = texture2D(blendMap1, texcoordNormal);
+     vec3 color = texture2D(layer0, texcoord*texScale0).xyz * blendStrength(blend0, blend1, 0)
+		+ texture2D(layer1, texcoord*texScale1).xyz * blendStrength(blend0, blend1, 1) * blend0.x
+		+ texture2D(layer2, texcoord*texScale2).xyz * blendStrength(blend0, blend1, 2) * blend0.y
+		+ texture2D(layer3, texcoord*texScale3).xyz * blendStrength(blend0, blend1, 3) * blend0.z
+		+ texture2D(layer4, texcoord*texScale4).xyz * blendStrength(blend0, blend1, 4) * blend0.w
+		+ texture2D(layer5, texcoord*texScale5).xyz * blendStrength(blend0, blend1, 5) * blend1.x
+		+ texture2D(layer6, texcoord*texScale6).xyz * blendStrength(blend0, blend1, 6) * blend1.y
+		+ texture2D(layer7, texcoord*texScale7).xyz * blendStrength(blend0, blend1, 7) * blend1.z
+		+ texture2D(layer8, texcoord*texScale8).xyz * blend1.w;
      gl_FragColor = vec4(color * 0.1, 1.0);
 }

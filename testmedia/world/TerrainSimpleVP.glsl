@@ -1,4 +1,4 @@
-#version 150
+#version 110
 
 // General functions
 // parameters
@@ -8,9 +8,9 @@ uniform mat4 world;
 attribute vec4 vertex;
 // attribute vec4 uv;
 
-out vec2 texcoordNormal;
-out vec2 texcoord;
-out vec4 pixelPos;
+varying vec2 texcoordNormal;
+varying vec2 texcoord;
+varying vec4 pixelPos;
 
 /* Vertex program which includes specular component */
 void main()
