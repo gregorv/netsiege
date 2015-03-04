@@ -26,6 +26,21 @@ TerrainMaterial::TerrainMaterial(Ogre::String materialName, bool addNormalmap, b
     : mMaterialName(materialName), mAddNormalMap(addNormalmap), mCloneMaterial(cloneMaterial)
 {
     std::cout << "+-+-+-+-+ TerrainMaterial" << std::endl;
+    // define the layers
+    // We expect terrain textures to have no alpha, so we use the alpha channel
+    // in the albedo texture to store specular reflection
+    // similarly we double-up the normal and height (for parallax)
+    mLayerDecl.samplers.push_back(Ogre::TerrainLayerSampler("albedo_specular", Ogre::PF_BYTE_RGBA));
+//     mLayerDecl.samplers.push_back(Ogre::TerrainLayerSampler("normal_height", Ogre::PF_BYTE_RGBA));
+
+    mLayerDecl.elements.push_back(
+            Ogre::TerrainLayerSamplerElement(0, Ogre::TLSS_ALBEDO, 0, 3));
+    mLayerDecl.elements.push_back(
+            Ogre::TerrainLayerSamplerElement(0, Ogre::TLSS_SPECULAR, 3, 1));
+//     mLayerDecl.elements.push_back(
+//             Ogre::TerrainLayerSamplerElement(1, Ogre::TLSS_NORMAL, 0, 3));
+//     mLayerDecl.elements.push_back(
+//             Ogre::TerrainLayerSamplerElement(1, Ogre::TLSS_HEIGHT, 3, 1));
     mProfiles.push_back(OGRE_NEW TerrainMaterial::Profile(this, "OgreMaterial", "Profile for rendering Ogre standard material"));
     setActiveProfile("OgreMaterial");
 }
