@@ -54,6 +54,7 @@ EditorViewWidget::EditorViewWidget(QWidget *parent)
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("../testmedia/", "FileSystem", "");
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("../testmedia/p0ss/", "FileSystem", "");
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("../testmedia/dim/", "FileSystem", "");
+    Ogre::ResourceGroupManager::getSingleton().addResourceLocation("../testmedia/world/", "FileSystem", "");
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("testmedia/", "FileSystem", "");
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("testmedia/p0ss/", "FileSystem", "");
     Ogre::ResourceGroupManager::getSingleton().addResourceLocation("testmedia/dim/", "FileSystem", "");
@@ -67,20 +68,6 @@ EditorViewWidget::EditorViewWidget(QWidget *parent)
     Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
     Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(3);
 
-    auto sceneManager = OgreBase::getSingleton().getSceneManager();
-    sceneManager->setSkyDome(true, "CloudySky", 5, 8);
-    sceneManager->setAmbientLight(Ogre::ColourValue(0.2f, 0.2f, 0.2f));
-    Ogre::Vector3 lightDir(1.0, -2.0, 0.5);
-    lightDir.normalise();
-    auto lamp = sceneManager->createLight();
-    lamp->setPosition(5, 5, 5);
-    lamp->setCastShadows(true);
-    lamp->setDirection(lightDir);
-    lamp->setType(Ogre::Light::LT_DIRECTIONAL);
-    lamp->setDiffuseColour(Ogre::ColourValue::White);
-    lamp->setSpecularColour(Ogre::ColourValue(0.4, 0.4, 0.4));
-    Ogre::SceneNode *lightNode = sceneManager->getRootSceneNode()->createChildSceneNode("mainlight");
-    lightNode->attachObject(lamp);
     m_widget->getEmbeddedOgreWindow()->addViewport(OgreBase::getSingleton().getCamera()->getCamera());
 }
 

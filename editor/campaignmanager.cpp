@@ -91,7 +91,7 @@ CampaignManager::CampaignManager(const boost::filesystem::path& campaignPath)
     defaultimp.maxBatchSize = 65;
     defaultimp.constantHeight = 0.0f;
 
-    defaultimp.layerList.resize(6);
+    defaultimp.layerList.resize(8);
     defaultimp.layerList[0].worldSize = 10;
     defaultimp.layerList[0].textureNames.push_back("checkers.png");
     defaultimp.layerList[0].textureNames.push_back("checkers_normal.png");
@@ -117,13 +117,48 @@ CampaignManager::CampaignManager(const boost::filesystem::path& campaignPath)
     defaultimp.layerList[5].textureNames.push_back("Ancient Flooring.JPG");
     defaultimp.layerList[5].textureNames.push_back("Ancient Flooring_N.jpg");
 
-//     defaultimp.layerList[6].worldSize = 5;
-//     defaultimp.layerList[6].textureNames.push_back("Boards.JPG");
-//     defaultimp.layerList[6].textureNames.push_back("Boards_N.jpg");
-//
-//     defaultimp.layerList[7].worldSize = 5;
-//     defaultimp.layerList[7].textureNames.push_back("Chimeny.JPG");
-//     defaultimp.layerList[7].textureNames.push_back("Chimeny_N.jpg");
+    defaultimp.layerList[6].worldSize = 5;
+    defaultimp.layerList[6].textureNames.push_back("Boards.JPG");
+    defaultimp.layerList[6].textureNames.push_back("Boards_N.jpg");
+
+    defaultimp.layerList[7].worldSize = 5;
+    defaultimp.layerList[7].textureNames.push_back("Chimeny.JPG");
+    defaultimp.layerList[7].textureNames.push_back("Chimeny_N.jpg");
+
+    auto sceneManager = OgreBase::getSingleton().getSceneManager();
+    sceneManager->setSkyDome(true, "CloudySky", 5, 8);
+    sceneManager->setAmbientLight(Ogre::ColourValue(0.2f, 0.2f, 0.2f));
+    Ogre::Vector3 lightDir(1.0, -2.0, 0.5);
+    lightDir.normalise();
+    auto lamp = sceneManager->createLight();
+    lamp->setPosition(5, 5, 5);
+    lamp->setCastShadows(true);
+    lamp->setDirection(lightDir);
+    lamp->setType(Ogre::Light::LT_DIRECTIONAL);
+    lamp->setDiffuseColour(Ogre::ColourValue::White*0.7);
+    lamp->setSpecularColour(Ogre::ColourValue(0.4, 0.4, 0.4));
+    Ogre::SceneNode *lightNode = sceneManager->getRootSceneNode()->createChildSceneNode("mainlight");
+    lightNode->attachObject(lamp);
+
+    lamp = sceneManager->createLight();
+    lamp->setPosition(0, 10, 0);
+    lamp->setCastShadows(true);
+    lamp->setType(Ogre::Light::LT_POINT);
+    lamp->setDiffuseColour(Ogre::ColourValue::White);
+    lamp->setSpecularColour(Ogre::ColourValue(0.4, 0.4, 0.4));
+    lamp->setAttenuation(600, 1.0, 0.007, 0.0002);
+    lightNode = sceneManager->getRootSceneNode()->createChildSceneNode("secondary");
+    lightNode->attachObject(lamp);
+
+    lamp = sceneManager->createLight();
+    lamp->setPosition(60, 10, 0);
+    lamp->setCastShadows(true);
+    lamp->setType(Ogre::Light::LT_POINT);
+    lamp->setDiffuseColour(Ogre::ColourValue::White);
+    lamp->setSpecularColour(Ogre::ColourValue(0.4, 0.4, 0.4));
+    lamp->setAttenuation(600, 1.0, 0.007, 0.0002);
+    lightNode = sceneManager->getRootSceneNode()->createChildSceneNode("tertiary");
+    lightNode->attachObject(lamp);
 }
 
 CampaignManager::~CampaignManager()
