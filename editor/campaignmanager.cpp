@@ -91,39 +91,43 @@ CampaignManager::CampaignManager(const boost::filesystem::path& campaignPath)
     defaultimp.maxBatchSize = 65;
     defaultimp.constantHeight = 0.0f;
 
-    defaultimp.layerList.resize(8);
-    defaultimp.layerList[0].worldSize = 10;
-    defaultimp.layerList[0].textureNames.push_back("checkers.png");
-    defaultimp.layerList[0].textureNames.push_back("checkers_normal.png");
+    defaultimp.layerList.resize(9);
+    defaultimp.layerList[0].worldSize = 2;
+    defaultimp.layerList[0].textureNames.push_back("Grass2.JPG");
+    defaultimp.layerList[0].textureNames.push_back("Grass2_N.jpg");
 
-    defaultimp.layerList[1].worldSize = 1;
-    defaultimp.layerList[1].textureNames.push_back("tilable-IMG_0044-grey.png");
+    defaultimp.layerList[1].worldSize = 2;
+    defaultimp.layerList[1].textureNames.push_back("GrassDry.JPG");
 //     defaultimp.layerList[1].textureNames.push_back("tilable-IMG_0044-grey_normalmap.png");
-    defaultimp.layerList[1].textureNames.push_back("neutral_normals.png");
+    defaultimp.layerList[1].textureNames.push_back("DrassDry_N.jpg");
 
     defaultimp.layerList[2].worldSize = 1;
     defaultimp.layerList[2].textureNames.push_back("CliffRock.JPG");
     defaultimp.layerList[2].textureNames.push_back("CliffRock_N.jpg");
 
     defaultimp.layerList[3].worldSize = 5;
-    defaultimp.layerList[3].textureNames.push_back("Dirt.JPG");
-    defaultimp.layerList[3].textureNames.push_back("Dirt_N.jpg");
+    defaultimp.layerList[3].textureNames.push_back("CliffRock.JPG");
+    defaultimp.layerList[3].textureNames.push_back("CliffRock_N.jpg");
 
     defaultimp.layerList[4].worldSize = 5;
-    defaultimp.layerList[4].textureNames.push_back("CliffRock.JPG");
-    defaultimp.layerList[4].textureNames.push_back("CliffRock_N.jpg");
+    defaultimp.layerList[4].textureNames.push_back("CliffRock2.JPG");
+    defaultimp.layerList[4].textureNames.push_back("CliffRock2_N.jpg");
 
     defaultimp.layerList[5].worldSize = 5;
-    defaultimp.layerList[5].textureNames.push_back("Ancient Flooring.JPG");
-    defaultimp.layerList[5].textureNames.push_back("Ancient Flooring_N.jpg");
+    defaultimp.layerList[5].textureNames.push_back("Dirt.JPG");
+    defaultimp.layerList[5].textureNames.push_back("Dirt_N.jpg");
 
     defaultimp.layerList[6].worldSize = 5;
-    defaultimp.layerList[6].textureNames.push_back("Boards.JPG");
-    defaultimp.layerList[6].textureNames.push_back("Boards_N.jpg");
+    defaultimp.layerList[6].textureNames.push_back("PackedDirt.JPG");
+    defaultimp.layerList[6].textureNames.push_back("PackedDirt_N.jpg");
 
-    defaultimp.layerList[7].worldSize = 5;
-    defaultimp.layerList[7].textureNames.push_back("Chimeny.JPG");
-    defaultimp.layerList[7].textureNames.push_back("Chimeny_N.jpg");
+    defaultimp.layerList[7].worldSize = 4;
+    defaultimp.layerList[7].textureNames.push_back("Ancient Flooring.JPG");
+    defaultimp.layerList[7].textureNames.push_back("Ancient Flooring_N.jpg");
+
+    defaultimp.layerList[8].worldSize = 2;
+    defaultimp.layerList[8].textureNames.push_back("Gravel.JPG");
+    defaultimp.layerList[8].textureNames.push_back("Gravel_N.jpg");
 
     auto sceneManager = OgreBase::getSingleton().getSceneManager();
     sceneManager->setSkyDome(true, "CloudySky", 5, 8);
