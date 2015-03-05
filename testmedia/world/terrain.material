@@ -50,7 +50,7 @@ fragment_program TerrainSimpleFPGLSL glsl
 
 vertex_program TerrainSimpleAmbientVPGLSL glsl
 {
-	preprocessor_defines AMBIENT
+	preprocessor_defines AMBIENT=1
 	source TerrainSimpleVP.glsl
 	//syntax glsl120
 
@@ -65,8 +65,8 @@ vertex_program TerrainSimpleAmbientVPGLSL glsl
 
 fragment_program TerrainSimpleAmbientFPGLSL glsl
 {
-	preprocessor_defines AMBIENT
-	source TerrainSimpleAmbientFP.glsl
+	preprocessor_defines AMBIENT=1
+	source TerrainSimpleFP.glsl
 	default_params
 	{
 		param_named_auto lightPositionWorld light_position 0

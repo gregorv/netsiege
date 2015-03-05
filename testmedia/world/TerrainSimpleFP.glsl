@@ -56,11 +56,13 @@ float blendStrength(vec4 b0, vec4 b1, float layerIdx)
 void main()
 {
      vec3 normal = normalize(texture2D(normalMap, texcoordNormal).xyz - 0.5);
+#ifndef AMBIENT
      vec3 lightDir = normalize(lightPositionWorld.xyz - pixelPos.xyz*lightPositionWorld.w);
      float light = dot(normal, lightDir);
      float dist = distance(pixelPos.xyz, lightPositionWorld.xyz);
      float attenuate = min(1.0, 1.0 / (lightAttenuation.y + lightAttenuation.z*dist + lightAttenuation.w*dist*dist));
      attenuate *= clamp(lightAttenuation.x - dist, 0.0, 1.0);
+#endif
 
      vec4 blend0 = texture2D(blendMap0, texcoordNormal);
      vec4 blend1 = texture2D(blendMap1, texcoordNormal);
@@ -74,8 +76,12 @@ void main()
 		+ texture2D(layer7, texcoord*texScale7).xyz * blendStrength(blend0, blend1, 7) * blend1.z
 		+ texture2D(layer8, texcoord*texScale8).xyz * blend1.w;
 
+#ifdef AMBIENT
+    gl_FragColor = vec4(color*0.1, 1.0);
+#else
 //      gl_FragColor = vec4(color, 1.0)*0.1;
      gl_FragColor = vec4(color * lightDiffuse.xyz * attenuate * light, 1.0);
+#endif
 //      gl_FragColor = vec4(vec3(1.0, 1.0, 1.0) * 0.0, 1.0);
 //      gl_FragColor = texture(normalMap, texcoordNormal);
 //      gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0) * dist/200.0;
