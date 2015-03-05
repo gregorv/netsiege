@@ -53,6 +53,14 @@ float blendStrength(vec4 b0, vec4 b1, float layerIdx)
     return min(1.0, max(0.0, 1.0 - (dot(b0, mask0) + dot(b1, mask1))));
 }
 
+vec4 getTriPlanarBlend(sampler2D tex, vec3 coords, vec3 blending)
+{
+    vec4 xaxis = texture2D(tex, coords.yz);
+    vec4 yaxis = texture2D(tex, coords.xz);
+    vec4 zaxis = texture2D(tex, coords.xy);
+    return xaxis * blending.x + yaxis * blending.y + zaxis * blending.z;
+}
+
 void main()
 {
      vec3 normal = normalize(texture2D(normalMap, texcoordNormal).xyz - 0.5);
@@ -63,13 +71,19 @@ void main()
      float attenuate = min(1.0, 1.0 / (lightAttenuation.y + lightAttenuation.z*dist + lightAttenuation.w*dist*dist));
      attenuate *= clamp(lightAttenuation.x - dist, 0.0, 1.0);
 #endif
+     // in wNorm is the world-space normal of the fragment
+     vec3 blending = abs( normal );
+     blending = normalize(max(blending, 0.00001)); // Force weights to sum to 1.0
+     blending /= (blending.x + blending.y + blending.z);
 
      vec4 blend0 = texture2D(blendMap0, texcoordNormal);
      vec4 blend1 = texture2D(blendMap1, texcoordNormal);
      vec3 color = texture2D(layer0, texcoord*texScale0).xyz * blendStrength(blend0, blend1, 0)
 		+ texture2D(layer1, texcoord*texScale1).xyz * blendStrength(blend0, blend1, 1) * blend0.x
-		+ texture2D(layer2, texcoord*texScale2).xyz * blendStrength(blend0, blend1, 2) * blend0.y
-		+ texture2D(layer3, texcoord*texScale3).xyz * blendStrength(blend0, blend1, 3) * blend0.z
+		+ getTriPlanarBlend(layer2, pixelPos.xyz*texScale2, blending).xyz * blendStrength(blend0, blend1, 2) * blend0.y
+		+ getTriPlanarBlend(layer3, pixelPos.xyz*texScale3, blending).xyz * blendStrength(blend0, blend1, 3) * blend0.z
+// 		+ texture2D(layer2, texcoord*texScale2).xyz * blendStrength(blend0, blend1, 2) * blend0.y
+// 		+ texture2D(layer3, texcoord*texScale3).xyz * blendStrength(blend0, blend1, 3) * blend0.z
 		+ texture2D(layer4, texcoord*texScale4).xyz * blendStrength(blend0, blend1, 4) * blend0.w
 		+ texture2D(layer5, texcoord*texScale5).xyz * blendStrength(blend0, blend1, 5) * blend1.x
 		+ texture2D(layer6, texcoord*texScale6).xyz * blendStrength(blend0, blend1, 6) * blend1.y
