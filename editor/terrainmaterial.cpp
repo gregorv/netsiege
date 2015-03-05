@@ -93,7 +93,7 @@ Ogre::MaterialPtr TerrainMaterial::Profile::generate(const Ogre::Terrain* terrai
     // Add normalmap
 //     if(parent->mAddNormalMap) {
         // Get default pass
-        for(uint8_t i=0; i<2; i++) {
+        for(uint8_t i=0; i<mat->getTechnique(0)->getNumPasses(); i++) {
             Ogre::Pass *p = mat->getTechnique(0)->getPass(i);
             Ogre::GpuProgramParametersSharedPtr pParams = p->getFragmentProgramParameters();
             std::cout << "Num texture unit states " << p->getNumTextureUnitStates() << std::endl;
