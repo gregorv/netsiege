@@ -29,7 +29,8 @@
 
 class asIScriptEngine;
 
-namespace network {
+namespace network
+{
 
 class RPCPackage
 {
@@ -38,75 +39,129 @@ public:
     {
     };
 
-    static int RegisterType(std::shared_ptr<asIScriptEngine> engine);
-    static std::shared_ptr<RPCPackage> make(rpc_id_t id);
-    static std::shared_ptr<RPCPackage> make(rpc_id_t id, rpc_data_t data, std::string argString);
+    static int RegisterType ( std::shared_ptr<asIScriptEngine> engine );
+    static std::shared_ptr<RPCPackage> make ( rpc_id_t id );
+    static std::shared_ptr<RPCPackage> make ( rpc_id_t id, rpc_data_t data, std::string argString );
 
     void reset();
     void clear();
 
-    rpc_data_t data() const { return m_data; }
-    rpc_id_t rpcId() const { return m_rpcId; }
-    void setRpcId(rpc_id_t id) { m_rpcId = id; }
+    rpc_data_t data() const {
+        return m_data;
+    }
+    rpc_id_t rpcId() const {
+        return m_rpcId;
+    }
+    void setRpcId ( rpc_id_t id ) {
+        m_rpcId = id;
+    }
 
-    bool push(uint8_t val) { return pushGeneric(val, 'c'); }
-    bool push(int8_t val) { return pushGeneric(val, 'C'); }
-    bool push(uint16_t val) { return pushGeneric(val, 's'); }
-    bool push(int16_t val) { return pushGeneric(val, 'S'); }
-    bool push(uint32_t val) { return pushGeneric(val, 'i'); }
-    bool push(int32_t val) { return pushGeneric(val, 'I'); }
-    bool push(float val) { return pushGeneric(val, 'f'); }
-    bool push(double val) { return pushGeneric(val, 'd'); }
-    bool push(const std::string val);
+    bool push ( uint8_t val ) {
+        return pushGeneric ( val, 'c' );
+    }
+    bool push ( int8_t val ) {
+        return pushGeneric ( val, 'C' );
+    }
+    bool push ( uint16_t val ) {
+        return pushGeneric ( val, 's' );
+    }
+    bool push ( int16_t val ) {
+        return pushGeneric ( val, 'S' );
+    }
+    bool push ( uint32_t val ) {
+        return pushGeneric ( val, 'i' );
+    }
+    bool push ( int32_t val ) {
+        return pushGeneric ( val, 'I' );
+    }
+    bool push ( float val ) {
+        return pushGeneric ( val, 'f' );
+    }
+    bool push ( double val ) {
+        return pushGeneric ( val, 'd' );
+    }
+    bool push ( const std::string val );
 
     template<class T>
-    T popValue()
-    {
-        if(m_readOffset + sizeof(T) > MAX_PACKAGE_SIZE) {
+    T popValue() {
+        if ( m_readOffset + sizeof ( T ) > MAX_PACKAGE_SIZE ) {
             throw overflow_exception();
         }
-        T val = *reinterpret_cast<const T*>(&m_data[m_readOffset]);
-        m_readOffset += sizeof(T);
+        T val = *reinterpret_cast<const T *> ( &m_data[m_readOffset] );
+        m_readOffset += sizeof ( T );
         return val;
     }
+
+    uint8_t popValue_uint8() {
+        return popValue<uint8_t>();
+    }
+    int8_t popValue_int8() {
+        return popValue<int8_t>();
+    }
+    uint16_t popValue_uint16() {
+        return popValue<uint16_t>();
+    }
+    int16_t popValue_int16() {
+        return popValue<int16_t>();
+    }
+    uint32_t popValue_uint32() {
+        return popValue<uint32_t>();
+    }
+    int32_t popValue_int32() {
+        return popValue<int32_t>();
+    }
+    float popValue_float() {
+        return popValue<float>();
+    }
+    double popValue_double() {
+        return popValue<double>();
+    }
+
     std::string popString();
 
     void AddRef();
     void Release();
 
-    bool isValidPackage() const { return m_validPackage; }
+    bool isValidPackage() const {
+        return m_validPackage;
+    }
 
-    std::string argString() const { return m_argString; }
-    bool isSizeCached() const { return m_isSizeCached; }
+    std::string argString() const {
+        return m_argString;
+    }
+    bool isSizeCached() const {
+        return m_isSizeCached;
+    }
     size_t dataSize() const;
 
     size_t calculateDataSize() const;
 
 private:
-    static RPCPackage* make_getref(rpc_id_t id);
-    RPCPackage(rpc_id_t id);
-    RPCPackage(rpc_id_t id, rpc_data_t data, std::string argString);
-    RPCPackage(const RPCPackage& other);
+    static RPCPackage *make_getref ( rpc_id_t id );
+    RPCPackage ( rpc_id_t id );
+    RPCPackage ( rpc_id_t id, rpc_data_t data, std::string argString );
+    RPCPackage ( const RPCPackage &other );
     ~RPCPackage() {}
 
     void cachePackageSize();
 
     template<class T>
-    bool pushGeneric(const T& val, char argChar)
-    {
-        if(!m_isSizeCached) {
+    bool pushGeneric ( const T &val, char argChar ) {
+        if ( !m_isSizeCached ) {
             cachePackageSize();
         }
-        size_t newSize = m_packageSize + sizeof(val);
-        if(newSize > MAX_RPC_DATA_SIZE) {
+        size_t newSize = m_packageSize + sizeof ( val );
+        if ( newSize > MAX_RPC_DATA_SIZE ) {
             m_validPackage = false;
             return false;
         }
-        std::memcpy(m_data.data() + m_packageSize,
-                    &val, sizeof(val)
-        );
+        std::memcpy ( m_data.data() + m_packageSize,
+                      &val, sizeof ( val )
+                    );
         m_packageSize = newSize;
-        if(argChar != '\0') m_argString += argChar;
+        if ( argChar != '\0' ) {
+            m_argString += argChar;
+        }
         return true;
     }
 
